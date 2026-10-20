@@ -31,7 +31,7 @@ const getInitialTab = () => {
   if (typeof window !== 'undefined') {
     try {
       const path = window.location.pathname.replace(/\/+$/, '');
-      if (path === '/rafi') {
+      if (path === '/rafi' || path.endsWith('/rafi')) {
         return 'admin';
       }
 
@@ -240,7 +240,7 @@ export default function App() {
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.replace(/\/+$/, '');
-      if (path === '/rafi') {
+      if (path === '/rafi' || path.endsWith('/rafi')) {
         setCurrentTab('admin');
         return;
       }
@@ -259,7 +259,7 @@ export default function App() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.replace(/\/+$/, '');
-      if (path === '/rafi') {
+      if (path === '/rafi' || path.endsWith('/rafi')) {
         setCurrentTab('admin');
       }
     }
@@ -403,14 +403,14 @@ export default function App() {
           chaptersData={chaptersData}
           onExitAdmin={() => {
             if (typeof window !== 'undefined') {
-              window.history.pushState(null, '', '/');
+              window.history.pushState(null, '', window.location.pathname.replace(/\/rafi\/?$/, '') || '/');
             }
             setCurrentTab('lessons');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onNavigateToLesson={(lessonId) => {
             if (typeof window !== 'undefined') {
-              window.history.pushState(null, '', '/');
+              window.history.pushState(null, '', window.location.pathname.replace(/\/rafi\/?$/, '') || '/');
             }
             setCurrentTab('lessons');
           }}

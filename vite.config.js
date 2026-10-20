@@ -49,6 +49,7 @@ function localTtsPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [lessonStepsSplit(), react(), tailwindcss(), localTtsPlugin()],
   build: {
     chunkSizeWarningLimit: 3000,
