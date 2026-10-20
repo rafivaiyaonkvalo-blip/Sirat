@@ -155,6 +155,8 @@ if (typeof window !== 'undefined') {
   });
 }
 
+const getTtsEndpoint = () => (typeof window !== 'undefined' && window.location.hostname === 'markazuliman.com') ? 'https://sirat-theta.vercel.app/api/tts' : '/api/tts';
+
 // High-fidelity Audio Stream Player (via /api/tts - Rafi Ibrahim)
 export function playViaOnlineAudio(cleanText, overrideVoice = null, playbackRate = 1.0) {
   if (isSoundMuted()) return false;
@@ -169,7 +171,7 @@ export function playViaOnlineAudio(cleanText, overrideVoice = null, playbackRate
     const pitch = VOICE_PROFILES[getVoiceProfile()].arPitch;
     const encoded = encodeURIComponent(preparedText);
     // হালকা ও সাবলীল গতি (-14%), বিশুদ্ধ জ্বীম, আর hold=1: শেষ শব্দেও ওয়াকফ ছাড়া শেষ হরকত উচ্চারিত হয়
-    const url = `/api/tts?text=${encoded}&voice=${encodeURIComponent(voice)}&rate=${encodeURIComponent('-14%')}&pitch=${encodeURIComponent(pitch)}&hold=1&v=${AUDIO_CACHE_VERSION}`;
+    const url = `${getTtsEndpoint()}?text=${encoded}&voice=${encodeURIComponent(voice)}&rate=${encodeURIComponent('-14%')}&pitch=${encodeURIComponent(pitch)}&hold=1&v=${AUDIO_CACHE_VERSION}`;
     const cacheKey = `${AUDIO_CACHE_VERSION}:${voice}:${pitch}:${preparedText}`;
 
     let audio = audioCache.get(cacheKey);
@@ -216,7 +218,7 @@ export function playBengaliAudio(text, overrideVoice = null) {
     const voice = overrideVoice || BANGLA_MALE_VOICE;
     const pitch = VOICE_PROFILES[getVoiceProfile()].bnPitch;
     const encoded = encodeURIComponent(clean);
-    const url = `/api/tts?text=${encoded}&voice=${encodeURIComponent(voice)}&lang=bn&rate=${encodeURIComponent('-2%')}&pitch=${encodeURIComponent(pitch)}&v=bn-${AUDIO_CACHE_VERSION}`;
+    const url = `${getTtsEndpoint()}?text=${encoded}&voice=${encodeURIComponent(voice)}&lang=bn&rate=${encodeURIComponent('-2%')}&pitch=${encodeURIComponent(pitch)}&v=bn-${AUDIO_CACHE_VERSION}`;
     const cacheKey = `bn-${AUDIO_CACHE_VERSION}:${voice}:${pitch}:${clean}`;
 
     let audio = audioCache.get(cacheKey);
