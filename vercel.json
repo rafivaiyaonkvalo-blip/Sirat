@@ -5,6 +5,18 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/sirat/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/sirat/(.*)",
+      "destination": "/$1"
+    },
+    {
+      "source": "/sirat",
+      "destination": "/index.html"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

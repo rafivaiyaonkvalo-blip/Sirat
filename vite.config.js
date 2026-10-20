@@ -49,7 +49,7 @@ function localTtsPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/sirat/',
   plugins: [lessonStepsSplit(), react(), tailwindcss(), localTtsPlugin()],
   build: {
     chunkSizeWarningLimit: 3000,
