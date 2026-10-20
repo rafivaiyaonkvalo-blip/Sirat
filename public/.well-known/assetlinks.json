@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.markazuliman.arbigo",
+      "sha256_cert_fingerprints": [
+        "B9:76:DF:A2:85:55:77:BF:5F:73:D2:53:7E:31:AF:A2:31:9B:EF:65:8F:09:E8:22:7C:E8:3E:D7:AD:A6:4F:7A"
+      ]
+    }
+  }
+]

@@ -1,0 +1,61 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.vercel
+downloaded_original.pdf
+scripts/*.json
+
+.vercel
+.env*
+!.env.example
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+
+# Local/build junk
+.chrome-temp-profile/
+android-project/
+release/
+scratch/
+emulator_*.png
+current_app_*.png
+test_shot*.png
+launch_emulator.bat
+_render.mjs
+_sheet.mjs
+
+# scripts/tts-check.mjs output
+tts-check-out/
+
+# Agent scratch / junk
+.agents/teamwork_preview_*/
+test.js
+test_parser_detailed.js
+helpers.txt
+src/data/*.bak

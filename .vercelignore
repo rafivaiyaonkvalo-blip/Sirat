@@ -1,0 +1,8 @@
+# কিতাবের স্ক্যান ও লোকাল যাচাইয়ের ফাইল ডিপ্লয়ে যাবে না
+downloaded_original.pdf
+_book_compare
+.agents
+.claude
+src/data/*.bak
+android-project/
+release/

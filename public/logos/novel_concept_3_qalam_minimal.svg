@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="qalamBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="50%" stop-color="#022c22"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+
+    <linearGradient id="goldPure" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+
+    <filter id="qalamGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#eab308" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect width="512" height="512" rx="120" fill="url(#qalamBg)"/>
+
+  <!-- Minimalist Geometric Pen Nib (القلم) -->
+  <g filter="url(#qalamGlow)">
+    <!-- Sleek Minimalist Nib -->
+    <path d="M 256 100 L 320 230 C 310 270 290 300 256 320 C 222 300 202 270 192 230 Z" fill="url(#goldPure)"/>
+    
+    <!-- Inner Cutout Slit -->
+    <line x1="256" y1="100" x2="256" y2="230" stroke="#022c22" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="256" cy="240" r="10" fill="#022c22"/>
+
+    <!-- Subtle Floating Crescent Base -->
+    <path d="M 160 290 C 185 350 256 370 256 370 C 256 370 327 350 352 290 C 315 330 256 345 256 345 C 256 345 197 330 160 290 Z" fill="url(#goldPure)" opacity="0.9"/>
+  </g>
+
+  <!-- Brand Typography -->
+  <text x="256" y="440" font-family="'Outfit', system-ui, sans-serif" font-size="42" font-weight="800" text-anchor="middle" fill="#ffffff" letter-spacing="4">
+    ARBI<tspan fill="url(#goldPure)">GO</tspan>
+  </text>
+</svg>
