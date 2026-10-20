@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 /**
  * 'My Quran' Verified 20 Multi-Stop Dynamic Gradient Color Palettes
@@ -248,7 +249,7 @@ export default function AnimatedSplashIntro({ onFinish, onClosing, darkMode = tr
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       const img = new Image();
       const frameNum = String(i).padStart(3, '0');
-      img.src = `/intro_frames/frame_${frameNum}.png`;
+      img.src = getAssetUrl(`/intro_frames/frame_${frameNum}.png`);
       images.push(img);
 
       // Render frame 1 immediately at 0ms once loaded

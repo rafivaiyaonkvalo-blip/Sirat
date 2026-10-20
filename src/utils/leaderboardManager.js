@@ -2,6 +2,7 @@ import { db, auth } from '../services/firebase';
 import { collection, getDocs, query, limit, doc, setDoc } from 'firebase/firestore';
 import { getTotalXp, getXpHistory, getLevelInfo, toBengaliNumber } from './gamification';
 import { calculateMaxPlausibleXp } from './xpIntegrity';
+import { getAssetUrl } from './assetHelper';
 
 // ইন-মেমোরি ক্যাশ (৯০ সেকেন্ড) — যেন বারবার ফায়ারস্টোর রিড বিল না বাড়ে
 let cachedUsers = null;
@@ -120,7 +121,7 @@ export async function getRawLeaderboardUsers(forceRefresh = false) {
         const hideName = Boolean(data.hideNameInLeaderboard || profile.hideNameInLeaderboard);
         const rawPhoto = (data.photoURL || profile.photo || '').trim();
         // ছবি থাকলে আসল ছবি, ফাঁকা থাকলে মদীনা শরীফের পবিত্র ছবি
-        const photoURL = rawPhoto ? rawPhoto : '/madina.jpg';
+        const photoURL = rawPhoto ? rawPhoto : getAssetUrl('/madina.jpg');
 
         const maxAllowed = calculateMaxPlausibleXp(data);
         const rawXp = parseInt(data.totalXp || '0', 10) || 0;
@@ -159,7 +160,7 @@ export async function getRawLeaderboardUsers(forceRefresh = false) {
   const localName = localProfile.name || auth?.currentUser?.displayName || '';
   const localBlur = getBlurMyNameSetting() || Boolean(localProfile.hideNameInLeaderboard);
   const localRawPhoto = (auth?.currentUser?.photoURL || localProfile.photo || '').trim();
-  const localPhoto = localRawPhoto ? localRawPhoto : '/madina.jpg';
+  const localPhoto = localRawPhoto ? localRawPhoto : getAssetUrl('/madina.jpg');
 
   if (currentAuthUid) {
     const existingIdx = rawList.findIndex((u) => u.uid === currentAuthUid);

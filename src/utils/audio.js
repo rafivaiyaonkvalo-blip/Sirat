@@ -1,4 +1,5 @@
 import { isSoundMuted } from './soundEffects';
+import { getAssetUrl } from './assetHelper';
 
 // High-fidelity Arabic audio player - Persona: Pure Classical Fusha Qari (ফাহেদ - কুয়েতি বিশুদ্ধ জ্বীম ও ফাসিহ্ আরবি)
 // Characteristics: Pure Jeem [d͡ʒ] (not Egyptian G), slow deliberate rate (-22%), prolonged Madd, zero waqf
@@ -155,7 +156,12 @@ if (typeof window !== 'undefined') {
   });
 }
 
-const getTtsEndpoint = () => (typeof window !== 'undefined' && window.location.hostname === 'markazuliman.com') ? 'https://sirat-theta.vercel.app/api/tts' : '/api/tts';
+const getTtsEndpoint = () => {
+  if (typeof window !== 'undefined' && window.location.hostname.includes('markazuliman.com')) {
+    return '/sirat/api/tts';
+  }
+  return getAssetUrl('/api/tts');
+};
 
 // High-fidelity Audio Stream Player (via /api/tts - Rafi Ibrahim)
 export function playViaOnlineAudio(cleanText, overrideVoice = null, playbackRate = 1.0) {

@@ -39,9 +39,11 @@ function localTtsPlugin() {
   return {
     name: 'local-tts-plugin',
     configureServer(server) {
+      server.middlewares.use('/sirat/api/tts', ttsMiddleware);
       server.middlewares.use('/api/tts', ttsMiddleware);
     },
     configurePreviewServer(server) {
+      server.middlewares.use('/sirat/api/tts', ttsMiddleware);
       server.middlewares.use('/api/tts', ttsMiddleware);
     }
   };

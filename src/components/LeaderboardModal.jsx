@@ -9,53 +9,54 @@ import {
 } from '../utils/leaderboardManager';
 import { toBengaliNumber } from '../utils/gamification';
 import { triggerHaptic } from '../utils/haptics';
+import { getAssetUrl } from '../utils/assetHelper';
 
 // ইসলামের পবিত্র মসজিদ ও ঐতিহাসিক নিদর্শনের ছবি (অটো স্লাইডশো)
 const MOSQUE_BACKGROUNDS = [
   {
     id: 'madina',
     name: 'মসজিদে নববী (মদীনা মুনাওয়ারা)',
-    src: '/masjid_podium_bg.jpg'
+    src: getAssetUrl('/masjid_podium_bg.jpg')
   },
   {
     id: 'makkah',
     name: 'কাবা শরীফ ও মসজিদুল হারাম (মক্কা)',
-    src: '/mosque_bg_makkah.jpg'
+    src: getAssetUrl('/mosque_bg_makkah.jpg')
   },
   {
     id: 'alaqsa',
     name: 'মসজিদুল আকসা (বায়তুল মুকাদ্দাস)',
-    src: '/mosque_bg_alaqsa.jpg'
+    src: getAssetUrl('/mosque_bg_alaqsa.jpg')
   },
   {
     id: 'makkah_night',
     name: 'রাতে কাবা শরীফ ও তাওয়াফ (মক্কা)',
-    src: '/mosque_bg_makkah_night.jpg'
+    src: getAssetUrl('/mosque_bg_makkah_night.jpg')
   },
   {
     id: 'medina_dome',
     name: 'মসজিদে নববীর সবুজ গম্বুজ ও চত্বর',
-    src: '/mosque_bg_medina_dome.jpg'
+    src: getAssetUrl('/mosque_bg_medina_dome.jpg')
   },
   {
     id: 'quba',
     name: 'মসজিদে কুবা (মদীনা মুনাওয়ারা)',
-    src: '/mosque_bg_quba.jpg'
+    src: getAssetUrl('/mosque_bg_quba.jpg')
   },
   {
     id: 'sheikh_zayed',
     name: 'শাইখ জায়েদ গ্র্যান্ড মসজিদ',
-    src: '/mosque_bg_sheikh_zayed.jpg'
+    src: getAssetUrl('/mosque_bg_sheikh_zayed.jpg')
   },
   {
     id: 'blue_mosque',
     name: 'সুলতান আহমেদ মসজিদ (ব্লু মস্ক)',
-    src: '/mosque_bg_blue_mosque.jpg'
+    src: getAssetUrl('/mosque_bg_blue_mosque.jpg')
   },
   {
     id: 'islamic_arch',
     name: 'ঐতিহাসিক ইসলামিক স্থাপত্য ও খিলান',
-    src: '/mosque_bg_islamic_arch.jpg'
+    src: getAssetUrl('/mosque_bg_islamic_arch.jpg')
   }
 ];
 
@@ -152,7 +153,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
         <div className="relative mb-2">
           <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-2 sm:ring-4 ${ringColor} p-0.5 flex items-center justify-center bg-white dark:bg-slate-800 shadow-lg overflow-hidden`}>
             <img 
-              src={entry.photoURL || '/madina.jpg'} 
+              src={entry.photoURL || getAssetUrl('/madina.jpg')} 
               alt="" 
               className="w-full h-full rounded-full object-cover" 
             />
@@ -417,7 +418,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                             entry.isCurrentUser ? 'border-emerald-500 ring-2 ring-emerald-400/50 shadow-xs' : 'border-slate-200/60 dark:border-slate-700 shadow-xs'
                           }`}>
                             <img 
-                              src={entry.photoURL || '/madina.jpg'} 
+                              src={entry.photoURL || getAssetUrl('/madina.jpg')} 
                               alt="" 
                               className="w-full h-full object-cover" 
                             />

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 // The 4 Master Ayn Ribbon Logos with matching brand text colors
 export const LOGO_VARIANTS = [
   {
     id: 'emerald',
     name: 'এমারেল্ড ও মিন্ট',
-    src: '/logos/novel_concept_1_ayn.jpg',
+    src: getAssetUrl('/logos/novel_concept_1_ayn.jpg'),
     glowColor: 'rgba(16, 185, 129, 0.45)',
     borderColor: 'border-emerald-500/40',
     textColorLight: '#059669',
@@ -15,7 +16,7 @@ export const LOGO_VARIANTS = [
   {
     id: 'ocean',
     name: 'রয়্যাল ওশান ব্লু',
-    src: '/logos/ayn_flawless_blue.png',
+    src: getAssetUrl('/logos/ayn_flawless_blue.png'),
     glowColor: 'rgba(2, 132, 199, 0.45)',
     borderColor: 'border-sky-500/40',
     textColorLight: '#0284c7',
@@ -25,7 +26,7 @@ export const LOGO_VARIANTS = [
   {
     id: 'gold',
     name: 'রয়্যাল গোল্ড',
-    src: '/logos/ayn_flawless_gold.png',
+    src: getAssetUrl('/logos/ayn_flawless_gold.png'),
     glowColor: 'rgba(234, 179, 8, 0.45)',
     borderColor: 'border-amber-500/40',
     textColorLight: '#d97706',
@@ -35,7 +36,7 @@ export const LOGO_VARIANTS = [
   {
     id: 'indigo',
     name: 'সাফায়ার ও ইন্ডিগো',
-    src: '/logos/ayn_flawless_indigo.png',
+    src: getAssetUrl('/logos/ayn_flawless_indigo.png'),
     glowColor: 'rgba(129, 140, 248, 0.45)',
     borderColor: 'border-indigo-500/40',
     textColorLight: '#6366f1',

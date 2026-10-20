@@ -167,7 +167,9 @@
             }
             return;
           }
-          navigator.serviceWorker.register('/sw.js').then((reg) => {
+          const swUrl = window.location.pathname.startsWith('/sirat') ? '/sirat/sw.js' : '/sw.js';
+          const swScope = window.location.pathname.startsWith('/sirat') ? '/sirat/' : '/';
+          navigator.serviceWorker.register(swUrl, { scope: swScope }).then((reg) => {
             reg.update();
           }).catch(() => {});
         });

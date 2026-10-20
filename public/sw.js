@@ -1,12 +1,12 @@
-// Service Worker for এসো আরবী শিখি - মারকাযুল ঈমান (PWA v8 - Zero Stale Cache Edition)
-const CACHE_NAME = 'eso-arbi-v8';
+// Service Worker for Sirat - মারকাযুল ঈমান (PWA v9 - Subpath Compatible)
+const CACHE_NAME = 'sirat-pwa-v9';
+const BASE_PATH = self.location.pathname.replace(/\/sw\.js$/, '') || '';
 const STATIC_ASSETS = [
-  '/logo.png',
-  '/manifest.json'
+  (BASE_PATH + '/logo.png').replace(/\/\//g, '/'),
+  (BASE_PATH + '/manifest.json').replace(/\/\//g, '/')
 ];
 
 self.addEventListener('install', (event) => {
-  // Activate immediately without waiting
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -16,7 +16,6 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  // Delete all older stale caches immediately (v1 through v6)
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -37,13 +36,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // NEVER cache or intercept /api/ endpoints, versioned assets (?v=...), or external requests
-  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/') || url.searchParams.has('v')) {
+  if (url.origin !== self.location.origin || url.pathname.includes('/api/') || url.searchParams.has('v')) {
     return;
   }
 
   // 1. Navigation / HTML Requests: ALWAYS NETWORK-FIRST
-  // Guarantees that users always receive the latest index.html with fresh asset hashes
-  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+  const isNav = event.request.mode === 'navigate' || 
+    url.pathname === '/' || 
+    url.pathname === '/sirat' || 
+    url.pathname === '/sirat/' || 
+    url.pathname.endsWith('.html');
+
+  if (isNav) {
     event.respondWith(
       fetch(event.request)
         .then((networkResponse) => {
@@ -53,12 +57,12 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request) || caches.match('/'))
+        .catch(() => caches.match(event.request) || caches.match(BASE_PATH + '/') || caches.match('/sirat/'))
     );
     return;
   }
 
-  // 2. Static Assets: Network-first for development/hashed assets to prevent stale JS traps
+  // 2. Static Assets: Network-first
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
@@ -71,4 +75,3 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request))
   );
 });
-

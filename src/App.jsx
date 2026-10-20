@@ -403,14 +403,16 @@ export default function App() {
           chaptersData={chaptersData}
           onExitAdmin={() => {
             if (typeof window !== 'undefined') {
-              window.history.pushState(null, '', window.location.pathname.replace(/\/rafi\/?$/, '') || '/');
+              const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
+              window.history.pushState(null, '', baseRoot);
             }
             setCurrentTab('lessons');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onNavigateToLesson={(lessonId) => {
             if (typeof window !== 'undefined') {
-              window.history.pushState(null, '', window.location.pathname.replace(/\/rafi\/?$/, '') || '/');
+              const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
+              window.history.pushState(null, '', baseRoot);
             }
             setCurrentTab('lessons');
           }}
