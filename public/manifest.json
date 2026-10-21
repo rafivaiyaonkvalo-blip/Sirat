@@ -1,13 +1,13 @@
 {
-  "name": "সীরাত – মারকাযুল ঈমান",
-  "short_name": "সীরাত",
-  "description": "নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস",
+  "name": "Sirat - সীরাত",
+  "short_name": "Sirat",
+  "description": "Sirat - সীরাত প্ল্যাটফর্ম",
   "start_url": "/sirat/",
   "scope": "/sirat/",
   "display": "standalone",
-  "background_color": "#0b3b37",
-  "theme_color": "#0b3b37",
-  "orientation": "any",
+  "background_color": "#0A0D12",
+  "theme_color": "#0A0D12",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/sirat/apple-touch-icon.png",

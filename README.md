@@ -1,14 +1,16 @@
-# সীরাত (মারকাযুল ঈমান)
+# React + Vite
 
-নবীজী ﷺ-এর জীবনী নিয়ে ৩২টি দারস: প্রতিটি দারস অনেকগুলো পাঠে বিভক্ত, প্রতি পাঠে **ভিডিও → পাঠ → কুইজ**।
-মেনু: দারস · কুইজ · পরীক্ষা · দুরূদ · বই।
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## কনটেন্ট যুক্ত করা
-- **Word → ওয়েব**: `sirat-word/` ফোল্ডারে (গিট-ইগনোরড) `dars-NN.docx` রেখে `npm run convert` (বা `npm run convert -- path/to/file.zip`)। এটি `src/data/dars/*.json` ও `src/data/darsIndex.json` তৈরি করে। কনভার্টার Word-এর পাঠ-শিরোনাম, `◆` উপ-শিরোনাম, পাদটীকা ও শেষের MCQ (পাঠের নামে ট্যাগ করা) পড়ে।
-- **ভিডিও**: `src/data/videos.json`-এ `"দারস-পাঠ": "লিংক"` (YouTube / Vimeo / Drive / .mp4)।
-- **নাম, লোগো, বইয়ের তথ্য, দুরূদ ক্যাম্পেইন**: `src/config/brand.js` ও `public/sirat-logo.svg`।
+Currently, two official plugins are available:
 
-## কমান্ড
-`npm run dev` · `npm run build` · `npx vercel deploy --prod`
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-লাইভ: https://www.markazuliman.com/sirat (Vite `base: '/sirat/'`, হ্যাশ-রাউটার)। সব ছবি/অ্যাসেট `getAssetUrl` দিয়ে।
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
