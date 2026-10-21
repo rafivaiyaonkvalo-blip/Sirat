@@ -29,7 +29,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#0ea5e9', '#f59e0b', '#0284c7', '#fbbf24', '#ffffff']
+        colors: ['#475569', '#f59e0b', '#334155', '#fbbf24', '#ffffff']
       });
     } catch {}
   };
@@ -95,7 +95,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
 
       // ৩. বিসমিল্লাহির রাহমানির রাহিম (ক্যালিগ্রাফি স্টাইল)
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#0c4a6e';
+      ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 22px "Amiri", "Scheherazade New", serif';
       ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', width / 2, 85);
 
@@ -108,7 +108,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
       ctx.font = 'bold 26px "Hind Siliguri", "Segoe UI", sans-serif';
       ctx.fillText(organization, width / 2, 146);
 
-      ctx.fillStyle = '#075985';
+      ctx.fillStyle = '#1e293b';
       ctx.font = '600 14px "Hind Siliguri", sans-serif';
       ctx.fillText('অনলাইন সীরাত শিক্ষা বিভাগ • ' + madrasaLocation, width / 2, 170);
 
@@ -133,7 +133,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
       ctx.fillText('এই মর্মে প্রশংসাপত্র ও স্বীকৃতি প্রদান করা যাচ্ছে যে,', width / 2, 310);
 
       // শিক্ষার্থীর নাম (বড়, মার্জিত ও স্পষ্ট)
-      ctx.fillStyle = '#0c4a6e';
+      ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 36px "Hind Siliguri", "Segoe UI", sans-serif';
       ctx.fillText(studentName, width / 2, 360);
 
@@ -156,7 +156,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
       ctx.fillText('এর সকল দারস, ব্যাকরণ, তামরীন ও কুইজ সফলতার সাথে সম্পন্ন করেছেন।', width / 2, 492);
 
       // ফলাফল ও গ্রেড ব্যাজ
-      ctx.fillStyle = '#0284c7';
+      ctx.fillStyle = '#334155';
       ctx.beginPath();
       ctx.roundRect(width / 2 - 170, 520, 340, 38, 19);
       ctx.fill();
@@ -222,7 +222,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
       ctx.lineTo(sigX + 90, sigY);
       ctx.stroke();
 
-      ctx.fillStyle = '#0c4a6e';
+      ctx.fillStyle = '#0f172a';
       ctx.font = 'italic 16px "Segoe Script", cursive';
       ctx.fillText('M. Abdul Hakim', sigX, sigY - 10);
 

@@ -60,7 +60,7 @@ export function calculateStudentGrade(totalXp = 0, percent = 100) {
       gradeBn: 'মুমতাজ (সর্বোচ্চ কৃতিত্ব)',
       gradeAr: 'مُمْتَاز',
       gradeEn: 'Mumtaz (Outstanding)',
-      color: '#0284c7', // emerald
+      color: '#334155', // emerald
       sealTone: 'gold'
     };
   }
@@ -69,7 +69,7 @@ export function calculateStudentGrade(totalXp = 0, percent = 100) {
       gradeBn: 'জায়্যিদ জিদ্দান (অতি উত্তম)',
       gradeAr: 'جَيِّدٌ جِدًّا',
       gradeEn: 'Jayyid Jiddan (Very Good)',
-      color: '#2563eb', // sky
+      color: '#0ea5e9', // sky
       sealTone: 'silver'
     };
   }

@@ -50,7 +50,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
       ctx.fill();
 
       // 2. Decorative Gold/Emerald Border
-      ctx.strokeStyle = '#0ea5e9';
+      ctx.strokeStyle = '#475569';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.roundRect(8, 8, width - 16, height - 16, 20);
@@ -74,7 +74,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
       ctx.font = 'bold 18px "Hind Siliguri", "Segoe UI", sans-serif';
       ctx.fillText('মারকাযুল ঈমান (Markazul Iman)', 40, 50);
 
-      ctx.fillStyle = '#7dd3fc'; // emerald-300
+      ctx.fillStyle = '#cbd5e1'; // emerald-300
       ctx.font = '600 13px "Hind Siliguri", "Segoe UI", sans-serif';
       ctx.fillText('সীরাত • ডিজিটাল শিক্ষার্থী পরিচয়পত্র', 40, 72);
 
@@ -83,7 +83,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
       ctx.beginPath();
       ctx.roundRect(width - 165, 36, 135, 36, 10);
       ctx.fill();
-      ctx.strokeStyle = '#0ea5e9';
+      ctx.strokeStyle = '#475569';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.roundRect(width - 165, 36, 135, 36, 10);
@@ -99,13 +99,13 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
       const avatarSize = 96;
 
       const avatarGrad = ctx.createLinearGradient(avatarX, avatarY, avatarX + avatarSize, avatarY + avatarSize);
-      avatarGrad.addColorStop(0, '#0284c7');
-      avatarGrad.addColorStop(1, '#2563eb');
+      avatarGrad.addColorStop(0, '#334155');
+      avatarGrad.addColorStop(1, '#0ea5e9');
       ctx.fillStyle = avatarGrad;
       ctx.beginPath();
       ctx.roundRect(avatarX, avatarY, avatarSize, avatarSize, 18);
       ctx.fill();
-      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(avatarX, avatarY, avatarSize, avatarSize, 18);
@@ -179,7 +179,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
       ctx.fillStyle = '#94a3b8';
       ctx.font = '11px "Hind Siliguri", sans-serif';
       ctx.fillText('লেভেল', 44 + (colWidth * 2), 272);
-      ctx.fillStyle = '#0ea5e9';
+      ctx.fillStyle = '#475569';
       ctx.font = 'bold 18px sans-serif';
       ctx.fillText(String(toBengaliNumber(level)), 44 + (colWidth * 2), 302);
 

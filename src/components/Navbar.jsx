@@ -122,7 +122,7 @@ export default function Navbar({
                   <span 
                     className="font-black tracking-tight transition-colors duration-1000"
                     style={{ 
-                      color: darkMode ? (activeVariant?.textColorDark || '#38bdf8') : (activeVariant?.textColorLight || '#0284c7'),
+                      color: darkMode ? (activeVariant?.textColorDark || '#94a3b8') : (activeVariant?.textColorLight || '#334155'),
                       textShadow: activeVariant?.glowColor ? `0 0 14px ${activeVariant.glowColor}` : undefined
                     }}
                   >
@@ -137,7 +137,7 @@ export default function Navbar({
                   title="মারকাযুল ঈমান অফিসিয়াল ওয়েবসাইট (markazuliman.com)"
                   className="text-[11px] mt-0.5 font-semibold hover:underline block transition-colors duration-1000"
                   style={{ 
-                    color: darkMode ? (activeVariant?.textColorDark || '#38bdf8') : (activeVariant?.textColorLight || '#0284c7')
+                    color: darkMode ? (activeVariant?.textColorDark || '#94a3b8') : (activeVariant?.textColorLight || '#334155')
                   }}
                 >
                   <span className="underline decoration-emerald-500/50">মারকাযুল ঈমান ↗</span>
