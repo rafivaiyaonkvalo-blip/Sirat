@@ -202,8 +202,8 @@ export default function FloatingSpeedDial({
     if (e && e.stopPropagation) e.stopPropagation();
     const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://arabic.markazuliman.com';
     const shareData = {
-      title: 'Arbi Shikhi - এসো আরবী শিখি',
-      text: 'Arbi Shikhi — এসো আরবী শিখি ও আত-তামরীনুল কিতাবী আধুনিক পদ্ধতিতে আরবী ভাষা শিক্ষা!',
+      title: 'Sirat - সীরাত',
+      text: 'সীরাত — নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস, মারকাযুল ঈমান।',
       url: shareUrl
     };
 
@@ -419,7 +419,7 @@ export default function FloatingSpeedDial({
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 animate-bounce pointer-events-none">
           <div className="px-4 py-2 rounded-xl bg-emerald-950/95 text-white font-bold text-xs shadow-2xl border border-emerald-400/50 flex items-center gap-2 backdrop-blur-md">
             <Download size={14} className="text-emerald-400 animate-pulse" />
-            <span>Arbi Shikhi APK ডাউনলোড শুরু হচ্ছে... 🚀</span>
+            <span>Sirat APK ডাউনলোড শুরু হচ্ছে... 🚀</span>
           </div>
         </div>
       )}

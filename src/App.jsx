@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import LessonsView from './components/LessonsView';
-import Flashcards from './components/Flashcards';
-import Practice from './components/Practice';
-import SpellingPractice from './components/SpellingPractice';
-import GrillMeExam from './components/GrillMeExam';
-import VocabularyTable from './components/VocabularyTable';
 import AuthModal from './components/AuthModal';
-import BookViewer from './components/BookViewer';
 import ReportModal from './components/ReportModal';
 import Footer from './components/Footer';
 import FloatingSpeedDial from './components/FloatingSpeedDial';
@@ -22,10 +15,15 @@ import { loadMistakesFromCloud } from './utils/mistakesManager';
 import { initAnalyticsTracker, updateTrackerUser, trackPageView } from './services/analyticsTracker';
 import { useLiveScreenBroadcaster } from './hooks/useLiveScreenBroadcaster';
 
-import { unifiedVocabulary as vocabularyData } from './data/unifiedVocabulary';
-import chaptersData from './data/chapters.json';
-import lessonsData from './data/lessons.json';
+import SiratDars from './sirat/SiratDars';
+import DuroodView from './sirat/DuroodView';
+import QuizView from './sirat/QuizView';
+import ExamView from './sirat/ExamView';
+import BookView from './sirat/BookView';
 import { isSuperUser, applySuperUserUnlock, setVerifiedSuperUser } from './utils/superUser';
+
+const EMPTY_LIST = [];
+const EMPTY_LESSONS = { lessons: [] };
 
 const getInitialTab = () => {
   if (typeof window !== 'undefined') {
@@ -35,7 +33,7 @@ const getInitialTab = () => {
         return 'admin';
       }
 
-      const validTabs = ['lessons', 'flashcards', 'practice', 'spelling', 'exam', 'vocab', 'book'];
+      const validTabs = ['lessons', 'durood', 'quiz', 'exam', 'book'];
       const params = new URLSearchParams(window.location.search);
       const hash = window.location.hash.replace('#', '');
       const paramTab = params.get('tab');
@@ -146,17 +144,6 @@ export default function App() {
       if (currentUser) {
         await loadUserDataFromCloud(currentUser);
         await loadMistakesFromCloud(currentUser);
-        if (isSuperUser(currentUser)) {
-          try {
-            const { getDynamicLessonStages } = await import('./utils/lessonSubSections.js');
-            const { allTamrins } = await import('./data/tamrinKitabiData.js');
-            applySuperUserUnlock(lessonsData.lessons, allTamrins, getDynamicLessonStages);
-            await syncUserDataToCloud(currentUser);
-            console.log('All lessons and tamrins 100% unlocked for SuperUser:', currentUser.email);
-          } catch (e) {
-            console.error('Failed to auto-unlock lessons:', e);
-          }
-        }
         setUser(currentUser);
       } else {
         setUser(null);
@@ -246,7 +233,7 @@ export default function App() {
       }
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab') || 'lessons';
-      const validTabs = ['lessons', 'flashcards', 'practice', 'spelling', 'exam', 'vocab', 'book'];
+      const validTabs = ['lessons', 'durood', 'quiz', 'exam', 'book'];
       if (validTabs.includes(tab)) {
         setCurrentTab(tab);
       }
@@ -398,9 +385,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-100">
         <AdminPortal
-          lessonsData={lessonsData}
-          vocabularyData={vocabularyData}
-          chaptersData={chaptersData}
+          lessonsData={EMPTY_LESSONS}
+          vocabularyData={EMPTY_LIST}
+          chaptersData={EMPTY_LIST}
           onExitAdmin={() => {
             if (typeof window !== 'undefined') {
               const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
@@ -441,94 +428,23 @@ export default function App() {
         {/* Navigation Bar */}
         <Navbar
         currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
+        setCurrentTab={(t) => { if (t === 'lessons' && /^#\/dars\/\d/.test(window.location.hash)) window.location.hash = '#/dars'; setCurrentTab(t); }}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        totalWords={vocabularyData.length}
+        totalWords={0}
         user={user}
         onOpenAuth={() => setAuthModalOpen(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 pb-12 md:pb-16">
-        {(currentTab === 'lessons' || !['flashcards', 'practice', 'spelling', 'exam', 'vocab', 'book'].includes(currentTab)) && (
-          <LessonsView 
-            key={user ? user.uid : 'guest'}
-            lessonsData={lessonsData} 
-            user={user}
-            onOpenBookViewer={(book) => {
-              if (book) setSelectedBook(book);
-              setCurrentTab('book');
-            }} 
-          />
-        )}
-
-        {currentTab === 'flashcards' && (
-          <Flashcards 
-            key={user ? user.uid : 'guest'}
-            vocabulary={vocabularyData} 
-            chapters={chaptersData} 
-            onOpenReport={(ctx) => {
-              setReportContext(ctx || {});
-              setReportModalOpen(true);
-            }} 
-          />
-        )}
-
-        {currentTab === 'practice' && (
-          <Practice 
-            key={user ? user.uid : 'guest'}
-            vocabulary={vocabularyData} 
-            user={user}
-            onNavigateTab={setCurrentTab}
-            onOpenReport={(ctx) => {
-              setReportContext(ctx || {});
-              setReportModalOpen(true);
-            }} 
-          />
-        )}
-
-        {/* বানান অংশ সবার জন্য খোলা */}
-        {currentTab === 'spelling' && (
-          <SpellingPractice 
-            key={user ? user.uid : 'guest'}
-            vocabulary={vocabularyData} 
-            onOpenReport={(ctx) => {
-              setReportContext(ctx || {});
-              setReportModalOpen(true);
-            }} 
-          />
-        )}
-
-        {currentTab === 'exam' && (
-          <GrillMeExam 
-            key={user ? user.uid : 'guest'}
-            vocabulary={vocabularyData} 
-            onOpenReport={(ctx) => {
-              setReportContext(ctx || {});
-              setReportModalOpen(true);
-            }} 
-          />
-        )}
-
-        {currentTab === 'vocab' && (
-          <VocabularyTable 
-            key={user ? user.uid : 'guest'}
-            vocabulary={vocabularyData} 
-            onOpenBookViewer={(book) => {
-              setSelectedBook(book || 'original');
-              setCurrentTab('book');
-            }}
-            onOpenReport={(ctx) => {
-              setReportContext(ctx || {});
-              setReportModalOpen(true);
-            }}
-          />
-        )}
-
-        {currentTab === 'book' && (
-          <BookViewer initialBook={selectedBook} onBack={() => setCurrentTab('lessons')} />
-        )}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
+          {(currentTab === 'lessons' || !['durood', 'quiz', 'exam', 'book'].includes(currentTab)) && <SiratDars />}
+          {currentTab === 'durood' && <DuroodView />}
+          {currentTab === 'quiz' && <QuizView />}
+          {currentTab === 'exam' && <ExamView />}
+          {currentTab === 'book' && <BookView />}
+        </div>
       </main>
 
       {/* Clean & Elegant Footer */}
@@ -562,7 +478,7 @@ export default function App() {
         isOpen={mistakesModalOpen}
         onClose={() => setMistakesModalOpen(false)}
         user={user}
-        vocabulary={vocabularyData}
+        vocabulary={EMPTY_LIST}
       />
       {/* "লিডারবোর্ড" (Leaderboard) Modal */}
       <LeaderboardModal
