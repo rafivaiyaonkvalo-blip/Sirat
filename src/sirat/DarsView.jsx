@@ -5,7 +5,7 @@ import videos from '../data/videos.json';
 import { brand } from './brand';
 import { bn } from './questions';
 import { href } from './router';
-import { Branch, DarsNode, LessonNode } from './PathNode';
+import { DarsNode, PathNode } from './PathNode';
 
 const TABS = [
   { key: 'concise', to: '/dars', label: 'সংক্ষিপ্ত', icon: BookOpen },
@@ -16,44 +16,59 @@ export default function DarsView({ progress, mode = 'concise', id }) {
   return <Roadmap progress={progress} mode={mode} focusId={id} />;
 }
 
-function DarsRow({ d, progress, current, focus }) {
+// আগের ডুয়োলিঙ্গো-ধাঁচের আঁকাবাঁকা পথের অবস্থান (মোবাইল / ডেস্কটপ)
+const OFFSETS = [
+  '-translate-x-14 sm:-translate-x-22',
+  '-translate-x-7 sm:-translate-x-11',
+  'translate-x-7 sm:translate-x-11',
+  'translate-x-14 sm:translate-x-22',
+  'translate-x-7 sm:translate-x-11',
+  '-translate-x-7 sm:-translate-x-11',
+];
+const SIDES = ['right', 'right', 'left', 'left', 'left', 'right'];
+
+function DarsRow({ d, idx, progress, current, open, onToggle, focus }) {
   const [openNo, setOpenNo] = useState(null);
   const rowRef = useRef(null);
-  const trackRef = useRef(null);
   const doneCount = d.porbos.filter((p) => progress.done[`${d.id}-${p.no}`]).length;
   const currentNo = current ? (progress.last?.dars === d.id && progress.last.porbo) || d.porbos.find((p) => !progress.done[`${d.id}-${p.no}`])?.no || 1 : 0;
-  const open = d.porbos.find((p) => p.no === openNo);
 
   useEffect(() => {
     if (focus) rowRef.current?.scrollIntoView({ block: 'start' });
-    if (current && currentNo > 1) trackRef.current?.children[currentNo - 1]?.scrollIntoView({ inline: 'center', block: 'nearest' });
-  }, [focus, current, currentNo]);
-
-  const right = d.id % 2 === 1; // বেজোড় দারসে পাঠ ডানে, জোড়ে বামে
-  const track = (
-    <div ref={trackRef} dir={right ? 'ltr' : 'rtl'} className="flex min-w-0 items-center gap-1 overflow-x-auto px-1 py-8">
-      {d.porbos.map((p, i) => (
-        <div key={p.no} dir="ltr" style={{ transform: `translateY(${i % 2 === 0 ? -14 : 14}px)` }}>
-          <LessonNode no={p.no} done={!!progress.done[`${d.id}-${p.no}`]} current={p.no === currentNo} open={openNo === p.no} onToggle={() => setOpenNo(openNo === p.no ? null : p.no)} />
-        </div>
-      ))}
-    </div>
-  );
+  }, [focus]);
 
   return (
     <section ref={rowRef} id={`dars-row-${d.id}`} className="scroll-mt-32">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-        <div className="min-w-0">{!right && track}</div>
-        <DarsNode number={d.number} done={doneCount === d.porbos.length} />
-        <div className="min-w-0">{right && track}</div>
+      <div className="flex justify-center">
+        <DarsNode number={d.number} done={doneCount === d.porbos.length} open={open} onToggle={onToggle} offsetClass={OFFSETS[idx % OFFSETS.length]} />
       </div>
-      {open && <Branch darsId={d.id} no={open.no} hasQuiz={open.quiz > 0} hasVideo={!!videos[`${d.id}-${open.no}`]} />}
+      {open && (
+        <div className="relative flex flex-col items-center gap-6 py-5 sm:gap-7">
+          {d.porbos.map((p, i) => (
+            <div key={p.no} className="relative" style={{ animation: `subNodePop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) ${i * 60}ms both` }}>
+              <PathNode
+                darsId={d.id}
+                no={p.no}
+                offsetClass={OFFSETS[i % OFFSETS.length]}
+                side={SIDES[i % SIDES.length]}
+                done={!!progress.done[`${d.id}-${p.no}`]}
+                current={p.no === currentNo}
+                open={openNo === p.no}
+                onToggle={() => setOpenNo(openNo === p.no ? null : p.no)}
+                hasQuiz={p.quiz > 0}
+                hasVideo={!!videos[`${d.id}-${p.no}`]}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
 function Roadmap({ progress, mode, focusId }) {
   const deep = mode === 'deep';
+  const [openDars, setOpenDars] = useState(focusId || null);
   const total = index.reduce((a, x) => a + x.porbos.length, 0);
   const doneTotal = index.reduce((a, x) => a + x.porbos.filter((p) => progress.done[`${x.id}-${p.no}`]).length, 0);
   const pct = Math.round((doneTotal / total) * 100);
@@ -128,10 +143,10 @@ function Roadmap({ progress, mode, focusId }) {
             </div>
           </div>
 
-          {/* সব দারস: প্রতিটির পাশে অনুভূমিক পাঠের পথ */}
-          <div className="space-y-2 pb-4">
-            {index.map((x) => (
-              <DarsRow key={x.id} d={x} progress={progress} current={x.id === cur.id} focus={x.id === focusId} />
+          {/* সব দারস: আঁকাবাঁকা পথ; দারসে চাপলে নিচে পাঠগুলো বের হয় */}
+          <div className="space-y-4 pb-4">
+            {index.map((x, i) => (
+              <DarsRow key={x.id} d={x} idx={i} progress={progress} current={x.id === cur.id} open={openDars === x.id} onToggle={() => setOpenDars(openDars === x.id ? null : x.id)} focus={x.id === focusId} />
             ))}
           </div>
         </>
