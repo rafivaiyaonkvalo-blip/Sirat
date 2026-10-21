@@ -29,23 +29,23 @@ function DarsRow({ d, progress, current, focus }) {
     if (current && currentNo > 1) trackRef.current?.children[currentNo - 1]?.scrollIntoView({ inline: 'center', block: 'nearest' });
   }, [focus, current, currentNo]);
 
+  const right = d.id % 2 === 1; // বেজোড় দারসে পাঠ ডানে, জোড়ে বামে
+  const track = (
+    <div ref={trackRef} dir={right ? 'ltr' : 'rtl'} className="flex min-w-0 items-center gap-1 overflow-x-auto px-1 py-8">
+      {d.porbos.map((p, i) => (
+        <div key={p.no} dir="ltr" style={{ transform: `translateY(${i % 2 === 0 ? -14 : 14}px)` }}>
+          <LessonNode no={p.no} done={!!progress.done[`${d.id}-${p.no}`]} current={p.no === currentNo} open={openNo === p.no} onToggle={() => setOpenNo(openNo === p.no ? null : p.no)} />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <section ref={rowRef} id={`dars-row-${d.id}`} className="scroll-mt-32">
-      {/* Unit banner (আগের ডিজাইনের মতো) */}
-      <div className="mb-3 p-5 sm:p-6 rounded-3xl text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600">
-        <div className="relative z-10">
-          <span className="inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md mb-2">📖 সংক্ষিপ্ত • দারস {bn(d.number)}</span>
-          <h3 className="text-lg sm:text-xl font-bold leading-snug">{d.title}</h3>
-          <p className="text-sm text-emerald-50 mt-1">{d.subtitle}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+        <div className="min-w-0">{!right && track}</div>
         <DarsNode number={d.number} done={doneCount === d.porbos.length} />
-        <div ref={trackRef} className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-3 pl-1 pr-4">
-          {d.porbos.map((p) => (
-            <LessonNode key={p.no} no={p.no} done={!!progress.done[`${d.id}-${p.no}`]} current={p.no === currentNo} open={openNo === p.no} onToggle={() => setOpenNo(openNo === p.no ? null : p.no)} />
-          ))}
-        </div>
+        <div className="min-w-0">{right && track}</div>
       </div>
       {open && <Branch darsId={d.id} no={open.no} hasQuiz={open.quiz > 0} hasVideo={!!videos[`${d.id}-${open.no}`]} />}
     </section>
@@ -129,7 +129,7 @@ function Roadmap({ progress, mode, focusId }) {
           </div>
 
           {/* সব দারস: প্রতিটির পাশে অনুভূমিক পাঠের পথ */}
-          <div className="space-y-8 pb-4">
+          <div className="space-y-2 pb-4">
             {index.map((x) => (
               <DarsRow key={x.id} d={x} progress={progress} current={x.id === cur.id} focus={x.id === focusId} />
             ))}
