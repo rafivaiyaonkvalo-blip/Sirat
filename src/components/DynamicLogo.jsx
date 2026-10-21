@@ -9,9 +9,9 @@ export const LOGO_VARIANTS = [
     src: getAssetUrl('/logos/sirat_emerald.svg'),
     glowColor: 'rgba(14, 165, 233, 0.45)',
     borderColor: 'border-emerald-500/40',
-    textColorLight: '#0284c7',
-    textColorDark: '#38bdf8',
-    accentColor: '#0ea5e9'
+    textColorLight: '#334155',
+    textColorDark: '#94a3b8',
+    accentColor: '#475569'
   },
   {
     id: 'ocean',
@@ -19,9 +19,9 @@ export const LOGO_VARIANTS = [
     src: getAssetUrl('/logos/sirat_ocean.svg'),
     glowColor: 'rgba(2, 132, 199, 0.45)',
     borderColor: 'border-sky-500/40',
-    textColorLight: '#2563eb',
-    textColorDark: '#38bdf8',
-    accentColor: '#0ea5e9'
+    textColorLight: '#0ea5e9',
+    textColorDark: '#94a3b8',
+    accentColor: '#475569'
   },
   {
     id: 'gold',
