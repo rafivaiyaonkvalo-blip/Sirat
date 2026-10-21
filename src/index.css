@@ -6,6 +6,29 @@
   --font-sans: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-bengali: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-arabic: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  /* ব্র্যান্ড রং: নীল (markazuliman.com-ধাঁচ); emerald/teal ইউটিলিটি এখন নীল */
+  --color-emerald-50: #eff6ff;
+  --color-emerald-100: #dbeafe;
+  --color-emerald-200: #bfdbfe;
+  --color-emerald-300: #93c5fd;
+  --color-emerald-400: #60a5fa;
+  --color-emerald-500: #3b82f6;
+  --color-emerald-600: #2563eb;
+  --color-emerald-700: #1d4ed8;
+  --color-emerald-800: #1e40af;
+  --color-emerald-900: #1e3a8a;
+  --color-emerald-950: #172554;
+  --color-teal-50: #f0f9ff;
+  --color-teal-100: #e0f2fe;
+  --color-teal-200: #bae6fd;
+  --color-teal-300: #7dd3fc;
+  --color-teal-400: #38bdf8;
+  --color-teal-500: #0ea5e9;
+  --color-teal-600: #0284c7;
+  --color-teal-700: #0369a1;
+  --color-teal-800: #075985;
+  --color-teal-900: #0c4a6e;
+  --color-teal-950: #082f49;
 }
 
 @layer base {
@@ -77,7 +100,7 @@
   border-radius: 9999px;
 }
 .custom-dial-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.7);
+  background: rgba(37, 99, 235, 0.7);
 }
 
 /* Smooth Slide-over Drawer Animations */
@@ -208,10 +231,10 @@
 
 @keyframes liquidPulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.25), 0 0 40px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.25), 0 0 40px rgba(37, 99, 235, 0.15);
   }
   50% {
-    box-shadow: 0 0 35px rgba(56, 189, 248, 0.45), 0 0 60px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 35px rgba(56, 189, 248, 0.45), 0 0 60px rgba(37, 99, 235, 0.3);
   }
 }
 
@@ -224,7 +247,7 @@
 }
 
 .liquid-metal-chromatic-ring {
-  background: conic-gradient(from 180deg at 50% 50%, #ffffff 0%, #38bdf8 16%, #ec4899 33%, #fbbf24 50%, #10b981 66%, #818cf8 83%, #ffffff 100%);
+  background: conic-gradient(from 180deg at 50% 50%, #ffffff 0%, #38bdf8 16%, #ec4899 33%, #fbbf24 50%, #2563eb 66%, #818cf8 83%, #ffffff 100%);
   animation: liquidRotate 12s linear infinite;
 }
 
@@ -345,11 +368,11 @@
 @keyframes zoomInOutBreathe {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
   }
   50% {
     transform: scale(1.09);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.5);
   }
 }
 
