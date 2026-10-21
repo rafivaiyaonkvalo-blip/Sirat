@@ -214,7 +214,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
           <div className="flex items-center gap-2.5">
             <div 
               className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center shadow-xs text-emerald-600 dark:text-emerald-400 select-none"
-              title="ইলমে দ্বীন ও আরবী ভাষা চর্চা"
+              title="ইলমে দ্বীন ও সীরাত চর্চা"
             >
               <BookOpen size={20} className="stroke-[2.2]" />
             </div>

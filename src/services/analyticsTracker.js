@@ -1,5 +1,5 @@
 // ULS Arabic Website Usage Tracer & Analytics Service
-// মারকাযুল ঈমান ইলমী বোর্ড - ULS Arabic (Arbi Shikhi)
+// মারকাযুল ঈমান ইলমী বোর্ড - Sirat
 import { db } from './firebase';
 import { doc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { getUserLocation, getCachedUserLocation } from './locationService';

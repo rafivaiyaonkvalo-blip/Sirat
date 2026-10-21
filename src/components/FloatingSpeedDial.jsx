@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sun, Moon, Volume2, VolumeX, User, Share2, MessageSquare, Flag, 
   HelpCircle, ArrowDown, ArrowUp, X, Check, ExternalLink, 
-  BookOpen, Award, ShieldCheck, Send, Download, Sparkles,
+  BookOpen, Award, ShieldCheck, Send, Sparkles,
   Languages, BookX, Trophy, Lock, SlidersHorizontal
 } from 'lucide-react';
 import { useSoundMuted } from '../utils/soundEffects';
@@ -10,7 +10,7 @@ import { getShowEnglish, toggleShowEnglish } from '../utils/storage';
 import { getVoiceProfile, setVoiceProfile, playArabicAudio } from '../utils/audio';
 import { getPendingMistakesCount } from '../utils/mistakesManager';
 import { getVolumeProgress } from '../utils/certificateManager';
-import { toBengaliNumber } from '../utils/lessonSubSections';
+import { toBengaliNumber } from '../utils/gamification';
 
 export default function FloatingSpeedDial({
   darkMode,
@@ -31,7 +31,6 @@ export default function FloatingSpeedDial({
   const [soundMuted, toggleSound] = useSoundMuted();
   const [isScrolledDown, setIsScrolledDown] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
-  const [downloadToast, setDownloadToast] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
 
   const rightDialRef = useRef(null);
@@ -182,21 +181,6 @@ export default function FloatingSpeedDial({
     setIsOpen(false);
   };
 
-  // Direct APK Download handler
-  const handleDownloadApk = (e) => {
-    if (e && e.stopPropagation) e.stopPropagation();
-    const apkUrl = '/downloads/ArbiShikhi-release-signed.apk';
-    const link = document.createElement('a');
-    link.href = apkUrl;
-    link.download = 'ArbiShikhi-release-signed.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setDownloadToast(true);
-    setTimeout(() => setDownloadToast(false), 3200);
-    setIsOpen(false);
-  };
-
   // Share handler
   const handleShareClick = async (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
@@ -321,13 +305,6 @@ export default function FloatingSpeedDial({
       onClick: handleShareClick
     },
     {
-      id: 'download_apk',
-      label: downloadToast ? 'ডাউনলোড' : 'অ্যাপ',
-      icon: downloadToast ? Check : Download,
-      gradient: 'from-emerald-600 via-teal-600 to-cyan-600 shadow-emerald-600/35 ring-emerald-400/30',
-      onClick: handleDownloadApk
-    },
-    {
       id: 'message',
       label: 'মেসেজ',
       icon: MessageSquare,
@@ -410,16 +387,6 @@ export default function FloatingSpeedDial({
           <div className="px-4 py-2 rounded-xl bg-slate-900/95 dark:bg-emerald-950/95 text-white font-bold text-xs shadow-2xl border border-emerald-500/50 flex items-center gap-2 backdrop-blur-md">
             <Check size={14} className="text-emerald-400" />
             <span>সাইটের লিংক কপি করা হয়েছে!</span>
-          </div>
-        </div>
-      )}
-
-      {/* Toast confirmation for APK Download */}
-      {downloadToast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 animate-bounce pointer-events-none">
-          <div className="px-4 py-2 rounded-xl bg-emerald-950/95 text-white font-bold text-xs shadow-2xl border border-emerald-400/50 flex items-center gap-2 backdrop-blur-md">
-            <Download size={14} className="text-emerald-400 animate-pulse" />
-            <span>Sirat APK ডাউনলোড শুরু হচ্ছে... 🚀</span>
           </div>
         </div>
       )}

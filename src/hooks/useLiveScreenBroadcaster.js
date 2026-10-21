@@ -22,12 +22,10 @@ export function useLiveScreenBroadcaster(currentTab, user) {
     if (window.location.pathname.startsWith('/rafi')) return;
 
     let tabLabel = 'দারস ও পাঠসমূহ';
-    if (currentTab === 'flashcards') tabLabel = 'ফ্ল্যাশকার্ড অনুশীলন';
-    else if (currentTab === 'practice') tabLabel = 'অভ্যাস ও অনুশীলন';
-    else if (currentTab === 'spelling') tabLabel = 'বানান ও বর্ণ লিখন';
-    else if (currentTab === 'exam') tabLabel = 'গ্রিল মি মৌখিক পরীক্ষা';
-    else if (currentTab === 'vocab') tabLabel = '১,৩৪৩ শব্দকোষ ডিকশনারি';
-    else if (currentTab === 'book') tabLabel = 'মূল কিতাব ভিউয়ার (PDF)';
+    if (currentTab === 'durood') tabLabel = 'দুরূদ';
+    else if (currentTab === 'quiz') tabLabel = 'কুইজ';
+    else if (currentTab === 'exam') tabLabel = 'পরীক্ষা';
+    else if (currentTab === 'book') tabLabel = 'বই';
 
     broadcastStudentScreenState({
       currentTab,

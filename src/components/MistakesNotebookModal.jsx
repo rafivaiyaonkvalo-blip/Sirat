@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import AudioButton from './AudioButton';
-import { toBengaliNumber } from '../utils/lessonSubSections';
+import { toBengaliNumber } from '../utils/gamification';
 import { 
   getMistakes, 
   recordMistakeSuccess, 

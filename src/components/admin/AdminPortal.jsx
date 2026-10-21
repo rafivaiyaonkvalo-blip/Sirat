@@ -477,9 +477,6 @@ export default function AdminPortal({
     { id: 'notices', label: 'নোটিশ', icon: Megaphone, count: activeNoticesCount },
     { id: 'certificates', label: 'সনদপত্র', icon: Award, count: graduatesCount },
     { id: 'reports', label: 'রিপোর্ট', icon: Flag, hasAlert: pendingReportsCount > 0 },
-    { id: 'lessons', label: 'পাঠ', icon: BookOpen },
-    { id: 'vocab', label: 'শব্দকোষ', icon: Search },
-    { id: 'audit', label: 'অডিট', icon: Sparkles },
     { id: 'tools', label: 'সেটিংস', icon: SlidersHorizontal },
   ];
 
@@ -1090,7 +1087,7 @@ export default function AdminPortal({
                         {reporter.phone && (
                           <a
                             href={`https://wa.me/${reporter.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                              `আসসালামু আলাইকুম ${reporter.name}, মারকাযুল ঈমান 'এসো আরবী শিখি' পোর্টালে আপনার প্রেরিত রিপোর্টটি (${catMeta.label}) আমরা পেয়েছি।`
+                              `আসসালামু আলাইকুম ${reporter.name}, মারকাযুল ঈমান 'সীরাত' পোর্টালে আপনার প্রেরিত রিপোর্টটি (${catMeta.label}) আমরা পেয়েছি।`
                             )}`}
                             target="_blank"
                             rel="noreferrer"

@@ -76,7 +76,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
 
       ctx.fillStyle = '#6ee7b7'; // emerald-300
       ctx.font = '600 13px "Hind Siliguri", "Segoe UI", sans-serif';
-      ctx.fillText('এসো আরবী শিখি • ডিজিটাল শিক্ষার্থী পরিচয়পত্র', 40, 72);
+      ctx.fillText('সীরাত • ডিজিটাল শিক্ষার্থী পরিচয়পত্র', 40, 72);
 
       // Verified Badge Pill (Top Right)
       ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
@@ -203,8 +203,8 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
 
   const handleShare = async () => {
     const shareData = {
-      title: 'মারকাযুল ঈমান - এসো আরবী শিখি',
-      text: `আমি মারকাযুল ঈমান-এর "এসো আরবী শিখি" কোর্সের একজন নিবন্ধিত শিক্ষার্থী (আইডি: ${studentId})। আপনিও যুক্ত হোন!`,
+      title: 'মারকাযুল ঈমান - সীরাত',
+      text: `আমি মারকাযুল ঈমান-এর "সীরাত" কোর্সের একজন নিবন্ধিত শিক্ষার্থী (আইডি: ${studentId})। আপনিও যুক্ত হোন!`,
       url: typeof window !== 'undefined' ? window.location.origin : ''
     };
     if (navigator.share) {
@@ -244,7 +244,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
               </span>
             </div>
             <p className="text-[11px] text-emerald-200/90 font-medium">
-              এসো আরবী শিখি • ডিজিটাল শিক্ষার্থী পরিচয়পত্র
+              সীরাত • ডিজিটাল শিক্ষার্থী পরিচয়পত্র
             </p>
           </div>
 

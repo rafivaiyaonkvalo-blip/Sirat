@@ -150,7 +150,7 @@ export default function ReportModal({
     const lines = [
       'আসসালামু আলাইকুম ওয়া রাহমাতুল্লাহ',
       '',
-      isMessageMode ? '*এসো আরবী শিখি — মেসেজ*' : '*এসো আরবী শিখি — ভুল রিপোর্ট*',
+      isMessageMode ? '*সীরাত — মেসেজ*' : '*সীরাত — ভুল রিপোর্ট*',
       '━━━━━━━━━━━━━━',
       `📌 *ধরন:* ${categoryLabel}`,
       ...(context.lessonTitle ? [`📖 *পাঠ:* ${context.lessonTitle}`] : []),

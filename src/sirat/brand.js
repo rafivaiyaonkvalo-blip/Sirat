@@ -21,5 +21,4 @@ export const book = {
 export const campaign = {
   title: 'সম্মিলিত দুরূদ ক্যাম্পেইন',
   target: 1000000,
-  globalCount: null, // সার্ভার যুক্ত হলে মোট সংখ্যা এখানে/এপিআই থেকে আসবে
 };
