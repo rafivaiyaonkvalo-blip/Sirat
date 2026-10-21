@@ -60,7 +60,7 @@ export function calculateStudentGrade(totalXp = 0, percent = 100) {
       gradeBn: 'মুমতাজ (সর্বোচ্চ কৃতিত্ব)',
       gradeAr: 'مُمْتَاز',
       gradeEn: 'Mumtaz (Outstanding)',
-      color: '#059669', // emerald
+      color: '#1d4ed8', // emerald
       sealTone: 'gold'
     };
   }
