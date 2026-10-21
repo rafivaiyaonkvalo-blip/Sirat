@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Layers, Award, Menu, X, Download, LogIn, User, PenTool } from 'lucide-react';
+import { BookOpen, Heart, Library, Layers, Award, Menu, X, Download, LogIn, User, PenTool } from 'lucide-react';
 import { isSuperUser } from '../utils/superUser';
 import DynamicLogo, { LOGO_VARIANTS } from './DynamicLogo';
 import { triggerHaptic } from '../utils/haptics';
@@ -82,11 +82,11 @@ export default function Navbar({
   };
 
   const navItems = [
-    { id: 'lessons', label: 'দরস', icon: BookOpen },
-    { id: 'flashcards', label: 'ফ্ল্যাশকার্ড', icon: Layers },
-    { id: 'practice', label: 'অনুশীলন', icon: BookOpen },
-    { id: 'spelling', label: 'বানান', icon: PenTool },
+    { id: 'lessons', label: 'দারস', icon: BookOpen },
+    { id: 'durood', label: 'দুরূদ', icon: Heart },
+    { id: 'quiz', label: 'কুইজ', icon: PenTool },
     { id: 'exam', label: 'পরীক্ষা', icon: Award },
+    { id: 'book', label: 'বই', icon: Library },
   ];
 
 
@@ -126,9 +126,9 @@ export default function Navbar({
                       textShadow: activeVariant?.glowColor ? `0 0 14px ${activeVariant.glowColor}` : undefined
                     }}
                   >
-                    Arbi Shikhi
+                    Sirat
                   </span>
-                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">• এসো আরবী শিখি</span>
+                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold">• সীরাত</span>
                 </div>
                 <a 
                   href="https://markazuliman.com" 

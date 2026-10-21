@@ -62,7 +62,7 @@ class GlobalErrorBoundary extends Component {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-3xl">
               📖
             </div>
-            <h2 className="text-xl font-bold mb-2">এসো আরবী শিখি - মারকাযুল ঈমান</h2>
+            <h2 className="text-xl font-bold mb-2">সীরাত - মারকাযুল ঈমান</h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
               পেজটি লোড করার সময় একটি সাময়িক ত্রুটি হয়েছে। নিচের বাটনে ক্লিক করে পুনরায় লোড করুন।
             </p>

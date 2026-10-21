@@ -182,7 +182,7 @@ export default function Footer({ user, onOpenAuth }) {
             © {new Date().getFullYear()} <a href="https://markazuliman.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-600 hover:underline">মারকাযুল ঈমান (Markazul Iman)</a> • সর্বস্বত্ব সংরক্ষিত
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400">
-            এসো আরবী শিখি ও আত-তামরীনুল কিতাবী ডিজিটাল সংস্করণ
+            সীরাত: নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস
           </div>
         </div>
 
