@@ -4,6 +4,7 @@
 - Name: **Sirat**
 - Organization: মারকাযুল ঈমান (Markazul Iman)
 - Framework: React 19 + Vite 8 + Tailwind CSS v4
+- Content: 32 Seerah dars (Word → JSON via `npm run convert`); menu: Dars, Quiz, Exam, Durood, Book. See README.md.
 
 ## Subpath Deployment Rules
 - Production URL: `https://www.markazuliman.com/sirat`
