@@ -43,7 +43,7 @@ export default function Home({ progress }) {
           {last && <a href={href(`/dars/${progress.last.dars}/${progress.last.porbo}`)} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 font-semibold hover:bg-white/10">দারস {last.number} থেকে চালিয়ে যান <ArrowRight size={18} /></a>}
         </div>
       </section>
-      <h2 className="mb-4 mt-10 text-2xl font-bold text-brand-700 dark:text-brand-200">সব দারস</h2>
+      <h2 className="mb-4 mt-10 text-2xl font-bold text-brand-700 dark:text-brand-200">সংক্ষিপ্ত দারস</h2>
       <DarsGrid progress={progress} />
     </div>
   );

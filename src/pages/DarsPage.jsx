@@ -11,7 +11,7 @@ export default function DarsPage({ id, progress }) {
   const next = index.find((x) => x.id === id + 1);
   return (
     <div>
-      <a href={href('/dars')} className="text-sm font-semibold text-brand-600 dark:text-brand-400">← সব দারস</a>
+      <a href={href('/dars')} className="text-sm font-semibold text-brand-600 dark:text-brand-400">← সংক্ষিপ্ত দারস</a>
       <header className="mt-2 rounded-3xl bg-brand-900 p-6 text-white sm:p-8">
         <p className="text-sm font-semibold text-brand-200">দারস {d.number}</p>
         <h1 className="mt-1 text-3xl font-bold sm:text-4xl">{d.title}</h1>

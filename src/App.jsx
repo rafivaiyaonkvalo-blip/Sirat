@@ -24,6 +24,7 @@ export default function App() {
   else if (seg[0] === 'durood') page = <DuroodPage />;
   else if (seg[0] === 'book') page = <BookPage />;
   else if (seg[0] === 'dars' && seg.length === 1) page = <DarsList progress={progress} />;
+  else if (seg[0] === 'dars' && seg[1] === 'deep') page = <DarsList progress={progress} mode="deep" />;
   else if (seg[0] === 'dars' && seg.length === 2 && num(seg[1])) page = <DarsPage id={num(seg[1])} progress={progress} />;
   else if (seg[0] === 'dars' && seg.length === 3 && num(seg[1]) && num(seg[2])) page = <PorboPage id={num(seg[1])} no={num(seg[2])} progress={progress} />;
 
