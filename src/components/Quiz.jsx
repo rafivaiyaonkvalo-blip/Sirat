@@ -24,7 +24,7 @@ export default function Quiz({ questions, onFinish, previous }) {
   return (
     <section className="mt-10" key={round}>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-brand-700 dark:text-brand-200">পর্ব-কুইজ</h2>
+        <h2 className="text-xl font-bold text-brand-700 dark:text-brand-200">পাঠ-কুইজ</h2>
         <span className="text-sm text-slate-500 dark:text-slate-400">
           {answered}/{questions.length}
           {previous && !answered ? ` · আগের ফল ${previous.score}/${previous.total}` : ''}

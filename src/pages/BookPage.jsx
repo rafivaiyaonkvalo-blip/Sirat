@@ -22,7 +22,7 @@ export default function BookPage() {
           )}
         </div>
       </div>
-      <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">এই ওয়েবসাইটে কিতাবের পাঠ দারস ও পর্ব আকারে সহায়ক হিসেবে দেওয়া আছে; মূল কিতাবটি ছাপা আকারে সংগ্রহ করতে পারবেন।</p>
+      <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">এই ওয়েবসাইটে কিতাবের পাঠ দারস ও পাঠ আকারে সহায়ক হিসেবে দেওয়া আছে; মূল কিতাবটি ছাপা আকারে সংগ্রহ করতে পারবেন।</p>
     </div>
   );
 }

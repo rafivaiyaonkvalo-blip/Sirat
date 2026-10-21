@@ -15,7 +15,7 @@ export default function VideoPlayer({ url, title }) {
     return (
       <div className="aspect-video w-full rounded-2xl border-2 border-dashed border-brand-200 dark:border-brand-700/50 bg-brand-50 dark:bg-brand-900/30 flex flex-col items-center justify-center gap-2 text-brand-700 dark:text-brand-200">
         <Clapperboard size={40} strokeWidth={1.5} />
-        <p className="font-semibold">এই পর্বের ভিডিও শিগগিরই আসছে</p>
+        <p className="font-semibold">এই পাঠের ভিডিও শিগগিরই আসছে</p>
       </div>
     );
   }

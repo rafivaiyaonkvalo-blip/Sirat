@@ -228,7 +228,7 @@ for (const [file, buf] of await loadSources()) {
     porbos: dars.porbos.map((p) => ({ no: p.no, title: p.title, quiz: p.quiz.length })),
   });
   const fnTotal = dars.porbos.reduce((a, p) => a + p.footnotes.length, 0);
-  console.log(`${file}: ${dars.porbos.length} পর্ব, ${fnTotal} footnote, ${dars.quizCount} MCQ, ${dars.sources.length} source${warn.length ? '  ⚠ ' + warn.join(' | ') : ''}`);
+  console.log(`${file}: ${dars.porbos.length} পাঠ, ${fnTotal} footnote, ${dars.quizCount} MCQ, ${dars.sources.length} source${warn.length ? '  ⚠ ' + warn.join(' | ') : ''}`);
   totalWarn += warn.length;
 }
 fs.writeFileSync(path.join(root, 'src/data/darsIndex.json'), JSON.stringify(index));
