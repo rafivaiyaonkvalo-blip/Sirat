@@ -31,11 +31,14 @@ function DarsRow({ d, progress, current, focus }) {
 
   return (
     <section ref={rowRef} id={`dars-row-${d.id}`} className="scroll-mt-32">
-      <div className="mb-1 flex flex-wrap items-baseline gap-x-2">
-        <h3 className="text-base font-extrabold leading-snug sm:text-lg">{d.title}</h3>
-        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{bn(doneCount)}/{bn(d.porbos.length)} পাঠ</span>
+      {/* Unit banner (আগের ডিজাইনের মতো) */}
+      <div className="mb-3 p-5 sm:p-6 rounded-3xl text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600">
+        <div className="relative z-10">
+          <span className="inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md mb-2">📖 সংক্ষিপ্ত • দারস {bn(d.number)}</span>
+          <h3 className="text-lg sm:text-xl font-bold leading-snug">{d.title}</h3>
+          <p className="text-sm text-emerald-50 mt-1">{d.subtitle}</p>
+        </div>
       </div>
-      <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{d.subtitle}</p>
       <div className="flex items-center gap-2">
         <DarsNode number={d.number} done={doneCount === d.porbos.length} />
         <div ref={trackRef} className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto py-3 pl-1 pr-4">
@@ -44,7 +47,7 @@ function DarsRow({ d, progress, current, focus }) {
           ))}
         </div>
       </div>
-      {open && <Branch darsId={d.id} no={open.no} title={open.title} hasQuiz={open.quiz > 0} hasVideo={!!videos[`${d.id}-${open.no}`]} />}
+      {open && <Branch darsId={d.id} no={open.no} hasQuiz={open.quiz > 0} hasVideo={!!videos[`${d.id}-${open.no}`]} />}
     </section>
   );
 }
@@ -106,7 +109,6 @@ function Roadmap({ progress, mode, focusId }) {
               </div>
               <span className="shrink-0 text-[11px] sm:text-xs font-extrabold text-slate-600 dark:text-slate-300 whitespace-nowrap">{bn(doneTotal)}/{bn(total)} <span className="font-bold text-slate-400 dark:text-slate-500">পাঠ</span></span>
             </div>
-            <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-lg text-white text-[11px] sm:text-xs font-bold shadow-2xs bg-emerald-600">{bn(index.length)}টি দারস</span>
           </div>
 
           {/* চলমান পাঠ কুইক রেজ্যুম কার্ড */}
@@ -127,7 +129,7 @@ function Roadmap({ progress, mode, focusId }) {
           </div>
 
           {/* সব দারস: প্রতিটির পাশে অনুভূমিক পাঠের পথ */}
-          <div className="space-y-6 pb-4">
+          <div className="space-y-8 pb-4">
             {index.map((x) => (
               <DarsRow key={x.id} d={x} progress={progress} current={x.id === cur.id} focus={x.id === focusId} />
             ))}
