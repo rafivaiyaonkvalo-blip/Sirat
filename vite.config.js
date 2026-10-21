@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import ttsHandler from './api/tts.js'
-import lessonStepsSplit from './build/lessonStepsSplit.js'
 
 // লোকাল dev/preview সার্ভারে /api/tts — Vercel-এর একই api/tts.js ব্যবহার করে,
 // যেন ল্যাপটপেও একই পুরুষ কণ্ঠ, শিশু কণ্ঠ ও ওয়াকফ-ছাড়া উচ্চারণ পাওয়া যায়
@@ -52,7 +51,7 @@ function localTtsPlugin() {
 // https://vite.dev/config/
 export default defineConfig({
   base: '/sirat/',
-  plugins: [lessonStepsSplit(), react(), tailwindcss(), localTtsPlugin()],
+  plugins: [react(), tailwindcss(), localTtsPlugin()],
   build: {
     chunkSizeWarningLimit: 3000,
     rollupOptions: {
@@ -64,9 +63,6 @@ export default defineConfig({
             if (id.includes('canvas-confetti')) return 'vendor-confetti';
             return 'vendor';
           }
-          if (id.includes('virtual:lessons-stripped')) return 'data-lessons';
-          if (id.includes('vocabulary.json')) return 'data-vocabulary';
-          if (id.includes('tamrinBook.json')) return 'data-tamrin';
         }
       }
     }

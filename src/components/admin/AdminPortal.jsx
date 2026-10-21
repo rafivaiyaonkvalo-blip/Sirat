@@ -477,9 +477,6 @@ export default function AdminPortal({
     { id: 'notices', label: 'নোটিশ', icon: Megaphone, count: activeNoticesCount },
     { id: 'certificates', label: 'সনদপত্র', icon: Award, count: graduatesCount },
     { id: 'reports', label: 'রিপোর্ট', icon: Flag, hasAlert: pendingReportsCount > 0 },
-    { id: 'lessons', label: 'পাঠ', icon: BookOpen },
-    { id: 'vocab', label: 'শব্দকোষ', icon: Search },
-    { id: 'audit', label: 'অডিট', icon: Sparkles },
     { id: 'tools', label: 'সেটিংস', icon: SlidersHorizontal },
   ];
 

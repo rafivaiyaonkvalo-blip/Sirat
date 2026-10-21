@@ -10,7 +10,7 @@ import {
   getUserProviders
 } from '../services/firebase';
 import { getTotalXp, getStreakData, getLevelInfo, getXpHistory, getDateString } from '../utils/gamification';
-import { toBengaliNumber } from '../utils/lessonSubSections';
+import { toBengaliNumber } from '../utils/gamification';
 import StudentIdCard from './StudentIdCard';
 import StudentCertificate from './StudentCertificate';
 import { getCertificateData, getVolumeProgress } from '../utils/certificateManager';

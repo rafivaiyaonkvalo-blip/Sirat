@@ -9,90 +9,46 @@
  * - Certificate metadata generation
  */
 
-import lessonsData from '../data/lessons.json';
+import darsIndex from '../data/darsIndex.json';
 import { getTotalXp, getLevelInfo, toBengaliNumber } from './gamification';
 import { isSuperUser } from './superUser';
 
-// খণ্ডভিত্তিক পাঠের তালিকা
+const TOTAL_LESSONS = darsIndex.reduce((a, d) => a + d.porbos.length, 0);
+
+// সনদের কোর্স: সীরাতের সব দারস (আইডি 'vol1' রাখা হয়েছে, পুরনো কোডের সঙ্গে সামঞ্জস্যের জন্য)
 export const VOLUME_CONFIGS = [
   {
     id: 'vol1',
     volumeNumber: 1,
-    title: '১ম খণ্ড (মৌলিক স্তর)',
-    bookTitle: 'এসো আরবী শিখি (১ম খণ্ড) ও আত-তামরীনুল কিতাবী',
-    arabicBookTitle: 'دُرُوسُ اللُّغَةِ الْعَرَبِيَّةِ — الْجُزْءُ الأَوَّلُ',
-    description: 'মৌলিক শব্দভাণ্ডার, কাছে-দূরের ইশারা, সম্বন্ধযুক্ত শব্দ ও গুণবাচক বাক্য',
-    totalLessons: 23,
-    minXp: 400
-  },
-  {
-    id: 'vol2',
-    volumeNumber: 2,
-    title: '২য় খণ্ড (মধ্যম স্তর)',
-    bookTitle: 'এসো আরবী শিখি (২য় খণ্ড) ও আত-তামরীনুল কিতাবী',
-    arabicBookTitle: 'دُرُوسُ اللُّغَةِ الْعَرَبِيَّةِ — الْجُزْءُ الثَّانِي',
-    description: 'ক্রিয়াপদ, বাবে নাসারা, যারাবা, ফাতাহা ও ব্যবহারিক বাক্যমালা',
-    totalLessons: 30,
-    minXp: 1200
-  },
-  {
-    id: 'vol3',
-    volumeNumber: 3,
-    title: '৩য় খণ্ড (উচ্চতর স্তর)',
-    bookTitle: 'এসো আরবী শিখি (৩য় খণ্ড) ও আত-তামরীনুল কিতাবী',
-    arabicBookTitle: 'دُرُوسُ اللُّغَةِ الْعَرَبِيَّةِ — الْجُزْءُ الثَّالِثُ',
-    description: 'উচ্চতর ভাষা, কুরআন-হাদীসের পাঠ ও সাহিত্যিক বাক্যমালা',
-    totalLessons: 28,
-    minXp: 2500
+    title: 'সীরাত (পূর্ণাঙ্গ কোর্স)',
+    bookTitle: 'সীরাত: নবীজী ﷺ-এর জীবনী (৩২ দারস)',
+    arabicBookTitle: 'السِّيرَةُ النَّبَوِيَّةُ',
+    description: 'নবীজী ﷺ-এর জীবনী নিয়ে ৩২টি দারসের সব পাঠ',
+    totalLessons: TOTAL_LESSONS,
+    minXp: 0
   }
 ];
 
 /**
- * শিক্ষার্থীর খণ্ডভিত্তিক পাঠ সম্পন্ন হওয়ার সংখ্যা ও শতকরা হার বের করা
+ * শিক্ষার্থীর পাঠ সম্পন্ন হওয়ার সংখ্যা ও শতকরা হার বের করা (সীরাতের অগ্রগতি থেকে)
  */
-export function getVolumeProgress(volumeId = 'vol1') {
-  const config = VOLUME_CONFIGS.find(v => v.id === volumeId) || VOLUME_CONFIGS[0];
-  
+export function getVolumeProgress() {
   let completedCount = 0;
   try {
-    const progress = JSON.parse(localStorage.getItem('uls_lessons_progress') || '{}') || {};
-    const lessons = lessonsData.lessons || [];
-    
-    // নির্দিষ্ট ভলিউমের পাঠগুলো ফিল্টার করা
-    const volLessons = lessons.filter(l => {
-      if (volumeId === 'vol1') return l.id.startsWith('vol1') || l.volume === 1 || l.volume === '১ম খণ্ড';
-      if (volumeId === 'vol2') return l.id.startsWith('vol2') || l.volume === 2 || l.volume === '২য় খণ্ড';
-      if (volumeId === 'vol3') return l.id.startsWith('vol3') || l.volume === 3 || l.volume === '৩য় খণ্ড';
-      return false;
-    });
-
-    const totalCount = volLessons.length || config.totalLessons;
-    volLessons.forEach(l => {
-      if (progress[l.id]?.completed) {
-        completedCount++;
-      }
-    });
-
-    const percent = Math.min(100, Math.round((completedCount / (totalCount || 1)) * 100));
-    const isUnlocked = Boolean((completedCount >= totalCount && totalCount > 0) || isSuperUser(null));
-    
-    return {
-      completedCount,
-      totalCount,
-      remainingCount: Math.max(0, totalCount - completedCount),
-      percent,
-      isUnlocked
-    };
+    const progress = JSON.parse(localStorage.getItem('sirat_progress_v1') || '{}') || {};
+    completedCount = Object.keys(progress.done || {}).length;
   } catch (err) {
-    console.warn('Error calculating volume progress:', err);
-    return {
-      completedCount: 0,
-      totalCount: config.totalLessons,
-      remainingCount: config.totalLessons,
-      percent: 0,
-      isUnlocked: Boolean(isSuperUser(null))
-    };
+    console.warn('Error calculating progress:', err);
   }
+  const totalCount = TOTAL_LESSONS;
+  const percent = Math.min(100, Math.round((completedCount / totalCount) * 100));
+  return {
+    completedCount,
+    totalCount,
+    remainingCount: Math.max(0, totalCount - completedCount),
+    percent,
+    isUnlocked: Boolean(completedCount >= totalCount || isSuperUser(null))
+  };
 }
 
 /**
