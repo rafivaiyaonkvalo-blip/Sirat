@@ -47,11 +47,10 @@ export function LessonNode({ no, done, current, open, onToggle }) {
 }
 
 // নোডে চাপলে সারির নিচে ডাল: ভিডিও → পাঠ → কুইজ
-export function Branch({ darsId, no, title, hasQuiz, hasVideo }) {
+export function Branch({ darsId, no, hasQuiz, hasVideo }) {
   const steps = STEPS.filter((s) => s.key !== 'quiz' || hasQuiz);
   return (
     <div className="mt-1 rounded-2xl border border-emerald-300 dark:border-emerald-400/40 bg-white dark:bg-slate-800 p-3 shadow-[0_0_24px_rgba(16,185,129,0.45)]" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both', transformOrigin: 'top left' }}>
-      <p className="mb-2 text-sm font-bold leading-snug text-slate-800 dark:text-slate-100">পাঠ {bn(no)} · {title}</p>
       <div className="flex flex-wrap gap-2">
         {steps.map(({ key, label, icon: Icon }) => (
           <a key={key} href={href(`/dars/${darsId}/${no}/${key}`)} className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-white/10 px-3 py-2 text-sm font-bold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-white/20">
