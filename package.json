@@ -1,31 +1,27 @@
 {
   "name": "sirat",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "convert": "node scripts/convert_dars.mjs",
     "build": "vite build",
-    "harmonize": "node scripts/patch_exact_19.cjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "canvas-confetti": "^1.9.4",
-    "firebase": "^12.19.0",
     "lucide-react": "^1.43.0",
-    "node-edge-tts": "^1.2.10",
-    "pdf-parse": "^2.4.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tailwindcss": "^4.3.3",
-    "ws": "^8.21.3"
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "jszip": "^3.10.1",
     "oxlint": "^1.79.0",
     "vite": "^8.2.2"
   }
