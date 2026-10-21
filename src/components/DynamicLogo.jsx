@@ -7,11 +7,11 @@ export const LOGO_VARIANTS = [
     id: 'emerald',
     name: 'এমারেল্ড ও মিন্ট',
     src: getAssetUrl('/logos/sirat_emerald.svg'),
-    glowColor: 'rgba(37, 99, 235, 0.45)',
+    glowColor: 'rgba(14, 165, 233, 0.45)',
     borderColor: 'border-emerald-500/40',
-    textColorLight: '#1d4ed8',
-    textColorDark: '#60a5fa',
-    accentColor: '#2563eb'
+    textColorLight: '#0284c7',
+    textColorDark: '#38bdf8',
+    accentColor: '#0ea5e9'
   },
   {
     id: 'ocean',
@@ -19,7 +19,7 @@ export const LOGO_VARIANTS = [
     src: getAssetUrl('/logos/sirat_ocean.svg'),
     glowColor: 'rgba(2, 132, 199, 0.45)',
     borderColor: 'border-sky-500/40',
-    textColorLight: '#0284c7',
+    textColorLight: '#2563eb',
     textColorDark: '#38bdf8',
     accentColor: '#0ea5e9'
   },
