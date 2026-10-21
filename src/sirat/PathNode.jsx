@@ -12,8 +12,8 @@ const STEPS = [
 export default function PathNode({ darsId, no, offsetClass, side, done, current, open, onToggle, hasQuiz, hasVideo }) {
   const steps = STEPS.filter((s) => s.key !== 'quiz' || hasQuiz);
   const tone = done
-    ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-900 border-teal-200 shadow-[0_0_22px_rgba(16,185,129,0.8)]'
-    : 'bg-gradient-to-br from-emerald-400 via-emerald-600 to-teal-700 border-emerald-200 shadow-lg shadow-emerald-700/25';
+    ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-900 border-teal-200 shadow-[0_0_22px_rgba(16,185,129,0.85)] animate-pulse'
+    : 'bg-gradient-to-br from-emerald-400 via-emerald-600 to-teal-700 border-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.55)]';
   return (
     <div className={`relative flex flex-col items-center transition-all duration-300 ${offsetClass} ${open ? 'z-30' : ''}`}>
       {current && !open && (
@@ -27,7 +27,7 @@ export default function PathNode({ darsId, no, offsetClass, side, done, current,
           onClick={onToggle}
           aria-expanded={open}
           aria-label={`পাঠ ${bn(no)}`}
-          className={`relative flex h-12 w-12 rotate-45 items-center justify-center rounded-xl border-2 transition hover:scale-105 active:scale-95 sm:h-14 sm:w-14 ${tone} ${current ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-900' : ''} ${open ? 'scale-110' : ''}`}
+          className={`relative flex h-12 w-12 rotate-45 items-center justify-center rounded-xl border-2 transition hover:scale-105 active:scale-95 sm:h-14 sm:w-14 ${tone} ${current ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-900 animate-pulse shadow-[0_0_26px_rgba(16,185,129,0.9)]' : ''} ${open ? 'scale-110' : ''}`}
         >
           <span className="-rotate-45 select-none text-base font-black leading-none text-white drop-shadow-sm">{bn(no)}</span>
           {done && <CheckCircle2 size={14} className="absolute -right-2.5 -top-2.5 -rotate-45 rounded-full bg-white text-emerald-600" />}
@@ -35,8 +35,8 @@ export default function PathNode({ darsId, no, offsetClass, side, done, current,
 
         {open && (
           <div className={`absolute top-1/2 z-30 flex -translate-y-1/2 items-center ${side === 'right' ? 'left-full' : 'right-full flex-row-reverse'}`}>
-            <span className="h-0.5 w-3 bg-emerald-400" />
-            <div className="flex flex-col gap-1.5 rounded-2xl border border-emerald-200 dark:border-white/15 bg-white dark:bg-slate-800 p-1.5 shadow-xl">
+            <span className="h-0.5 w-3 bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.9)]" style={{ animation: 'fadeInSubtle 0.25s ease-out' }} />
+            <div className="flex flex-col gap-1.5 rounded-2xl border border-emerald-300 dark:border-emerald-400/40 bg-white dark:bg-slate-800 p-1.5 shadow-[0_0_24px_rgba(16,185,129,0.45)]" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both', transformOrigin: side === 'right' ? 'left center' : 'right center' }}>
               {steps.map(({ key, label, icon: Icon }) => (
                 <a key={key} href={href(`/dars/${darsId}/${no}/${key}`)} className="flex w-28 items-center gap-2 rounded-xl px-2.5 py-2 text-sm font-bold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/10">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white"><Icon size={14} /></span>
