@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BookOpen, Compass, Hourglass, Sparkles, ArrowRight } from 'lucide-react';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
@@ -70,6 +70,20 @@ function DarsRow({ d, idx, progress, current, open, onToggle, focus }) {
 function Roadmap({ progress, mode, focusId }) {
   const deep = mode === 'deep';
   const [openDars, setOpenDars] = useState(focusId || null);
+  // চাপা দারসের নোড স্ক্রিনে একই জায়গায় থাকে (খোলা/বন্ধ হলে পাতা লাফায় না)
+  const anchor = useRef(null);
+  const toggleDars = (id) => {
+    const el = document.getElementById(`dars-row-${id}`);
+    anchor.current = el ? { id, top: el.getBoundingClientRect().top } : null;
+    setOpenDars(openDars === id ? null : id);
+  };
+  useLayoutEffect(() => {
+    const a = anchor.current;
+    if (!a) return;
+    anchor.current = null;
+    const el = document.getElementById(`dars-row-${a.id}`);
+    if (el) window.scrollBy(0, el.getBoundingClientRect().top - a.top);
+  }, [openDars]);
   const total = index.reduce((a, x) => a + x.porbos.length, 0);
   const doneTotal = index.reduce((a, x) => a + x.porbos.filter((p) => progress.done[`${x.id}-${p.no}`]).length, 0);
   const pct = Math.round((doneTotal / total) * 100);
@@ -145,9 +159,9 @@ function Roadmap({ progress, mode, focusId }) {
           </div>
 
           {/* সব দারস: আঁকাবাঁকা পথ; দারসে চাপলে নিচে পাঠগুলো বের হয় */}
-          <div className="space-y-4 pb-4">
+          <div className="space-y-4 pb-4" style={{ overflowAnchor: 'none' }}>
             {index.map((x, i) => (
-              <DarsRow key={x.id} d={x} idx={i} progress={progress} current={x.id === cur.id} open={openDars === x.id} onToggle={() => setOpenDars(openDars === x.id ? null : x.id)} focus={x.id === focusId} />
+              <DarsRow key={x.id} d={x} idx={i} progress={progress} current={x.id === cur.id} open={openDars === x.id} onToggle={() => toggleDars(x.id)} focus={x.id === focusId} />
             ))}
           </div>
         </>
