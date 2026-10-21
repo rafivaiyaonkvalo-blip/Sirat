@@ -23,3 +23,17 @@ If you are developing a production application, we recommend using TypeScript wi
 
 - নতুন কোড: `src/sirat/`। Word → JSON: `npm run convert -- <zip>` (`scripts/convert_dars.mjs`, ফলাফল `src/data/dars/`)।
 - ভিডিও: `src/data/videos.json` (`"দারস-পাঠ": "লিংক"`)। নাম/বই/দুরূদ ক্যাম্পেইন: `src/sirat/brand.js`।
+
+## দুরূদের সম্মিলিত গণনা (Firebase)
+Vercel-এর Environment Variables-এ `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` দিন। Firestore-এ `campaigns/durood` ডকে `count` (সংখ্যা) আর ঐচ্ছিক `target` থাকে। নিয়ম (rules) — সবাই পড়তে পারবে, শুধু `count` বাড়াতে পারবে (ছোট ধাপে):
+
+```
+match /campaigns/durood {
+  allow read: if true;
+  allow create: if request.resource.data.keys().hasOnly(['count']) && request.resource.data.count <= 200;
+  allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count'])
+                && request.resource.data.count > resource.data.count
+                && request.resource.data.count - resource.data.count <= 200;
+}
+```
+কনফিগ না থাকলে শুধু ব্যক্তিগত গণনা চলে। পূর্ণ অপব্যবহার-সুরক্ষা (বট ঠেকানো) চাইলে Cloud Function/App Check লাগবে।
