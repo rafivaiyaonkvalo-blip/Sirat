@@ -2,34 +2,177 @@
 <html lang="bn">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>সীরাত – মারকাযুল ঈমান</title>
-    <meta name="description" content="নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস: ভিডিও, পাঠ ও কুইজ। মারকাযুল ঈমান মাদরাসা।" />
-    <link rel="icon" type="image/svg+xml" href="/sirat-logo.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0b3b37" />
     <script>
-      (function () {
+      (function() {
         try {
-          var s = localStorage.getItem('sirat_theme');
-          var dark = s ? s === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (dark) document.documentElement.classList.add('dark');
+          var saved = localStorage.getItem('uls_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = (saved === 'dark' || saved === 'light') ? (saved === 'dark') : prefersDark;
+          var root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+            root.style.backgroundColor = '#0A0D12';
+            root.style.colorScheme = 'dark';
+          } else {
+            root.classList.remove('dark');
+            root.style.backgroundColor = '#FFFFFF';
+            root.style.colorScheme = 'light';
+          }
         } catch (e) {}
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      /* Native App Ergonomics: Eliminate browser artifacts */
+      * {
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-touch-callout: none;
+      }
+      /* Prevent accidental text selection on UI chrome and buttons */
+      button, a, nav, header, [role="button"], .select-none {
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      /* Native look: Hide scrollbars across the entire app */
+      ::-webkit-scrollbar {
+        display: none !important;
+        width: 0px !important;
+        height: 0px !important;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background-color: #0A0D12;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+        overscroll-behavior-y: none;
+      }
+      @media (prefers-color-scheme: light) {
+        html:not(.dark), html:not(.dark) body {
+          background-color: #FFFFFF !important;
+        }
+      }
+      html.dark, html.dark body {
+        background-color: #0A0D12 !important;
+      }
+    </style>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo-512.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    <title>Sirat - সীরাত</title>
+    <meta name="description" content="Sirat - সীরাত প্ল্যাটফর্ম" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0A0D12" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Sirat" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- iOS PWA Startup Images (Prevents White Screen Flash on iPhone Add to Home Screen) -->
+    <!-- iPhone 16 Pro Max, 15 Pro Max, 14 Pro Max (430x932 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-430x932-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-430x932-3x.png">
+
+    <!-- iPhone 16 Pro (402x874 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-402x874-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-402x874-3x.png">
+
+    <!-- iPhone 16, 15 Pro, 15, 14 Pro (393x852 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-393x852-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-393x852-3x.png">
+
+    <!-- iPhone 16 Plus, 15 Plus, 14 Plus, 13 Pro Max, 12 Pro Max (428x926 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-428x926-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-428x926-3x.png">
+
+    <!-- iPhone 14, 13, 13 Pro, 12, 12 Pro (390x844 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-390x844-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-390x844-3x.png">
+
+    <!-- iPhone 13 mini, 12 mini, 11 Pro, XS, X (375x812 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-375x812-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-375x812-3x.png">
+
+    <!-- iPhone 11 Pro Max, XS Max (414x896 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-414x896-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-414x896-3x.png">
+
+    <!-- iPhone 11, XR (414x896 @2x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-dark-414x896-2x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-light-414x896-2x.png">
+
+    <!-- iPhone 8 Plus, 7 Plus, 6s Plus (414x736 @3x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-dark-414x736-3x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-light-414x736-3x.png">
+
+    <!-- iPhone SE 2/3, 8, 7, 6s (375x667 @2x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-dark-375x667-2x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-light-375x667-2x.png">
+
+    <!-- iPad Pro 12.9" / 13" (1024x1366 @2x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-dark-1024x1366-2x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-light-1024x1366-2x.png">
+
+    <!-- iPad Pro 11" / Air (834x1194 @2x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-dark-834x1194-2x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-light-834x1194-2x.png">
+
+    <!-- iPad 10.2" / 10.9" (810x1080 @2x) -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark) and (device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-dark-810x1080-2x.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light) and (device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/splash-light-810x1080-2x.png">
+
+    <!-- Default Fallback -->
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: dark)" href="/splash/splash-dark-default.png">
+    <link rel="apple-touch-startup-image" media="(prefers-color-scheme: light)" href="/splash/splash-light-default.png">
+    <!-- Google Fonts: Amiri, Scheherazade New (Arabic) & Hind Siliguri (Bengali) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body>
+  <body class="bg-slate-50 text-slate-800 dark:bg-[#0A0D12] dark:text-slate-100 min-h-screen font-bengali">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-      // পুরনো আরবি-পোর্টালের service worker থাকলে মুছে ফেলা
+      // Automatically refresh when a new build deployment updates asset chunk hashes
+      window.addEventListener('vite:preloadError', () => {
+        window.location.reload();
+      });
+      window.addEventListener('error', (e) => {
+        const msg = e?.message || '';
+        if (msg.includes('Loading chunk') || msg.includes('dynamically imported module') || msg.includes('Failed to fetch')) {
+          const now = Date.now();
+          const last = parseInt(sessionStorage.getItem('uls_chunk_retry') || '0', 10);
+          if (now - last > 8000) {
+            sessionStorage.setItem('uls_chunk_retry', now.toString());
+            window.location.reload();
+          }
+        }
+      });
+
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (r) { r.forEach(function (x) { x.unregister(); }); });
-        if (window.caches) caches.keys().then(function (k) { k.forEach(function (n) { caches.delete(n); }); });
+        window.addEventListener('load', () => {
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            navigator.serviceWorker.getRegistrations().then((regs) => {
+              for (const reg of regs) reg.unregister();
+            });
+            if ('caches' in window) {
+              caches.keys().then((keys) => {
+                for (const key of keys) caches.delete(key);
+              });
+            }
+            return;
+          }
+          const swUrl = window.location.pathname.startsWith('/sirat') ? '/sirat/sw.js' : '/sw.js';
+          const swScope = window.location.pathname.startsWith('/sirat') ? '/sirat/' : '/';
+          navigator.serviceWorker.register(swUrl, { scope: swScope }).then((reg) => {
+            reg.update();
+          }).catch(() => {});
+        });
       }
     </script>
   </body>

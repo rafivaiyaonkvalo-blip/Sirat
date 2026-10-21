@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="chatBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="50%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <linearGradient id="goldAcc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <filter id="softShad" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect width="512" height="512" rx="120" fill="url(#chatBg)"/>
+
+  <!-- Minimal Speech Bubble (Pure Modern White) -->
+  <g filter="url(#softShad)">
+    <path d="M 130 140 C 130 100 165 75 220 75 L 292 75 C 347 75 382 100 382 140 L 382 250 C 382 290 347 315 292 315 L 230 315 L 160 365 L 175 315 L 160 315 C 130 315 130 290 130 250 Z" fill="#ffffff"/>
+
+    <!-- Inside the bubble: Clean Modern Arabic Letter 'ع' in Deep Blue -->
+    <path d="M 285 145 C 285 132 272 120 256 120 C 240 120 228 132 228 146 C 228 162 245 170 260 170 C 278 170 296 160 304 145" fill="none" stroke="#0369a1" stroke-width="15" stroke-linecap="round"/>
+    <path d="M 252 170 C 235 182 220 202 220 224 C 220 248 238 260 260 260 C 290 260 312 236 312 208" fill="none" stroke="#0369a1" stroke-width="15" stroke-linecap="round"/>
+  </g>
+
+  <!-- Golden Floating Fathah Accent (যবর) -->
+  <rect x="290" y="45" width="46" height="14" rx="7" transform="rotate(-28 290 45)" fill="url(#goldAcc)"/>
+
+  <!-- Clean Minimalist Typography "ArbiGo" -->
+  <text x="256" y="440" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="44" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="1.5">
+    Arbi<tspan fill="#38bdf8">Go</tspan>
+  </text>
+</svg>

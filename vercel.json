@@ -4,9 +4,45 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/sirat/assets/(.*)", "destination": "/assets/$1" },
-    { "source": "/sirat/(.*)", "destination": "/$1" },
-    { "source": "/sirat", "destination": "/index.html" },
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+    {
+      "source": "/sirat/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/sirat/(.*)",
+      "destination": "/$1"
+    },
+    {
+      "source": "/sirat",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/pages/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
   ]
 }
