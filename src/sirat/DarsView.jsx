@@ -38,7 +38,7 @@ function Roadmap({ d, progress, mode }) {
 
   return (
     <div className="mx-auto max-w-2xl" onClick={() => setOpenNo(null)}>
-      <section className="rounded-3xl bg-gradient-to-br from-emerald-700 to-teal-900 p-6 text-white shadow-lg">
+      <section className="rounded-3xl bg-gradient-to-br from-emerald-700 to-teal-900 p-6 text-white shadow-[0_8px_30px_rgba(16,185,129,0.3)]">
         <span className="inline-block rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold">{brand.org}</span>
         <h1 className="mt-3 text-2xl font-extrabold leading-snug sm:text-3xl">{brand.name} <span className="font-arabic text-xl text-emerald-100">({brand.nameArabic})</span></h1>
         <p className="mt-2 text-sm text-emerald-50">নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস। প্রতিটি পাঠে ভিডিও, লেখা ও কুইজ।</p>
@@ -74,7 +74,7 @@ function Roadmap({ d, progress, mode }) {
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 text-sm font-bold text-white">চালিয়ে যান <ArrowRight size={16} /></span>
           </a>
 
-          <section className="mt-6 rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 p-5 text-white shadow-lg">
+          <section className="mt-6 rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 p-5 text-white shadow-[0_8px_30px_rgba(16,185,129,0.35)]">
             <span className="inline-block rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold">📖 সংক্ষিপ্ত · দারস {bn(d.number)}</span>
             <h2 className="mt-2 text-xl font-bold leading-snug">{d.title}</h2>
             <p className="mt-1 text-sm text-emerald-50">{d.subtitle}</p>
