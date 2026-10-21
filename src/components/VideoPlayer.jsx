@@ -1,7 +1,7 @@
 import { Clapperboard } from 'lucide-react';
 
 function embedUrl(url) {
-  let m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  let m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([\w-]{11})/);
   if (m) return { kind: 'iframe', src: `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0` };
   m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (m) return { kind: 'iframe', src: `https://player.vimeo.com/video/${m[1]}` };
