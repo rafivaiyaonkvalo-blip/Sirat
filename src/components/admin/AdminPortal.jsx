@@ -1087,7 +1087,7 @@ export default function AdminPortal({
                         {reporter.phone && (
                           <a
                             href={`https://wa.me/${reporter.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                              `আসসালামু আলাইকুম ${reporter.name}, মারকাযুল ঈমান 'এসো আরবী শিখি' পোর্টালে আপনার প্রেরিত রিপোর্টটি (${catMeta.label}) আমরা পেয়েছি।`
+                              `আসসালামু আলাইকুম ${reporter.name}, মারকাযুল ঈমান 'সীরাত' পোর্টালে আপনার প্রেরিত রিপোর্টটি (${catMeta.label}) আমরা পেয়েছি।`
                             )}`}
                             target="_blank"
                             rel="noreferrer"

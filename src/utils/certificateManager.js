@@ -1,6 +1,6 @@
 /**
  * certificateManager.js
- * মারকাযুল ঈমান (Markazul Iman) — এসো আরবী শিখি ডিজিটাল সনদপত্র ও স্বীকৃতি ইঞ্জিন
+ * মারকাযুল ঈমান (Markazul Iman) — সীরাত ডিজিটাল সনদপত্র ও স্বীকৃতি ইঞ্জিন
  * 
  * Provides:
  * - Volume completion calculation (১ম খণ্ড, ২য় খণ্ড, ৩য় খণ্ড)

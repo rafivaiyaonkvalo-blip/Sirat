@@ -185,13 +185,11 @@ export default function LiveScreenViewerModal({ session, onClose }) {
   const studentId = studentDetails?.studentId || (session?.user?.uid ? `STU-${session.user.uid.slice(-4).toUpperCase()}` : `GUEST-${(session?.visitorId || '').slice(-4)}`);
 
   const getTabLabel = (tab) => {
-    if (tab === 'flashcards') return 'ফ্ল্যাশকার্ড অনুশীলন';
-    if (tab === 'practice') return 'অনুশীলন ও তামরীন';
-    if (tab === 'spelling') return 'বানান ও বর্ণ লিখন';
-    if (tab === 'exam') return 'গ্রিল মি পরীক্ষা';
-    if (tab === 'vocab') return 'শব্দকোষ ডিকশনারি';
-    if (tab === 'book') return 'মূল কিতাব PDF';
-    return 'এসো আরবী শিখি পাঠসমূহ (Lessons)';
+    if (tab === 'durood') return 'দুরূদ';
+    if (tab === 'quiz') return 'কুইজ';
+    if (tab === 'exam') return 'পরীক্ষা';
+    if (tab === 'book') return 'বই';
+    return 'দারস ও পাঠসমূহ';
   };
 
   return (
@@ -405,22 +403,22 @@ export default function LiveScreenViewerModal({ session, onClose }) {
                       {/* Current Lesson Hero Card */}
                       <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30">
                         <div className="flex items-center justify-between text-[11px] text-emerald-400 font-bold mb-1">
-                          <span>ভলিউম ১ • এসো আরবী শিখি</span>
+                          <span>সীরাত • সংক্ষিপ্ত</span>
                           <span className="font-arabic text-sm">الدَّرْسُ الأَوَّلُ</span>
                         </div>
                         <h4 className="text-sm font-black text-white">
-                          দারস ১: ইশারা ও মৌলিক শব্দমালা
+                          দারস ১: সীরাত কেন পড়ব
                         </h4>
                         <p className="text-[11px] text-slate-400 mt-1 font-arabic text-right text-base text-emerald-300">
-                          هَذَا كِتَابٌ • ذَلِكَ قَلَمٌ • هَذَا مَسْجِدٌ
+                          السِّيرَةُ النَّبَوِيَّةُ
                         </p>
                       </div>
 
                       {/* Sub-sections tabs inside lesson */}
                       <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-bold">
-                        <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-xs">শব্দকোষ</div>
-                        <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">বাক্য</div>
-                        <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">তামরীন</div>
+                        <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-xs">ভিডিও</div>
+                        <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">পাঠ</div>
+                        <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">লেখা</div>
                         <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">কুইজ</div>
                       </div>
 
@@ -482,7 +480,7 @@ export default function LiveScreenViewerModal({ session, onClose }) {
                   {liveStream?.currentTab === 'book' && (
                     <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-3">
                       <BookOpen size={32} className="mx-auto text-emerald-400" />
-                      <h4 className="text-sm font-bold text-white">এসো আরবী শিখি (মূল কিতাব)</h4>
+                      <h4 className="text-sm font-bold text-white">সীরাত (মূল কিতাব)</h4>
                       <span className="text-xs text-slate-400 block">পৃষ্ঠা নম্বর: ১২ / ৪৪৬</span>
                     </div>
                   )}
@@ -596,7 +594,7 @@ export default function LiveScreenViewerModal({ session, onClose }) {
                           {phone}
                         </a>
                         <a
-                          href={`https://wa.me/${cleanPhoneForWhatsApp(phone)}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${studentDetails?.displayName || 'শিক্ষার্থী'},\nমারকাযুল ঈমান 'এসো আরবী শিখি' অনলাইন প্ল্যাটফর্ম থেকে আপনার সাথে যোগাযোগ করা হচ্ছে।`)}`}
+                          href={`https://wa.me/${cleanPhoneForWhatsApp(phone)}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${studentDetails?.displayName || 'শিক্ষার্থী'},\nমারকাযুল ঈমান 'সীরাত' অনলাইন প্ল্যাটফর্ম থেকে আপনার সাথে যোগাযোগ করা হচ্ছে।`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors"

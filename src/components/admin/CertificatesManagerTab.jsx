@@ -374,7 +374,7 @@ export default function CertificatesManagerTab() {
                 <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
                   {st.phone ? (
                     <a
-                      href={`https://wa.me/${st.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${st.displayName},\nমারকাযুল ঈমান 'এসো আরবী শিখি' কোর্সের ১ম খণ্ড সফলভাবে সম্পন্ন করায় আপনাকে আন্তরিক মোবারকবাদ! আপনার অফিসিয়াল সনদপত্র সিরিয়াল: ${st.certificateSerial}`)}`}
+                      href={`https://wa.me/${st.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${st.displayName},\nমারকাযুল ঈমান 'সীরাত' কোর্সের ১ম খণ্ড সফলভাবে সম্পন্ন করায় আপনাকে আন্তরিক মোবারকবাদ! আপনার অফিসিয়াল সনদপত্র সিরিয়াল: ${st.certificateSerial}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-2.5 py-1.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-800/80 text-emerald-300 text-[11px] font-bold flex items-center gap-1 transition-colors"

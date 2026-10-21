@@ -182,7 +182,7 @@ export default function StudentsDirectoryTab() {
   const makeWhatsAppUrl = (rawPhone, name) => {
     const clean = cleanPhoneForWhatsApp(rawPhone);
     if (!clean) return '#';
-    const text = encodeURIComponent(`আসসালামু আলাইকুম ${name || 'শিক্ষার্থী'},\nমারকাযুল ঈমান 'এসো আরবী শিখি' অনলাইন প্ল্যাটফর্ম থেকে আপনার সাথে যোগাযোগ করা হচ্ছে।`);
+    const text = encodeURIComponent(`আসসালামু আলাইকুম ${name || 'শিক্ষার্থী'},\nমারকাযুল ঈমান 'সীরাত' অনলাইন প্ল্যাটফর্ম থেকে আপনার সাথে যোগাযোগ করা হচ্ছে।`);
     return `https://wa.me/${clean}?text=${text}`;
   };
 
@@ -292,7 +292,7 @@ export default function StudentsDirectoryTab() {
           <div className="text-2xl font-black text-sky-300">
             {toBengaliNumber(metrics.totalLessons)} <span className="text-xs text-slate-400 font-normal">টি</span>
           </div>
-          <span className="text-[10px] text-sky-400 font-bold block mt-1">এসো আরবী শিখি</span>
+          <span className="text-[10px] text-sky-400 font-bold block mt-1">সীরাত</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-800/80 border border-indigo-500/30">
@@ -303,7 +303,7 @@ export default function StudentsDirectoryTab() {
           <div className="text-2xl font-black text-indigo-300">
             {toBengaliNumber(metrics.totalTamrins)} <span className="text-xs text-slate-400 font-normal">টি</span>
           </div>
-          <span className="text-[10px] text-indigo-400 font-bold block mt-1">আত-তামরীনুল কিতাবী</span>
+          <span className="text-[10px] text-indigo-400 font-bold block mt-1">সীরাত</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-800/80 border border-purple-500/30">

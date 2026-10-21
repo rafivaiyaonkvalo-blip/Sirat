@@ -110,7 +110,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
 
       ctx.fillStyle = '#047857';
       ctx.font = '600 14px "Hind Siliguri", sans-serif';
-      ctx.fillText('অনলাইন আরবী ভাষা শিক্ষা বিভাগ • ' + madrasaLocation, width / 2, 170);
+      ctx.fillText('অনলাইন সীরাত শিক্ষা বিভাগ • ' + madrasaLocation, width / 2, 170);
 
       // ৫. সার্টিফিকেটের মূল শিরোনাম
       ctx.fillStyle = '#b45309';
@@ -270,7 +270,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
   const handleShare = async () => {
     triggerHaptic();
     const shareUrl = (typeof window !== 'undefined' ? window.location.origin : '');
-    const text = `আলহামদুলিল্লাহ! মারকাযুল ঈমানের 'এসো আরবী শিখি' অনলাইন প্ল্যাটফর্মের মাধ্যমে আমি সফলতার সাথে ${volumeConfig.title} সম্পন্ন করেছি! আপনিও আরবী ভাষা শিখুন: ${shareUrl}`;
+    const text = `আলহামদুলিল্লাহ! মারকাযুল ঈমানের 'সীরাত' অনলাইন প্ল্যাটফর্মের মাধ্যমে আমি সফলতার সাথে ${volumeConfig.title} সম্পন্ন করেছি! আপনিও আরবী ভাষা শিখুন: ${shareUrl}`;
 
     if (navigator.share) {
       try {
@@ -369,7 +369,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
               {organization}
             </h1>
             <p className="text-[11px] sm:text-xs font-semibold text-emerald-700">
-              অনলাইন আরবী ভাষা শিক্ষা বিভাগ • {madrasaLocation}
+              অনলাইন সীরাত শিক্ষা বিভাগ • {madrasaLocation}
             </p>
           </div>
 

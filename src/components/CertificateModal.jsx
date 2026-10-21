@@ -66,7 +66,7 @@ export default function CertificateModal({ isOpen, onClose, user }) {
                 ডিজিটাল প্রশংসাপত্র ও সনদপত্র
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                মারকাযুল ঈমান • এসো আরবী শিখি পাঠ্যক্রম
+                মারকাযুল ঈমান • সীরাত পাঠ্যক্রম
               </p>
             </div>
           </div>
