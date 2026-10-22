@@ -82,7 +82,7 @@ export default function PorboPage({ id, no, step, progress }) {
         })}
       </div>
 
-      {step === 'video' && <VideoPlayer url={videos[`${id}-${no}`]} title={porbo.title} />}
+      {step === 'video' && <VideoPlayer entry={videos[`${id}-${no}`]} title={porbo.title} />}
 
       {step === 'text' && (
         <>
