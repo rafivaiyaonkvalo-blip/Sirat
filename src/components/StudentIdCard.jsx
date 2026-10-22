@@ -79,7 +79,7 @@ export default function StudentIdCard({ user, profileData, totalXp, streakDays }
       ctx.fillText('সীরাত • ডিজিটাল শিক্ষার্থী পরিচয়পত্র', 40, 72);
 
       // Verified Badge Pill (Top Right)
-      ctx.fillStyle = 'rgba(14, 165, 233, 0.25)';
+      ctx.fillStyle = 'rgba(14,165,233, 0.25)';
       ctx.beginPath();
       ctx.roundRect(width - 165, 36, 135, 36, 10);
       ctx.fill();

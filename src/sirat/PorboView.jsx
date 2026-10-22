@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Lightbulb, PenLine } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Lightbulb, Lock, PenLine } from 'lucide-react';
+import { isUnlocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
 import { loadDars } from '../data/loadDars';
@@ -58,14 +59,20 @@ export default function PorboPage({ id, no, step, progress }) {
   const done = progress.done[`${id}-${no}`];
   const steps = ['video', 'text', ...(porbo.quiz.length ? ['quiz'] : [])];
   if (!steps.includes(step)) return <NotFound />;
+  if (!isUnlocked(progress.done, id, no)) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <Lock size={44} className="mx-auto text-slate-400" />
+        <p className="mt-4 text-lg font-bold">এই পাঠ এখনও বন্ধ</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">আগের পাঠ (পাঠ {no - 1}) এর কুইজ শেষ করলে এটি খুলবে।</p>
+        <a href={href(`/dars/${id}/${no - 1}/video`)} className="mt-5 inline-flex rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">আগের পাঠে যান</a>
+      </div>
+    );
+  }
   const si = steps.indexOf(step);
   const go = (p) => href(p);
   const prevHref = si > 0 ? `/dars/${id}/${no}/${steps[si - 1]}` : null;
-  let nextHref = null;
-  if (si < steps.length - 1) nextHref = `/dars/${id}/${no}/${steps[si + 1]}`;
-  else if (no < meta.porbos.length) nextHref = `/dars/${id}/${no + 1}/video`;
-  else if (id < index.length) nextHref = `/dars/${id + 1}/1/video`;
-  const last = si === steps.length - 1;
+  const nextLessonHref = no < meta.porbos.length ? `/dars/${id}/${no + 1}/video` : id < index.length ? `/dars/${id + 1}/1/video` : null;
 
   return (
     <article className="mx-auto max-w-3xl">
@@ -73,8 +80,8 @@ export default function PorboPage({ id, no, step, progress }) {
       <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-slate-400">পাঠ {no}/{meta.porbos.length}</p>
       <h1 className="mb-4 text-2xl font-bold leading-snug sm:text-3xl">{porbo.title}</h1>
 
-      <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}>
-        {steps.map((k) => {
+      <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        {steps.filter((k) => k !== 'quiz').map((k) => {
           const { label, icon: Icon } = STEP_META[k];
           return (
             <a key={k} href={go(`/dars/${id}/${no}/${k}`)} className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold ${k === step ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 dark:text-slate-300'}`}><Icon size={16} /> {label}</a>
@@ -105,18 +112,23 @@ export default function PorboPage({ id, no, step, progress }) {
         </>
       )}
 
-      {step === 'quiz' && <Quiz key={`${id}-${no}`} questions={porbo.quiz} previous={progress.scores[`${id}-${no}`]} onFinish={(s, t) => progress.saveScore(id, no, s, t)} />}
+      {step === 'quiz' && <Quiz key={`${id}-${no}`} questions={porbo.quiz} previous={progress.scores[`${id}-${no}`]} onFinish={(s, t) => { progress.saveScore(id, no, s, t); progress.markDone(id, no); }} />}
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-        {last ? (
-          <button onClick={() => progress.toggleDone(id, no)} className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-semibold ${done ? 'bg-emerald-600 text-white' : 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-200'}`}>
-            {done ? <CheckCircle2 size={18} /> : <Circle size={18} />} {done ? 'সম্পন্ন' : 'সম্পন্ন চিহ্নিত করুন'}
-          </button>
-        ) : <span />}
-        <div className="flex gap-2">
-          {prevHref && <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a>}
-          {nextHref && <a href={go(nextHref)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 font-semibold text-white">{last ? 'পরের পাঠ' : 'পরের ধাপ'} <ChevronRight size={18} /></a>}
-        </div>
+        {prevHref ? <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a> : <span />}
+        {step === 'video' && <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পাঠ পড়ুন <ChevronRight size={18} /></a>}
+        {step === 'text' && porbo.quiz.length > 0 && (
+          <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
+        )}
+        {step === 'text' && porbo.quiz.length === 0 && !done && (
+          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><Circle size={18} /> পাঠ সম্পন্ন করুন</button>
+        )}
+        {done && step !== 'video' && (step === 'quiz' || porbo.quiz.length === 0) && (
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1 text-sm font-bold text-emerald-700 dark:text-emerald-300"><CheckCircle2 size={18} /> সম্পন্ন</span>
+            {nextLessonHref && <a href={go(nextLessonHref)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পরের পাঠ <ChevronRight size={18} /></a>}
+          </div>
+        )}
       </div>
     </article>
   );

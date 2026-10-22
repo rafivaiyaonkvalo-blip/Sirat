@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { isSuperUser } from '../utils/superUser';
 
 const KEY = 'sirat_progress_v1';
+
+// পাঠ N খোলা: প্রথম পাঠ সবসময়; অন্যগুলো আগের পাঠের কুইজ/সম্পন্ন হলে (সুপার ইউজারের জন্য সব খোলা)
+export const isUnlocked = (done, darsId, no) => no <= 1 || !!done[`${darsId}-${no - 1}`] || isSuperUser(null);
 
 const load = () => {
   try {
@@ -32,9 +36,10 @@ export function useProgress() {
       }),
     [],
   );
+  const markDone = useCallback((dars, porbo) => setState((s) => (s.done[`${dars}-${porbo}`] ? s : { ...s, done: { ...s.done, [`${dars}-${porbo}`]: 1 } })), []);
   const saveScore = useCallback(
     (dars, porbo, score, total) => setState((s) => ({ ...s, scores: { ...s.scores, [`${dars}-${porbo}`]: { score, total } } })),
     [],
   );
-  return { ...state, markVisited, toggleDone, saveScore };
+  return { ...state, markVisited, toggleDone, markDone, saveScore };
 }
