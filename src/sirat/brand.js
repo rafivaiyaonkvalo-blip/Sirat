@@ -21,4 +21,5 @@ export const book = {
 export const campaign = {
   title: 'সম্মিলিত দুরূদ ক্যাম্পেইন',
   target: 1000000,
+  endDate: null, // যেমন: '2026-12-31' দিলে "দিন বাকি" দেখাবে
 };

@@ -44,6 +44,7 @@ function videoFor(meta, id, no) {
   if (!v) return {};
   const cfg = typeof v === 'string' ? { url: v } : v;
   const part = cfg.parts?.[no - 1];
+  if (part?.segments) return { entries: part.segments };
   if (part) return { entry: { url: cfg.url, ...part } };
   const total = meta.porbos.reduce((a, p) => a + p.weight, 0);
   const before = meta.porbos.slice(0, no - 1).reduce((a, p) => a + p.weight, 0);

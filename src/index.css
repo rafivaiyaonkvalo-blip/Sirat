@@ -471,3 +471,11 @@ a[class*="bg-teal-600"] {
   background-image: linear-gradient(to right, #34d399, #14b8a6, #0d9488) !important;
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.85);
 }
+
+/* দুরূদ: ভেসে ওঠা +N */
+@keyframes duroodFloat {
+  0% { opacity: 0; transform: translateY(0) scale(0.8); }
+  15% { opacity: 1; transform: translateY(-12px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-110px) scale(1); }
+}
+.durood-bubble { animation: duroodFloat 2.4s ease-out forwards; }

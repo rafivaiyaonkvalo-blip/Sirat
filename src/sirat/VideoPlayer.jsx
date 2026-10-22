@@ -50,7 +50,7 @@ function Placeholder() {
 }
 
 // নিজস্ব কন্ট্রোলসহ প্লেয়ার (YouTube-এর নিজের বাটন/লিংক ঢাকা থাকে)
-function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title }) {
+function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title, autoplay, onEnd }) {
   const box = useRef(null);
   const mount = useRef(null);
   const media = useRef(null); // { play, pause, seek, time, duration, rate, mute, muted }
@@ -70,6 +70,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
   const len = Math.max(0, to - from);
   const [now, setNow] = useState(from);
   const rangeKey = `${from}-${end}`;
+  const autoRef = useRef(!!autoplay);
 
   // YouTube / mp4 অ্যাডাপ্টার
   useEffect(() => {
@@ -150,6 +151,12 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
     if (ready && (startProp !== undefined || dur)) { media.current?.seek(from); setNow(from); setEnded(false); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, rangeKey]);
+
+  // পরপর দুটি ভিডিও জুড়ে থাকা পাঠে: শেষ হলে পরের অংশ চালু
+  useEffect(() => { if (ended && onEnd) onEnd(); }, [ended, onEnd]);
+  useEffect(() => {
+    if (ready && autoRef.current) { autoRef.current = false; media.current?.play(); }
+  }, [ready]);
 
   // বর্তমান সময় ট্র্যাক; শেষ সীমায় পৌঁছালে থামে
   useEffect(() => {
@@ -242,13 +249,25 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
   );
 }
 
-export default function VideoPlayer({ entry, title, frac }) {
+// একটি পাঠ দুই ভিডিওতে ছড়ানো থাকলে অংশগুলো পরপর চলে
+function Sequence({ entries, title }) {
+  const [i, setI] = useState(0);
+  const next = useCallback(() => setI((x) => (x < entries.length - 1 ? x + 1 : x)), [entries.length]);
+  return <SingleVideo key={i} entry={entries[i]} title={title} autoplay={i > 0} onEnd={i < entries.length - 1 ? next : undefined} />;
+}
+
+export default function VideoPlayer({ entry, entries, title, frac }) {
+  if (entries?.length > 1) return <Sequence entries={entries} title={title} />;
+  return <SingleVideo entry={entries?.[0] || entry} title={title} frac={frac} />;
+}
+
+function SingleVideo({ entry, title, frac, autoplay, onEnd }) {
   const cfg = typeof entry === 'string' ? { url: entry } : entry;
   if (!cfg?.url) return <Placeholder />;
   const start = toSec(cfg.start);
   const end = toSec(cfg.end);
   const id = ytId(cfg.url);
-  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} />;
+  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} />;
 
   const vimeo = cfg.url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   const drive = cfg.url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
@@ -260,5 +279,5 @@ export default function VideoPlayer({ entry, title, frac }) {
       </div>
     );
   }
-  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} />;
+  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} />;
 }
