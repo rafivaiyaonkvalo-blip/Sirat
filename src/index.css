@@ -454,3 +454,14 @@ header nav button svg {
 @media (prefers-reduced-motion: reduce) {
   button[class*="bg-emerald-600"], a[class*="bg-emerald-600"], button[class*="bg-teal-600"], a[class*="bg-teal-600"] { animation: none; box-shadow: 0 0 14px rgba(14, 165, 233, 0.6); }
 }
+
+/* মূল বাটনের ব্যাকগ্রাউন্ডে মদীনার ছবি (মিডনাইট আস্তরণসহ) */
+button[class*="bg-emerald-600"],
+a[class*="bg-emerald-600"],
+button[class*="bg-teal-600"],
+a[class*="bg-teal-600"] {
+  background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), url(/hero-madinah.jpg);
+  background-size: cover;
+  background-position: center 66%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
