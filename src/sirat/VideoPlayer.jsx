@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Clapperboard, Maximize, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { Clapperboard, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { bn } from './questions';
 import { getAssetUrl } from '../utils/assetHelper';
 
@@ -61,6 +61,8 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
   const [muted, setMuted] = useState(false);
   const [ended, setEnded] = useState(false);
   const [err, setErr] = useState('');
+  const [full, setFull] = useState(false);
+  const [pseudo, setPseudo] = useState(false); // ব্রাউজার ফুলস্ক্রিন না দিলে (যেমন আইফোন) পুরো স্ক্রিন জুড়ে ফিক্সড
 
   const from = start || 0;
   const to = end ?? dur;
@@ -173,11 +175,29 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
     setRate(r); media.current?.rate(r);
   };
   const toggleMute = () => { setMuted(!muted); media.current?.mute(!muted); };
-  const full = () => {
+  const toggleFull = () => {
     const el = box.current;
-    if (document.fullscreenElement) document.exitFullscreen();
-    else (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+    if (full) {
+      if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      setPseudo(false); setFull(false);
+      return;
+    }
+    const rq = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!rq) { setPseudo(true); setFull(true); return; }
+    Promise.resolve(rq.call(el)).then(() => {
+      setFull(true);
+      try { window.screen.orientation?.lock?.('landscape').catch(() => {}); } catch { /* সমর্থিত না */ }
+    }).catch(() => { setPseudo(true); setFull(true); });
   };
+  useEffect(() => {
+    const onChange = () => {
+      const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (!on) { setFull((f) => (pseudo ? f : false)); try { window.screen.orientation?.unlock?.(); } catch { /* সমর্থিত না */ } }
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    return () => { document.removeEventListener('fullscreenchange', onChange); document.removeEventListener('webkitfullscreenchange', onChange); };
+  }, [pseudo]);
 
   const rel = Math.min(Math.max(now - from, 0), len);
 
@@ -186,7 +206,7 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
   }
 
   return (
-    <div ref={box} className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-lg select-none" aria-label={title}>
+    <div ref={box} className={`overflow-hidden bg-black shadow-lg select-none ${pseudo && full ? 'fixed inset-0 z-[100] h-screen w-screen' : 'relative aspect-video w-full rounded-2xl [&:fullscreen]:aspect-auto [&:fullscreen]:rounded-none'}`} aria-label={title}>
       <div ref={mount} className="absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full" />
       {/* ক্লিক ঢাকনা: নিচের YouTube লোগো/লিংকে ক্লিক ঠেকায়; চাপলে চালু/বন্ধ */}
       <button type="button" onClick={toggle} aria-label={playing ? 'বিরতি' : 'চালান'} className={`absolute inset-0 z-10 flex items-center justify-center ${playing ? 'bg-transparent' : 'bg-slate-950/80'}`}>
@@ -205,7 +225,7 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
           <span className="w-12 shrink-0 text-right text-[11px] tabular-nums">{fmt(len)}</span>
           <button type="button" onClick={cycleRate} className="!animate-none rounded-md px-1.5 py-0.5 text-[11px] font-bold hover:bg-white/15">{bn(rate)}x</button>
           <button type="button" onClick={toggleMute} aria-label="শব্দ" className="!animate-none rounded-full p-1.5 hover:bg-white/15">{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}</button>
-          <button type="button" onClick={full} aria-label="ফুলস্ক্রিন" className="!animate-none rounded-full p-1.5 hover:bg-white/15"><Maximize size={16} /></button>
+          <button type="button" onClick={toggleFull} aria-label="ফুলস্ক্রিন" className="!animate-none rounded-full p-1.5 hover:bg-white/15">{full ? <Minimize size={16} /> : <Maximize size={16} />}</button>
         </div>
       )}
     </div>
