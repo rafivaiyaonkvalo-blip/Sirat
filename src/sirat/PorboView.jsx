@@ -34,9 +34,21 @@ function Block({ b }) {
 
 const STEP_META = {
   video: { label: 'ভিডিও', icon: Film },
-  text: { label: 'পাঠ', icon: FileText },
+  text: { label: 'লেখা', icon: FileText },
   quiz: { label: 'কুইজ', icon: PenLine },
 };
+
+// দারসের একটি ভিডিও থেকে এই পাঠের অংশ: স্পষ্ট সময় থাকলে সেটি, নাহলে লেখার দৈর্ঘ্যের অনুপাতে
+function videoFor(meta, id, no) {
+  const v = videos[String(id)];
+  if (!v) return {};
+  const cfg = typeof v === 'string' ? { url: v } : v;
+  const part = cfg.parts?.[no - 1];
+  if (part) return { entry: { url: cfg.url, ...part } };
+  const total = meta.porbos.reduce((a, p) => a + p.weight, 0);
+  const before = meta.porbos.slice(0, no - 1).reduce((a, p) => a + p.weight, 0);
+  return { entry: { url: cfg.url }, frac: [before / total, (before + meta.porbos[no - 1].weight) / total] };
+}
 
 export default function PorboPage({ id, no, step, progress }) {
   const meta = index.find((x) => x.id === id);
@@ -63,9 +75,9 @@ export default function PorboPage({ id, no, step, progress }) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
         <Lock size={44} className="mx-auto text-slate-400" />
-        <p className="mt-4 text-lg font-bold">এই পাঠ এখনও বন্ধ</p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">আগের পাঠ (পাঠ {no - 1}) এর কুইজ শেষ করলে এটি খুলবে।</p>
-        <a href={href(`/dars/${id}/${no - 1}/video`)} className="mt-5 inline-flex rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">আগের পাঠে যান</a>
+        <p className="mt-4 text-lg font-bold">এই ধাপ এখনও বন্ধ</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">আগের ধাপ সম্পন্ন করলে এটি খুলবে।</p>
+        <a href={href(`/dars/${id}/${no - 1}/video`)} className="mt-5 inline-flex rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">আগের ধাপে যান</a>
       </div>
     );
   }
@@ -77,7 +89,7 @@ export default function PorboPage({ id, no, step, progress }) {
   return (
     <article className="mx-auto max-w-3xl">
       <a href={href(`/dars/${id}`)} className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">← দারস {meta.number}: {meta.title}</a>
-      <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-slate-400">পাঠ {no}/{meta.porbos.length}</p>
+      <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-slate-400">{no}/{meta.porbos.length}</p>
       <h1 className="mb-4 text-2xl font-bold leading-snug sm:text-3xl">{porbo.title}</h1>
 
       <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
@@ -89,7 +101,7 @@ export default function PorboPage({ id, no, step, progress }) {
         })}
       </div>
 
-      {step === 'video' && <VideoPlayer entry={videos[`${id}-${no}`]} title={porbo.title} />}
+      {step === 'video' && <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} />}
 
       {step === 'text' && (
         <>
@@ -118,20 +130,24 @@ export default function PorboPage({ id, no, step, progress }) {
         {prevHref ? <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a> : <span />}
         {step === 'video' && (
           <div className="flex flex-wrap items-center gap-2">
-            <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">পাঠ পড়ুন <ChevronRight size={18} /></a>
+            <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">লেখা পড়ুন <ChevronRight size={18} /></a>
             {porbo.quiz.length > 0 && <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><PenLine size={18} /> কুইজ খেলুন</a>}
           </div>
         )}
         {step === 'text' && porbo.quiz.length > 0 && (
           <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
         )}
-        {step === 'text' && porbo.quiz.length === 0 && !done && (
-          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><Circle size={18} /> পাঠ সম্পন্ন করুন</button>
+        {step === 'text' && porbo.quiz.length > 0 && !done && (
+          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200"><Circle size={18} /> কুইজ ছাড়াই সম্পন্ন করুন</button>
         )}
-        {done && step !== 'video' && (step === 'quiz' || porbo.quiz.length === 0) && (
+        {step === 'text' && porbo.quiz.length === 0 && !done && (
+          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><Circle size={18} /> সম্পন্ন করুন</button>
+        )}
+        {done && step !== 'video' && (
+
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1 text-sm font-bold text-emerald-700 dark:text-emerald-300"><CheckCircle2 size={18} /> সম্পন্ন</span>
-            {nextLessonHref && <a href={go(nextLessonHref)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পরের পাঠ <ChevronRight size={18} /></a>}
+            {nextLessonHref && <a href={go(nextLessonHref)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পরের ধাপ <ChevronRight size={18} /></a>}
           </div>
         )}
       </div>

@@ -1,17 +1,41 @@
 import { useCallback, useEffect, useState } from 'react';
 import { isSuperUser } from '../utils/superUser';
+import index from '../data/darsIndex.json';
 
-const KEY = 'sirat_progress_v1';
+const KEY = 'sirat_progress_v2';
+const OLD_KEY = 'sirat_progress_v1';
 
 // পাঠ N খোলা: প্রথম পাঠ সবসময়; অন্যগুলো আগের পাঠের কুইজ/সম্পন্ন হলে (সুপার ইউজারের জন্য সব খোলা)
 export const isUnlocked = (done, darsId, no) => no <= 1 || !!done[`${darsId}-${no - 1}`] || isSuperUser(null);
 
+// আগের (ছোট ছোট ভাগের) অগ্রগতি নতুন ৩-ভাগে রূপান্তর: নতুন পাঠের সব পুরনো পাঠ সম্পন্ন হলেই সেটি সম্পন্ন
+const migrate = (old) => {
+  const done = {};
+  const scores = {};
+  let last = null;
+  for (const d of index) {
+    for (const p of d.porbos) {
+      let all = true;
+      for (let n = p.from; n <= p.to; n++) if (!old.done?.[`${d.id}-${n}`]) all = false;
+      if (all) done[`${d.id}-${p.no}`] = 1;
+      const s = old.scores?.[`${d.id}-${p.to}`];
+      if (s) scores[`${d.id}-${p.no}`] = s;
+      if (old.last?.dars === d.id && old.last.porbo >= p.from && old.last.porbo <= p.to) last = { dars: d.id, porbo: p.no };
+    }
+  }
+  return { done, last, scores };
+};
+
 const load = () => {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) || { done: {}, last: null, scores: {} };
+    const cur = JSON.parse(localStorage.getItem(KEY));
+    if (cur) return cur;
+    const old = JSON.parse(localStorage.getItem(OLD_KEY));
+    if (old) return migrate(old);
   } catch {
-    return { done: {}, last: null, scores: {} };
+    /* স্টোরেজ পড়া যায়নি */
   }
+  return { done: {}, last: null, scores: {} };
 };
 
 export function useProgress() {

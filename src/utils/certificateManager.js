@@ -35,7 +35,7 @@ export const VOLUME_CONFIGS = [
 export function getVolumeProgress() {
   let completedCount = 0;
   try {
-    const progress = JSON.parse(localStorage.getItem('sirat_progress_v1') || '{}') || {};
+    const progress = JSON.parse(localStorage.getItem('sirat_progress_v2') || '{}') || {};
     completedCount = Object.keys(progress.done || {}).length;
   } catch (err) {
     console.warn('Error calculating progress:', err);

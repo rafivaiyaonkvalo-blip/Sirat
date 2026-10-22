@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Compass, Hourglass, Sparkles, ArrowRight } from 'lucide-react';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
@@ -6,7 +6,7 @@ import { brand } from './brand';
 import { getAssetUrl } from '../utils/assetHelper';
 import { bn } from './questions';
 import { href } from './router';
-import { DarsNode, PathNode } from './PathNode';
+import { PathNode } from './PathNode';
 import { isUnlocked } from './progress';
 
 const TABS = [
@@ -29,11 +29,10 @@ const OFFSETS = [
 ];
 const SIDES = ['right', 'right', 'left', 'left', 'left', 'right'];
 
-function DarsRow({ d, idx, progress, current, open, onToggle, focus }) {
-  const [openNo, setOpenNo] = useState(null);
+// একটি দারসের সব পাঠ (সর্বোচ্চ ৩টি) একসাথে; মাঝের নম্বর পুরো কোর্সজুড়ে ধারাবাহিক
+function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, focus }) {
   const rowRef = useRef(null);
   const doneCount = d.porbos.filter((p) => progress.done[`${d.id}-${p.no}`]).length;
-  const currentNo = current ? (progress.last?.dars === d.id && progress.last.porbo) || d.porbos.find((p) => !progress.done[`${d.id}-${p.no}`])?.no || 1 : 0;
 
   useEffect(() => {
     if (focus) rowRef.current?.scrollIntoView({ block: 'start' });
@@ -41,51 +40,45 @@ function DarsRow({ d, idx, progress, current, open, onToggle, focus }) {
 
   return (
     <section ref={rowRef} id={`dars-row-${d.id}`} className="scroll-mt-32">
-      <div className="flex justify-center">
-        <DarsNode number={d.number} done={doneCount === d.porbos.length} open={open} onToggle={onToggle} offsetClass={OFFSETS[idx % OFFSETS.length]} />
-      </div>
-      {open && (
-        <div className="relative flex flex-col items-center gap-6 py-5 sm:gap-7">
-          {d.porbos.map((p, i) => (
-            <div key={p.no} className="relative" style={{ animation: `subNodePop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) ${i * 60}ms both` }}>
-              <PathNode
-                darsId={d.id}
-                no={p.no}
-                offsetClass={OFFSETS[i % OFFSETS.length]}
-                side={SIDES[i % SIDES.length]}
-                done={!!progress.done[`${d.id}-${p.no}`]}
-                locked={!isUnlocked(progress.done, d.id, p.no)}
-                current={p.no === currentNo}
-                open={openNo === p.no}
-                onToggle={() => setOpenNo(openNo === p.no ? null : p.no)}
-                hasQuiz={p.quiz > 0}
-                hasVideo={!!videos[`${d.id}-${p.no}`]}
-              />
-            </div>
-          ))}
+      <div className="relative mx-auto mb-3 flex max-w-sm items-center justify-center rounded-2xl border border-emerald-200/70 bg-white px-4 py-2 shadow-xs dark:border-emerald-700/40 dark:bg-slate-900">
+        <div className="min-w-0 px-9 text-center">
+          <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-300">দারস {bn(d.number)}</p>
+          <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{d.title}</p>
         </div>
-      )}
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-500 dark:text-slate-400">{bn(doneCount)}/{bn(d.porbos.length)}</span>
+      </div>
+      <div className="relative flex flex-col items-center gap-6 pb-6 sm:gap-7">
+        {d.porbos.map((p, i) => {
+          const seq = start + i;
+          const key = `${d.id}-${p.no}`;
+          return (
+            <PathNode
+              key={p.no}
+              darsId={d.id}
+              darsNumber={d.number}
+              title={d.title}
+              seq={seq}
+              no={p.no}
+              offsetClass={OFFSETS[(seq - 1) % OFFSETS.length]}
+              side={SIDES[(seq - 1) % SIDES.length]}
+              done={!!progress.done[key]}
+              locked={!isUnlocked(progress.done, d.id, p.no)}
+              current={current && p.no === currentNo}
+              open={openKey === key}
+              onToggle={() => setOpenKey(openKey === key ? null : key)}
+              hasQuiz={p.quiz > 0}
+              hasVideo={!!videos[String(d.id)]}
+            />
+          );
+        })}
+      </div>
     </section>
   );
 }
 
 function Roadmap({ progress, mode, focusId }) {
   const deep = mode === 'deep';
-  const [openDars, setOpenDars] = useState(focusId || null);
-  // চাপা দারসের নোড স্ক্রিনে একই জায়গায় থাকে (খোলা/বন্ধ হলে পাতা লাফায় না)
-  const anchor = useRef(null);
-  const toggleDars = (id) => {
-    const el = document.getElementById(`dars-row-${id}`);
-    anchor.current = el ? { id, top: el.getBoundingClientRect().top } : null;
-    setOpenDars(openDars === id ? null : id);
-  };
-  useLayoutEffect(() => {
-    const a = anchor.current;
-    if (!a) return;
-    anchor.current = null;
-    const el = document.getElementById(`dars-row-${a.id}`);
-    if (el) window.scrollBy(0, el.getBoundingClientRect().top - a.top);
-  }, [openDars]);
+  const [openKey, setOpenKey] = useState(null);
   const total = index.reduce((a, x) => a + x.porbos.length, 0);
   const doneTotal = index.reduce((a, x) => a + x.porbos.filter((p) => progress.done[`${x.id}-${p.no}`]).length, 0);
   const pct = Math.round((doneTotal / total) * 100);
@@ -108,7 +101,7 @@ function Roadmap({ progress, mode, focusId }) {
             <span className="text-xs text-emerald-100 font-semibold px-2.5 py-0.5 rounded-full bg-black/20">{deep ? '🔎 গভীর পাঠ' : '📖 সংক্ষিপ্ত'}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">{brand.name} ({brand.nameArabic})</h1>
-          <p className="text-emerald-100 text-xs sm:text-sm md:text-base mt-2 max-w-2xl leading-relaxed">নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস। প্রতিটি দারসের ছোট ছোট পাঠে ভিডিও, লেখা ও কুইজ; প্রতিদিন অল্প করে পড়ুন, নিয়মিত এগিয়ে যান।</p>
+          <p className="text-emerald-100 text-xs sm:text-sm md:text-base mt-2 max-w-2xl leading-relaxed">নবীজী ﷺ-এর জীবনী নিয়ে ধারাবাহিক দারস। প্রতিটি দারসে ভিডিও, লেখা ও কুইজ; প্রতিদিন অল্প করে পড়ুন, নিয়মিত এগিয়ে যান।</p>
         </div>
       </div>
 
@@ -137,24 +130,24 @@ function Roadmap({ progress, mode, focusId }) {
         <>
           {/* Sticky stats & dars switcher bar */}
           <div className="sticky top-16 md:top-20 z-30 mb-5 py-1.5 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs sm:shadow-sm flex items-center gap-2 sm:gap-3" >
-                        <div className="flex-1 min-w-0 flex items-center gap-1.5 sm:gap-2" title="এই দারসের মোট পাঠের অগ্রগতি">
+                        <div className="flex-1 min-w-0 flex items-center gap-1.5 sm:gap-2" title="মোট অগ্রগতি">
               <div className="relative flex-1 h-1.5 sm:h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 to-emerald-600" style={{ width: `${Math.max(pct, 2)}%` }} />
               </div>
-              <span className="shrink-0 text-[11px] sm:text-xs font-extrabold text-slate-600 dark:text-slate-300 whitespace-nowrap">{bn(doneTotal)}/{bn(total)} <span className="font-bold text-slate-400 dark:text-slate-500">পাঠ</span></span>
+              <span className="shrink-0 text-[11px] sm:text-xs font-extrabold text-slate-600 dark:text-slate-300 whitespace-nowrap">{bn(doneTotal)}/{bn(total)}</span>
             </div>
           </div>
 
-          {/* চলমান পাঠ কুইক রেজ্যুম কার্ড */}
+          {/* চলমান দারস কুইক রেজ্যুম কার্ড */}
           <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-900/10 via-teal-900/5 to-emerald-900/10 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-500/30 dark:border-emerald-600/30 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4" >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-emerald-600 text-white"><Sparkles size={20} className="animate-pulse" /></div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md">আপনার চলমান পাঠ</span>
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md">আপনার চলমান দারস</span>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">(যেখানে শেষ করেছিলেন)</span>
                 </div>
-                <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate mt-0.5">দারস {bn(cur.number)} • পাঠ {bn(currentNo)}</div>
+                <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate mt-0.5">দারস {bn(cur.number)}: {cur.title}</div>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
@@ -163,9 +156,9 @@ function Roadmap({ progress, mode, focusId }) {
           </div>
 
           {/* সব দারস: আঁকাবাঁকা পথ; দারসে চাপলে নিচে পাঠগুলো বের হয় */}
-          <div className="space-y-4 pb-4" style={{ overflowAnchor: 'none' }}>
+          <div className="pb-4">
             {index.map((x, i) => (
-              <DarsRow key={x.id} d={x} idx={i} progress={progress} current={x.id === cur.id} open={openDars === x.id} onToggle={() => toggleDars(x.id)} focus={x.id === focusId} />
+              <DarsRow key={x.id} d={x} start={index.slice(0, i).reduce((a, y) => a + y.porbos.length, 0) + 1} progress={progress} current={x.id === cur.id} currentNo={currentNo} openKey={openKey} setOpenKey={setOpenKey} focus={x.id === focusId} />
             ))}
           </div>
         </>

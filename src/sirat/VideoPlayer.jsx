@@ -5,6 +5,7 @@ import { getAssetUrl } from '../utils/assetHelper';
 
 // ভিডিও এন্ট্রি: "লিংক" অথবা { url, start, end } (সেকেন্ড বা "মিনিট:সেকেন্ড" / "ঘণ্টা:মিনিট:সেকেন্ড")
 // একটি বড় ভিডিও থেকে প্রতি পাঠের নির্দিষ্ট অংশই (start–end) চলে; বাকি অংশ দেখা বা সিক করা যায় না।
+// start/end না দিলে frac=[শুরু,শেষ] (০–১ অনুপাত) থেকে ভিডিওর মোট দৈর্ঘ্য ধরে অংশ বের হয়।
 const toSec = (v) => {
   if (v === undefined || v === null || v === '') return undefined;
   if (typeof v === 'number') return v;
@@ -49,13 +50,12 @@ function Placeholder() {
 }
 
 // নিজস্ব কন্ট্রোলসহ প্লেয়ার (YouTube-এর নিজের বাটন/লিংক ঢাকা থাকে)
-function CustomPlayer({ kind, id, src, start, end, title }) {
+function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title }) {
   const box = useRef(null);
   const mount = useRef(null);
   const media = useRef(null); // { play, pause, seek, time, duration, rate, mute, muted }
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [now, setNow] = useState(start || 0);
   const [dur, setDur] = useState(0);
   const [rate, setRate] = useState(1);
   const [muted, setMuted] = useState(false);
@@ -64,9 +64,12 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
   const [full, setFull] = useState(false);
   const [pseudo, setPseudo] = useState(false); // ব্রাউজার ফুলস্ক্রিন না দিলে (যেমন আইফোন) পুরো স্ক্রিন জুড়ে ফিক্সড
 
-  const from = start || 0;
+  const from = startProp ?? (frac && dur ? Math.floor(frac[0] * dur) : 0);
+  const end = endProp ?? (frac && dur ? Math.ceil(frac[1] * dur) : undefined);
   const to = end ?? dur;
   const len = Math.max(0, to - from);
+  const [now, setNow] = useState(from);
+  const rangeKey = `${from}-${end}`;
 
   // YouTube / mp4 অ্যাডাপ্টার
   useEffect(() => {
@@ -82,7 +85,7 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
           videoId: id,
           width: '100%',
           height: '100%',
-          playerVars: { controls: 0, disablekb: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1, fs: 0, start: Math.floor(from), ...(end ? { end: Math.ceil(end) } : {}), origin: window.location.origin },
+          playerVars: { controls: 0, disablekb: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1, fs: 0, origin: window.location.origin },
           events: {
             onReady: () => {
               if (dead) return;
@@ -117,7 +120,6 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
       video.addEventListener('contextmenu', (e) => e.preventDefault());
       video.addEventListener('loadedmetadata', () => {
         if (dead) return;
-        video.currentTime = from;
         setDur(video.duration || 0);
         media.current = {
           play: () => video.play(),
@@ -141,7 +143,13 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
       if (player?.destroy) player.destroy();
       if (video) video.remove();
     };
-  }, [kind, id, src, from, end]);
+  }, [kind, id, src]);
+
+  // অংশ ঠিক হলে (বা বদলালে) শুরুর জায়গায় যান
+  useEffect(() => {
+    if (ready && (startProp !== undefined || dur)) { media.current?.seek(from); setNow(from); setEnded(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, rangeKey]);
 
   // বর্তমান সময় ট্র্যাক; শেষ সীমায় পৌঁছালে থামে
   useEffect(() => {
@@ -149,6 +157,8 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
     const t = setInterval(() => {
       const m = media.current;
       if (!m) return;
+      const full = m.duration();
+      if (full) setDur((d) => (d === full ? d : full));
       const cur = m.time();
       setNow(cur);
       if (end && cur >= end - 0.2) { m.pause(); setEnded(true); setPlaying(false); }
@@ -232,13 +242,13 @@ function CustomPlayer({ kind, id, src, start, end, title }) {
   );
 }
 
-export default function VideoPlayer({ entry, title }) {
+export default function VideoPlayer({ entry, title, frac }) {
   const cfg = typeof entry === 'string' ? { url: entry } : entry;
   if (!cfg?.url) return <Placeholder />;
   const start = toSec(cfg.start);
   const end = toSec(cfg.end);
   const id = ytId(cfg.url);
-  if (id) return <CustomPlayer kind="yt" id={id} start={start} end={end} title={title} />;
+  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} />;
 
   const vimeo = cfg.url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   const drive = cfg.url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
@@ -250,5 +260,5 @@ export default function VideoPlayer({ entry, title }) {
       </div>
     );
   }
-  return <CustomPlayer kind="file" src={cfg.url} start={start} end={end} title={title} />;
+  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} />;
 }
