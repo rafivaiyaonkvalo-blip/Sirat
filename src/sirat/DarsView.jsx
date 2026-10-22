@@ -7,6 +7,7 @@ import { getAssetUrl } from '../utils/assetHelper';
 import { bn } from './questions';
 import { href } from './router';
 import { DarsNode, PathNode } from './PathNode';
+import { isUnlocked } from './progress';
 
 const TABS = [
   { key: 'concise', to: '/dars', label: 'সংক্ষিপ্ত', icon: BookOpen },
@@ -53,6 +54,7 @@ function DarsRow({ d, idx, progress, current, open, onToggle, focus }) {
                 offsetClass={OFFSETS[i % OFFSETS.length]}
                 side={SIDES[i % SIDES.length]}
                 done={!!progress.done[`${d.id}-${p.no}`]}
+                locked={!isUnlocked(progress.done, d.id, p.no)}
                 current={p.no === currentNo}
                 open={openNo === p.no}
                 onToggle={() => setOpenNo(openNo === p.no ? null : p.no)}

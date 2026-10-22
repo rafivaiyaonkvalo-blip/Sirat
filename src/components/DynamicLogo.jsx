@@ -7,7 +7,7 @@ export const LOGO_VARIANTS = [
     id: 'emerald',
     name: 'এমারেল্ড ও মিন্ট',
     src: getAssetUrl('/logos/sirat_emerald.svg'),
-    glowColor: 'rgba(14, 165, 233, 0.45)',
+    glowColor: 'rgba(14,165,233, 0.45)',
     borderColor: 'border-emerald-500/40',
     textColorLight: '#334155',
     textColorDark: '#94a3b8',
