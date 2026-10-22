@@ -465,3 +465,9 @@ a[class*="bg-teal-600"] {
   background-position: center 66%;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+/* সব অগ্রগতি বারের ভরাট অংশ: সম্পন্ন বাটনের মতো সবুজ গ্রেডিয়েন্ট ও আভা */
+.progress-fill {
+  background-image: linear-gradient(to right, #34d399, #14b8a6, #0d9488) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.85);
+}

@@ -720,9 +720,9 @@ export default function ProfileDashboard({ user, loading, onLogout, onSaved, onE
             {profile.district && <span className="text-xs text-slate-500 dark:text-slate-400">{profile.district}</span>}
           </div>
         </div>
-        <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+        <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-700">
           <div
-            className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+            className="h-full rounded-full bg-emerald-500 progress-fill transition-all duration-700"
             style={{ width: `${Math.max(3, levelInfo.progressPercent)}%` }}
           />
         </div>
@@ -781,9 +781,9 @@ export default function ProfileDashboard({ user, loading, onLogout, onSaved, onE
                     {toBengaliNumber(vol1Progress.completedCount)} / {toBengaliNumber(vol1Progress.totalCount)} দারস ({toBengaliNumber(vol1Progress.percent)}%)
                   </span>
                 </div>
-                <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800">
                   <div 
-                    className="h-full rounded-full bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 transition-all duration-700"
+                    className="h-full rounded-full bg-emerald-500 progress-fill transition-all duration-700"
                     style={{ width: `${Math.max(4, vol1Progress.percent)}%` }}
                   />
                 </div>

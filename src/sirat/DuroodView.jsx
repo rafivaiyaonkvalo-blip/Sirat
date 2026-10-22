@@ -64,7 +64,7 @@ export default function DuroodPage() {
 
       <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
         <div className="flex justify-between text-sm font-semibold"><span>ক্যাম্পেইন লক্ষ্য</span><span>{bn(target)}</span></div>
-        <div className="mt-2 h-3 overflow-hidden rounded-full bg-emerald-100 dark:bg-white/10"><div className="h-full bg-emerald-500" style={{ width: `${pct}%` }} /></div>
+        <div className="mt-2 h-3 rounded-full bg-emerald-100 dark:bg-white/10"><div className="h-full rounded-full bg-emerald-500 progress-fill" style={{ width: `${pct}%` }} /></div>
         <p className="mt-2 text-xs text-slate-500">{hasGlobal ? `এ পর্যন্ত সম্মিলিত দুরূদ: ${bn(globalCount)}` : 'সম্মিলিত গণনা শিগগিরই চালু হবে, ইন শা আল্লাহ। এখন আপনার নিজের গণনা সংরক্ষিত হচ্ছে।'}</p>
       </div>
 

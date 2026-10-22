@@ -552,9 +552,9 @@ export default function StudentsDirectoryTab() {
                       লেভেল {toBengaliNumber(levelInfo.level)}
                     </span>
                   </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-800 rounded-full h-1.5">
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all"
+                      className="bg-emerald-500 progress-fill h-full rounded-full transition-all"
                       style={{ width: `${Math.min(100, Math.round((st.totalXp / (levelInfo.nextXp || 1000)) * 100))}%` }}
                     />
                   </div>

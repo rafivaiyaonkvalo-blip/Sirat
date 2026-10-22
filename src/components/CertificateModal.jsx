@@ -116,9 +116,9 @@ export default function CertificateModal({ isOpen, onClose, user }) {
                   </div>
 
                   {/* মিনি প্রোগ্রেস বার */}
-                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
                     <div 
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                      className="h-full rounded-full bg-emerald-500 progress-fill transition-all duration-500"
                       style={{ width: `${Math.max(4, volProg.percent)}%` }}
                     />
                   </div>
@@ -158,9 +158,9 @@ export default function CertificateModal({ isOpen, onClose, user }) {
                     {toBengaliNumber(progress.completedCount)} / {toBengaliNumber(progress.totalCount)} দারস ({toBengaliNumber(progress.percent)}%)
                   </span>
                 </div>
-                <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800">
                   <div 
-                    className="h-full rounded-full bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 transition-all duration-700"
+                    className="h-full rounded-full bg-emerald-500 progress-fill transition-all duration-700"
                     style={{ width: `${Math.max(4, progress.percent)}%` }}
                   />
                 </div>

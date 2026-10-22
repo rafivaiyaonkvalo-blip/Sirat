@@ -89,7 +89,7 @@ function Roadmap({ progress, mode, focusId }) {
   return (
     <div className="max-w-4xl mx-auto py-2 sm:py-4">
       {/* Top Hero Banner */}
-      <div className={`p-6 sm:p-8 rounded-3xl text-white shadow-xl mb-6 relative overflow-hidden transition-all duration-500 ${deep ? 'bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-800' : 'bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-700'}`}>
+      <div className={`p-6 sm:p-8 rounded-3xl text-white shadow-xl mb-6 relative overflow-hidden transition-all duration-500 ${'bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-800'}`}>
         {/* ছবি আসল মাপের কাছাকাছি, ডান দিকে ফেড করে, যাতে ঝাপসা না হয় */}
         <img src={getAssetUrl('/hero-madinah.jpg')} alt="" aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 h-full w-[58%] sm:w-[42%] object-cover" style={{ objectPosition: 'center 68%', WebkitMaskImage: 'linear-gradient(to left, #000 35%, transparent)', maskImage: 'linear-gradient(to left, #000 35%, transparent)' }} />
         <div className="relative z-10">
@@ -131,8 +131,8 @@ function Roadmap({ progress, mode, focusId }) {
           {/* Sticky stats & dars switcher bar */}
           <div className="sticky top-16 md:top-20 z-30 mb-5 py-1.5 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs sm:shadow-sm flex items-center gap-2 sm:gap-3" >
                         <div className="flex-1 min-w-0 flex items-center gap-1.5 sm:gap-2" title="মোট অগ্রগতি">
-              <div className="relative flex-1 h-1.5 sm:h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 to-emerald-600" style={{ width: `${Math.max(pct, 2)}%` }} />
+              <div className="relative flex-1 h-1.5 sm:h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
+                <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 bg-emerald-500 progress-fill" style={{ width: `${Math.max(pct, 2)}%` }} />
               </div>
               <span className="shrink-0 text-[11px] sm:text-xs font-extrabold text-slate-600 dark:text-slate-300 whitespace-nowrap">{bn(doneTotal)}/{bn(total)}</span>
             </div>

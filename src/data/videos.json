@@ -1,4 +1,402 @@
 {
-  "1": "https://youtube.com/live/LOzINE7H2nQ?feature=share",
+  "1": {
+    "url": "https://www.youtube.com/watch?v=LOzINE7H2nQ",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1229
+      },
+      {
+        "start": 1229,
+        "end": 2612
+      },
+      {
+        "start": 2612,
+        "end": 3683
+      }
+    ]
+  },
+  "2": {
+    "url": "https://www.youtube.com/watch?v=UKD-9ILoyyc",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1410
+      },
+      {
+        "start": 1410,
+        "end": 2602
+      },
+      {
+        "start": 2602,
+        "end": 3840
+      }
+    ]
+  },
+  "3": {
+    "url": "https://www.youtube.com/watch?v=UheKaPynbaY",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1667
+      },
+      {
+        "start": 1667,
+        "end": 3638
+      },
+      {
+        "start": 3638,
+        "end": 5507
+      }
+    ]
+  },
+  "4": {
+    "url": "https://www.youtube.com/watch?v=SdMCmpIhCGM",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1365
+      },
+      {
+        "start": 1365,
+        "end": 3252
+      },
+      {
+        "start": 3252,
+        "end": 5045
+      }
+    ]
+  },
+  "5": {
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=35NitBLp6X8",
+        "start": 0,
+        "end": 1488
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=35NitBLp6X8",
+        "start": 1488,
+        "end": 3076
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=-jLRt2rgMRg",
+        "start": 0,
+        "end": 1481
+      }
+    ]
+  },
+  "6": {
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=v-SXwUAZNLU",
+        "start": 0,
+        "end": 1936
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=t1hDKM9RU-c",
+        "start": 0,
+        "end": 1698
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=t1hDKM9RU-c",
+        "start": 1698,
+        "end": 3506
+      }
+    ]
+  },
+  "7": {
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=qjRK4CQG-DQ",
+        "start": 0,
+        "end": 2452
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=qjRK4CQG-DQ",
+        "start": 2452,
+        "end": 3622
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=uLWLxNji4JY",
+        "start": 0,
+        "end": 3563
+      }
+    ]
+  },
+  "8": {
+    "url": "https://www.youtube.com/watch?v=hZdE4QhSO7o",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1296
+      },
+      {
+        "start": 1296,
+        "end": 2565
+      },
+      {
+        "start": 2565,
+        "end": 3858
+      }
+    ]
+  },
+  "9": {
+    "url": "https://www.youtube.com/watch?v=j8gAkPaB1Gw",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1548
+      },
+      {
+        "start": 1548,
+        "end": 2793
+      },
+      {
+        "start": 2793,
+        "end": 4297
+      }
+    ]
+  },
+  "10": {
+    "url": "https://www.youtube.com/watch?v=OXe6pQEwrDY",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1210
+      },
+      {
+        "start": 1210,
+        "end": 2359
+      },
+      {
+        "start": 2359,
+        "end": 3517
+      }
+    ]
+  },
+  "11": {
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=pOiHbJSIu7s",
+        "start": 0,
+        "end": 4347
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=9V-E0G0ef-E",
+        "start": 0,
+        "end": 2443
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=9V-E0G0ef-E",
+        "start": 2443,
+        "end": 6014
+      }
+    ]
+  },
+  "12": {
+    "url": "https://www.youtube.com/watch?v=jsW9Cabj3a0",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1086
+      },
+      {
+        "start": 1086,
+        "end": 2108
+      },
+      {
+        "start": 2108,
+        "end": 3183
+      }
+    ]
+  },
+  "13": {
+    "url": "https://www.youtube.com/watch?v=V9jJUQ75Y8w",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1699
+      },
+      {
+        "start": 1699,
+        "end": 3713
+      },
+      {
+        "start": 3713,
+        "end": 5274
+      }
+    ]
+  },
+  "14": {
+    "url": "https://www.youtube.com/watch?v=RgPehGAO2Ds",
+    "parts": [
+      {
+        "start": 0,
+        "end": 2197
+      },
+      {
+        "start": 2197,
+        "end": 3637
+      },
+      {
+        "start": 3637,
+        "end": 5366
+      }
+    ]
+  },
+  "15": {
+    "url": "https://www.youtube.com/watch?v=HdHR_P0ewcE",
+    "parts": [
+      {
+        "start": 0,
+        "end": 2226
+      },
+      {
+        "start": 2226,
+        "end": 4243
+      },
+      {
+        "start": 4243,
+        "end": 6407
+      }
+    ]
+  },
+  "16": {
+    "url": "https://www.youtube.com/watch?v=muAilPwleRg",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1292
+      },
+      {
+        "start": 1292,
+        "end": 2525
+      },
+      {
+        "start": 2525,
+        "end": 3719
+      }
+    ]
+  },
+  "17": {
+    "url": "https://www.youtube.com/watch?v=vToglP7fJGs",
+    "parts": [
+      {
+        "start": 0,
+        "end": 951
+      },
+      {
+        "start": 951,
+        "end": 1676
+      },
+      {
+        "start": 1676,
+        "end": 2583
+      }
+    ]
+  },
+  "18": {
+    "url": "https://www.youtube.com/watch?v=L2NdNtcI_Go",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1307
+      },
+      {
+        "start": 1307,
+        "end": 2517
+      },
+      {
+        "start": 2517,
+        "end": 3879
+      }
+    ]
+  },
+  "19": {
+    "url": "https://www.youtube.com/watch?v=4qFYJUHPURM",
+    "parts": [
+      {
+        "start": 0,
+        "end": 2383
+      },
+      {
+        "start": 2383,
+        "end": 4580
+      },
+      {
+        "start": 4580,
+        "end": 7041
+      }
+    ]
+  },
+  "20": {
+    "url": "https://www.youtube.com/watch?v=Bw-kQJl3_tg",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1312
+      },
+      {
+        "start": 1312,
+        "end": 2842
+      },
+      {
+        "start": 2842,
+        "end": 4156
+      }
+    ]
+  },
+  "21": {
+    "url": "https://www.youtube.com/watch?v=S7yI6fzj0mw",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1424
+      },
+      {
+        "start": 1424,
+        "end": 2444
+      },
+      {
+        "start": 2444,
+        "end": 4001
+      }
+    ]
+  },
+  "22": {
+    "url": "https://www.youtube.com/watch?v=JBkgCf9z9Cw",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1094
+      },
+      {
+        "start": 1094,
+        "end": 2252
+      },
+      {
+        "start": 2252,
+        "end": 3260
+      }
+    ]
+  },
+  "23": {
+    "url": "https://www.youtube.com/watch?v=DyUmLgt40Us",
+    "parts": [
+      {
+        "start": 0,
+        "end": 1810
+      },
+      {
+        "start": 1810,
+        "end": 3460
+      },
+      {
+        "start": 3460,
+        "end": 5429
+      }
+    ]
+  },
   "_help": "প্রতিটি দারসের একটি ভিডিও: \"দারস-নম্বর\": \"লিংক\"। ভিডিওটি দারসের ৩টি পাঠে লেখার দৈর্ঘ্য অনুযায়ী স্বয়ংক্রিয়ভাবে ভাগ হয়। নির্দিষ্ট সময় বসাতে চাইলে: \"1\": { \"url\": \"লিংক\", \"parts\": [ {\"start\":\"0:00\",\"end\":\"12:30\"}, {\"start\":\"12:30\",\"end\":\"25:10\"}, {\"start\":\"25:10\",\"end\":\"38:00\"} ] } (সময় ঘণ্টা:মিনিট:সেকেন্ড, মিনিট:সেকেন্ড বা সেকেন্ডে)। YouTube / সরাসরি .mp4 নিজস্ব প্লেয়ারে; Vimeo / Drive সাধারণ প্লেয়ারে।"
 }
