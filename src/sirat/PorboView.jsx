@@ -116,7 +116,12 @@ export default function PorboPage({ id, no, step, progress }) {
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         {prevHref ? <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a> : <span />}
-        {step === 'video' && <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পাঠ পড়ুন <ChevronRight size={18} /></a>}
+        {step === 'video' && (
+          <div className="flex flex-wrap items-center gap-2">
+            <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">পাঠ পড়ুন <ChevronRight size={18} /></a>
+            {porbo.quiz.length > 0 && <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><PenLine size={18} /> কুইজ খেলুন</a>}
+          </div>
+        )}
         {step === 'text' && porbo.quiz.length > 0 && (
           <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
         )}
