@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sun, Moon, Volume2, VolumeX, User, Share2, MessageSquare, Flag, 
+  Sun, Moon, User, Share2, MessageSquare, Flag, 
   HelpCircle, ArrowDown, ArrowUp, X, Check, ExternalLink, 
-  BookOpen, Award, ShieldCheck, Send, Sparkles,
-  Languages, BookX, Trophy, Lock, SlidersHorizontal
+  BookOpen, Award, ShieldCheck, Sparkles,
+  Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send
 } from 'lucide-react';
-import { useSoundMuted } from '../utils/soundEffects';
 import { getShowEnglish, toggleShowEnglish } from '../utils/storage';
 import { getVoiceProfile, setVoiceProfile, playArabicAudio } from '../utils/audio';
 import { getPendingMistakesCount } from '../utils/mistakesManager';
@@ -28,7 +27,6 @@ export default function FloatingSpeedDial({
   // Single right button opens dual columns simultaneously (Left: Settings/Tools, Right: Learning/Profile)
   const [isOpen, setIsOpen] = useState(false);
 
-  const [soundMuted, toggleSound] = useSoundMuted();
   const [isScrolledDown, setIsScrolledDown] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
@@ -113,12 +111,6 @@ export default function FloatingSpeedDial({
     if (typeof setDarkMode === 'function') {
       setDarkMode(!darkMode);
     }
-  };
-
-  // Sound toggle handler
-  const handleSoundToggle = (e) => {
-    if (e && e.stopPropagation) e.stopPropagation();
-    toggleSound();
   };
 
   // Profile handler
@@ -271,15 +263,6 @@ export default function FloatingSpeedDial({
       onClick: handleThemeToggle
     },
     {
-      id: 'sound',
-      label: soundMuted ? 'মিউট' : 'সাউন্ড',
-      icon: soundMuted ? VolumeX : Volume2,
-      gradient: soundMuted 
-        ? 'from-slate-600 via-slate-700 to-slate-800 shadow-slate-600/35 ring-slate-400/30'
-        : 'from-emerald-500 via-teal-600 to-emerald-600 shadow-emerald-500/35 ring-emerald-400/30',
-      onClick: handleSoundToggle
-    },
-    {
       id: 'english_toggle',
       label: showEnglish ? 'English' : 'ইংরেজি',
       icon: Languages,
@@ -367,6 +350,26 @@ export default function FloatingSpeedDial({
       gradient: 'from-amber-500 via-yellow-500 to-amber-600 shadow-amber-500/35 ring-amber-400/30',
       onClick: () => {
         window.dispatchEvent(new CustomEvent('uls_replay_intro'));
+        setIsOpen(false);
+      }
+    },
+    {
+      id: 'youtube',
+      label: 'ইউটিউব',
+      icon: PlaySquare,
+      gradient: 'from-red-600 via-red-500 to-rose-600 shadow-red-600/35 ring-red-400/30',
+      onClick: () => {
+        window.open('https://www.youtube.com/@MarkazulImandawah', '_blank', 'noopener,noreferrer');
+        setIsOpen(false);
+      }
+    },
+    {
+      id: 'telegram',
+      label: 'টেলিগ্রাম',
+      icon: Send,
+      gradient: 'from-sky-500 via-cyan-500 to-blue-600 shadow-sky-500/35 ring-sky-400/30',
+      onClick: () => {
+        window.open('https://t.me/Markazulimanofficial', '_blank', 'noopener,noreferrer');
         setIsOpen(false);
       }
     },

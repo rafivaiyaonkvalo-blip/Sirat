@@ -9,7 +9,7 @@ const STEPS = [
 ];
 
 // একটি পাঠের হীরক-নোড; চাপলে পাশে ডাল বেরোয়: ভিডিও → লেখা → কুইজ
-export function PathNode({ darsId, darsNumber, title, seq, no, offsetClass, side, done, current, open, onToggle, hasQuiz, hasVideo, locked }) {
+export function PathNode({ darsId, darsNumber, title, seq, no, offsetClass, side, done, current, open, onToggle, onQuiz, hasQuiz, hasVideo, locked }) {
   const steps = STEPS.filter((s) => s.key !== 'quiz' || hasQuiz);
   const tone = locked
     ? 'bg-gradient-to-br from-slate-300 to-slate-500 dark:from-slate-600 dark:to-slate-800 border-slate-300/60 dark:border-slate-500/40 opacity-90'
@@ -41,13 +41,18 @@ export function PathNode({ darsId, darsNumber, title, seq, no, offsetClass, side
               <div className="w-40 rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-3 text-xs font-bold leading-snug text-slate-600 dark:text-slate-200 shadow-xl" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both' }}>🔒 আগের ধাপ সম্পন্ন করলে এটি খুলবে</div>
             ) : (
             <div className="flex flex-col gap-1.5 rounded-2xl border border-emerald-300 dark:border-emerald-400/40 bg-white dark:bg-slate-800 p-1.5 shadow-[0_0_24px_rgba(14,165,233,0.45)]" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both', transformOrigin: side === 'right' ? 'left center' : 'right center' }}>
-              {steps.map(({ key, label, icon: Icon }) => (
-                <a key={key} href={href(`/dars/${darsId}/${no}/${key}`)} className="flex w-28 items-center gap-2 rounded-xl px-2.5 py-2 text-sm font-bold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/10">
+              {steps.map(({ key, label, icon: Icon }) => {
+                const asBtn = key === 'quiz' && onQuiz;
+                const Tag = asBtn ? 'button' : 'a';
+                const props = asBtn ? { type: 'button', onClick: onQuiz } : { href: href(`/dars/${darsId}/${no}/${key}`) };
+                return (
+                <Tag key={key} {...props} className="flex w-28 items-center gap-2 text-left rounded-xl px-2.5 py-2 text-sm font-bold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/10">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white"><Icon size={14} /></span>
                   <span>{label}</span>
                   {key === 'video' && !hasVideo && <span className="ml-auto text-[9px] font-semibold text-slate-400">শিগগির</span>}
-                </a>
-              ))}
+                </Tag>
+                );
+              })}
             </div>
             )}
           </div>

@@ -8,6 +8,7 @@ import { bn } from './questions';
 import { href } from './router';
 import { PathNode } from './PathNode';
 import { isUnlocked } from './progress';
+import QuizModal from './QuizModal';
 
 const TABS = [
   { key: 'concise', to: '/dars', label: 'সংক্ষিপ্ত', icon: BookOpen },
@@ -30,7 +31,7 @@ const OFFSETS = [
 const SIDES = ['right', 'right', 'left', 'left', 'left', 'right'];
 
 // একটি দারসের সব পাঠ (সর্বোচ্চ ৩টি) একসাথে; মাঝের নম্বর পুরো কোর্সজুড়ে ধারাবাহিক
-function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, focus }) {
+function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, setQuiz, focus }) {
   const rowRef = useRef(null);
   const doneCount = d.porbos.filter((p) => progress.done[`${d.id}-${p.no}`]).length;
 
@@ -66,6 +67,7 @@ function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, 
               current={current && p.no === currentNo}
               open={openKey === key}
               onToggle={() => setOpenKey(openKey === key ? null : key)}
+              onQuiz={() => { setOpenKey(null); setQuiz({ id: d.id, no: p.no }); }}
               hasQuiz={p.quiz > 0}
               hasVideo={!!videos[String(d.id)]}
             />
@@ -79,6 +81,7 @@ function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, 
 function Roadmap({ progress, mode, focusId }) {
   const deep = mode === 'deep';
   const [openKey, setOpenKey] = useState(null);
+  const [quiz, setQuiz] = useState(null);
   const total = index.reduce((a, x) => a + x.porbos.length, 0);
   const doneTotal = index.reduce((a, x) => a + x.porbos.filter((p) => progress.done[`${x.id}-${p.no}`]).length, 0);
   const pct = Math.round((doneTotal / total) * 100);
@@ -158,11 +161,12 @@ function Roadmap({ progress, mode, focusId }) {
           {/* সব দারস: আঁকাবাঁকা পথ; দারসে চাপলে নিচে পাঠগুলো বের হয় */}
           <div className="pb-4">
             {index.map((x, i) => (
-              <DarsRow key={x.id} d={x} start={index.slice(0, i).reduce((a, y) => a + y.porbos.length, 0) + 1} progress={progress} current={x.id === cur.id} currentNo={currentNo} openKey={openKey} setOpenKey={setOpenKey} focus={x.id === focusId} />
+              <DarsRow key={x.id} d={x} start={index.slice(0, i).reduce((a, y) => a + y.porbos.length, 0) + 1} progress={progress} current={x.id === cur.id} currentNo={currentNo} openKey={openKey} setOpenKey={setOpenKey} setQuiz={setQuiz} focus={x.id === focusId} />
             ))}
           </div>
         </>
       )}
+      {quiz && <QuizModal id={quiz.id} no={quiz.no} progress={progress} onClose={() => setQuiz(null)} />}
     </div>
   );
 }

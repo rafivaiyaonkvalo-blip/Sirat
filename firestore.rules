@@ -2,6 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function signedIn() { return request.auth != null; }
+    // অ্যাডমিন: শুধু যাচাইকৃত এই ইমেইল (src/utils/superUser.js-এর SUPER_USER_EMAIL-এর সাথে মিলিয়ে রাখুন)
+    function isAdmin() { return signedIn() && request.auth.token.email_verified == true && request.auth.token.email == 'rafi.vaiya.onk.valo@gmail.com'; }
+
     // সম্মিলিত দুরূদ গণনা: সবাই পড়তে পারে; লেখা শুধু count (একবারে ১–২০০ বাড়ানো),
     // participants (একবারে ১) ও countries (একবারে একটি দেশ) বাড়ানো যায়।
     match /campaigns/durood {
@@ -13,5 +17,24 @@ service cloud.firestore {
         && (!('participants' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.participants - resource.data.get('participants', 0) == 1)
         && (!('countries' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.countries.diff(resource.data.get('countries', {})).affectedKeys().size() == 1);
     }
+
+    // শিক্ষার্থীর প্রোফাইল ও অগ্রগতি: প্রত্যেকে শুধু নিজেরটা পড়তে ও লিখতে পারে; অ্যাডমিন সবটা পারে।
+    // (লিডারবোর্ড অন্যের তথ্য পড়ে, তাই সেটা চালু করতে আলাদা পাবলিক সংগ্রহ লাগবে।)
+    match /users/{uid} {
+      allow read, create, update: if (signedIn() && request.auth.uid == uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ত্রুটির রিপোর্ট: যে কেউ পাঠাতে পারে; শুধু অ্যাডমিন দেখতে ও বদলাতে পারে
+    match /reports/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /announcements/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // ব্যবহার-পরিসংখ্যান: যে কেউ লিখতে পারে; শুধু অ্যাডমিন পড়তে পারে
+    match /analytics_sessions/{id} { allow create, update: if true; allow read, delete: if isAdmin(); }
+    match /analytics_daily/{id} { allow create, update: if true; allow read, delete: if isAdmin(); }
   }
 }

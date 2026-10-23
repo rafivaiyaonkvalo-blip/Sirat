@@ -7,7 +7,7 @@ import { loadDars } from '../data/loadDars';
 import { href } from './router';
 import Runs from './Runs';
 import VideoPlayer from './VideoPlayer';
-import Quiz from './Quiz';
+import QuizModal from './QuizModal';
 import NotFound from './NotFound';
 
 function Block({ b }) {
@@ -82,6 +82,7 @@ export default function PorboPage({ id, no, step, progress }) {
       </div>
     );
   }
+  const view = step === 'quiz' ? 'text' : step;
   const si = steps.indexOf(step);
   const go = (p) => href(p);
   const prevHref = si > 0 ? `/dars/${id}/${no}/${steps[si - 1]}` : null;
@@ -91,10 +92,10 @@ export default function PorboPage({ id, no, step, progress }) {
     <article className="mx-auto max-w-3xl">
       <a href={href(`/dars/${id}`)} className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">← দারস {meta.number}: {meta.title}</a>
       <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-slate-400">{no}/{meta.porbos.length}</p>
-      <h1 className="mb-4 text-2xl font-bold leading-snug sm:text-3xl">{porbo.title}</h1>
+      <h1 className="mb-4 text-xl font-bold leading-snug sm:text-2xl">{porbo.title.split(' • ')[0]}</h1>
 
-      <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-        {steps.filter((k) => k !== 'quiz').map((k) => {
+      <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}>
+        {steps.map((k) => {
           const { label, icon: Icon } = STEP_META[k];
           return (
             <a key={k} href={go(`/dars/${id}/${no}/${k}`)} className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold ${k === step ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 dark:text-slate-300'}`}><Icon size={16} /> {label}</a>
@@ -102,9 +103,9 @@ export default function PorboPage({ id, no, step, progress }) {
         })}
       </div>
 
-      {step === 'video' && <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} />}
+      {view === 'video' && <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} />}
 
-      {step === 'text' && (
+      {view === 'text' && (
         <>
           <div className="reader space-y-4">
             {porbo.blocks.map((b, i) => <Block key={i} b={b} />)}
@@ -125,26 +126,26 @@ export default function PorboPage({ id, no, step, progress }) {
         </>
       )}
 
-      {step === 'quiz' && <Quiz key={`${id}-${no}`} questions={porbo.quiz} previous={progress.scores[`${id}-${no}`]} onFinish={(s, t) => { progress.saveScore(id, no, s, t); progress.markDone(id, no); }} />}
+      {step === 'quiz' && <QuizModal id={id} no={no} progress={progress} onClose={() => { window.location.hash = `/dars/${id}/${no}/text`; }} />}
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         {prevHref ? <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a> : <span />}
-        {step === 'video' && (
+        {view === 'video' && (
           <div className="flex flex-wrap items-center gap-2">
             <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">লেখা পড়ুন <ChevronRight size={18} /></a>
             {porbo.quiz.length > 0 && <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><PenLine size={18} /> কুইজ খেলুন</a>}
           </div>
         )}
-        {step === 'text' && porbo.quiz.length > 0 && (
+        {view === 'text' && porbo.quiz.length > 0 && (
           <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
         )}
-        {step === 'text' && porbo.quiz.length > 0 && !done && (
+        {view === 'text' && porbo.quiz.length > 0 && !done && (
           <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200"><Circle size={18} /> কুইজ ছাড়াই সম্পন্ন করুন</button>
         )}
-        {step === 'text' && porbo.quiz.length === 0 && !done && (
+        {view === 'text' && porbo.quiz.length === 0 && !done && (
           <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><Circle size={18} /> সম্পন্ন করুন</button>
         )}
-        {done && step !== 'video' && (
+        {done && view !== 'video' && (
 
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1 text-sm font-bold text-emerald-700 dark:text-emerald-300"><CheckCircle2 size={18} /> সম্পন্ন</span>

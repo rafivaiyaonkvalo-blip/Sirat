@@ -61,6 +61,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
   const [muted, setMuted] = useState(false);
   const [ended, setEnded] = useState(false);
   const [err, setErr] = useState('');
+  const [started, setStarted] = useState(false);
   const [full, setFull] = useState(false);
   const [pseudo, setPseudo] = useState(false); // ব্রাউজার ফুলস্ক্রিন না দিলে (যেমন আইফোন) পুরো স্ক্রিন জুড়ে ফিক্সড
 
@@ -104,6 +105,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
             },
             onStateChange: (e) => {
               setPlaying(e.data === 1);
+              if (e.data === 1) setStarted(true);
               if (e.data === 0) setEnded(true);
             },
             onError: () => setErr('এই ভিডিওটি এখানে চালানো যাচ্ছে না। YouTube-এ ভিডিওর সেটিংসে "এম্বেড করার অনুমতি" চালু আছে কি না এবং ভিডিওটি প্রাইভেট নয় তা দেখুন।'),
@@ -224,9 +226,9 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
   return (
     <div ref={box} className={`overflow-hidden bg-black shadow-lg select-none ${pseudo && full ? 'fixed inset-0 z-[100] h-screen w-screen' : 'relative aspect-video w-full rounded-2xl [&:fullscreen]:aspect-auto [&:fullscreen]:rounded-none'}`} aria-label={title}>
-      <div ref={mount} className="absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full" />
-      {/* ক্লিক ঢাকনা: নিচের YouTube লোগো/লিংকে ক্লিক ঠেকায়; চাপলে চালু/বন্ধ */}
-      <button type="button" onClick={toggle} aria-label={playing ? 'বিরতি' : 'চালান'} className={`absolute inset-0 z-10 flex items-center justify-center ${playing ? 'bg-transparent' : 'bg-slate-950/80'}`}>
+      <div ref={mount} className={`absolute inset-x-0 [&_iframe]:h-full [&_iframe]:w-full ${kind === 'yt' ? '-top-[64px] -bottom-[64px]' : 'inset-y-0'}`} />
+      {/* YouTube-এর শিরোনাম/লোগো ক্রপ করে বাদ; থামা অবস্থায় ঢাকনা অস্বচ্ছ, যাতে "আরও ভিডিও" না দেখা যায়; চাপলে চালু/বন্ধ */}
+      <button type="button" onClick={toggle} aria-label={playing ? 'বিরতি' : 'চালান'} className={`absolute inset-0 z-10 flex items-center justify-center ${playing ? 'bg-transparent' : started || kind !== 'yt' ? 'bg-slate-950' : 'bg-slate-950/95'}`}>
         {!playing && (
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-[0_0_30px_rgba(14,165,233,0.8)]">
             {ended ? <RotateCcw size={28} /> : <Play size={30} className="ml-1" />}

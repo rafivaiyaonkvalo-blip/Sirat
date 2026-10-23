@@ -1,16 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { ArrowLeft, Award, CheckCircle2, Clock, MinusCircle, RotateCcw, XCircle } from 'lucide-react';
 import DarsPicker from './DarsPicker';
+import SectionHero from './SectionHero';
 import { buildQuestions, bn } from './questions';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
 const fmt = (s) => `${bn(String(Math.floor(s / 60)).padStart(2, '0'))}:${bn(String(s % 60).padStart(2, '0'))}`;
 
+function grade(pct) {
+  if (pct >= 90) return { text: 'মাশা আল্লাহ! চমৎকার', color: '#10b981' };
+  if (pct >= 70) return { text: 'অনেক ভালো, এগিয়ে চলুন', color: '#10b981' };
+  if (pct >= 50) return { text: 'ভালো চেষ্টা, আরেকটু পড়ে নিন', color: '#f59e0b' };
+  return { text: 'দারসগুলো আরেকবার পড়ে আবার চেষ্টা করুন', color: '#f43f5e' };
+}
+
+function ScoreRing({ pct, color, score, total }) {
+  const r = 52;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative mx-auto h-36 w-36">
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+        <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="9" />
+        <circle cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="9" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} style={{ filter: `drop-shadow(0 0 6px ${color})`, transition: 'stroke-dashoffset 0.9s ease-out' }} />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+        <span className="text-3xl font-extrabold leading-none">{bn(score)}/{bn(total)}</span>
+        <span className="mt-1 text-sm font-bold opacity-90">{bn(pct)}%</span>
+      </div>
+    </div>
+  );
+}
+
 function Exam({ questions, onExit }) {
   const [answers, setAnswers] = useState({});
   const [left, setLeft] = useState(questions.length * 60);
   const [done, setDone] = useState(false);
+  const [filter, setFilter] = useState('all');
   const submitted = useRef(false);
+  const total = questions.length;
 
   useEffect(() => {
     if (done) return undefined;
@@ -21,58 +48,91 @@ function Exam({ questions, onExit }) {
     if (left <= 0 && !submitted.current) { submitted.current = true; setDone(true); }
   }, [left]);
 
+  const answered = Object.keys(answers).length;
   const score = questions.reduce((a, q, i) => a + (answers[i] === q.answer ? 1 : 0), 0);
+  const submit = () => {
+    if (answered < total && !window.confirm(`${bn(total - answered)}টি প্রশ্নের উত্তর দেওয়া হয়নি। জমা দেবেন?`)) return;
+    submitted.current = true;
+    setDone(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (done) {
-    const pct = Math.round((score / questions.length) * 100);
+    const pct = Math.round((score / total) * 100);
+    const g = grade(pct);
+    const wrong = answered - score;
+    const skipped = total - answered;
+    const rows = questions.map((q, i) => ({ q, i, ok: answers[i] === q.answer, none: answers[i] === undefined }));
+    const shown = rows.filter((r) => (filter === 'wrong' ? !r.ok : filter === 'ok' ? r.ok : true));
     return (
-      <div className="mx-auto max-w-3xl">
-        <div className="rounded-3xl bg-emerald-900 p-6 text-center text-white">
-          <p className="text-sm text-emerald-200">পরীক্ষার ফল</p>
-          <p className="mt-1 text-5xl font-bold">{bn(score)}/{bn(questions.length)}</p>
-          <p className="mt-1 text-emerald-100">{bn(pct)}% · সময় ব্যবহার {fmt(questions.length * 60 - Math.max(left, 0))}</p>
-          <button onClick={onExit} className="mt-4 rounded-full bg-white px-5 py-2 font-bold text-emerald-700">নতুন পরীক্ষা</button>
+      <div className="mx-auto max-w-2xl">
+        <div className="rounded-3xl bg-gradient-to-br from-teal-800 via-teal-700 to-emerald-800 p-6 text-center text-white shadow-xl">
+          <p className="mb-3 text-sm font-bold text-emerald-100">পরীক্ষার ফল</p>
+          <ScoreRing pct={pct} color={g.color} score={score} total={total} />
+          <p className="mt-3 text-lg font-extrabold">{g.text}</p>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-sm font-bold">
+            <div className="rounded-2xl bg-black/25 py-2"><span className="block text-xl" style={{ color: '#34d399' }}>{bn(score)}</span>সঠিক</div>
+            <div className="rounded-2xl bg-black/25 py-2"><span className="block text-xl text-rose-300">{bn(wrong)}</span>ভুল</div>
+            <div className="rounded-2xl bg-black/25 py-2"><span className="block text-xl text-amber-300">{bn(skipped)}</span>বাদ</div>
+          </div>
+          <p className="mt-3 text-xs text-emerald-100">সময় ব্যবহার {fmt(total * 60 - Math.max(left, 0))}</p>
+          <button onClick={onExit} className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 font-bold text-emerald-700"><RotateCcw size={16} /> নতুন পরীক্ষা</button>
         </div>
-        <div className="mt-6 space-y-4">
-          {questions.map((q, i) => {
-            const ok = answers[i] === q.answer;
-            return (
-              <div key={i} className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-4">
-                <p className="flex gap-2 font-semibold">{ok ? <CheckCircle2 className="shrink-0 text-emerald-600" size={20} /> : <XCircle className="shrink-0 text-rose-600" size={20} />}<span>{bn(i + 1)}. {q.q}</span></p>
-                <p className="mt-2 text-sm">আপনার উত্তর: <b>{answers[i] === undefined ? 'উত্তর দেননি' : q.options[answers[i]]}</b></p>
-                {!ok && <p className="text-sm">সঠিক উত্তর: <b className="text-emerald-700 dark:text-emerald-400">{q.options[q.answer]}</b></p>}
-                {q.explain && <p className="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-2 text-sm">{q.explain}</p>}
-                <p className="mt-1 text-xs text-slate-400">{q.from}</p>
-              </div>
-            );
-          })}
+
+        <div className="mt-6 mb-3 flex gap-2">
+          {[['all', `সব (${bn(total)})`], ['wrong', `ভুল/বাদ (${bn(wrong + skipped)})`], ['ok', `সঠিক (${bn(score)})`]].map(([k, l]) => (
+            <button key={k} onClick={() => setFilter(k)} className={`rounded-full px-3.5 py-1.5 text-xs font-bold sm:text-sm ${filter === k ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-200'}`}>{l}</button>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {shown.map(({ q, i, ok, none }) => (
+            <div key={i} className={`rounded-2xl border-2 bg-white p-4 dark:bg-white/5 ${ok ? 'border-[#10b981]/40' : 'border-rose-400/40'}`}>
+              <p className="flex gap-2 font-semibold leading-relaxed">
+                {ok ? <CheckCircle2 className="mt-0.5 shrink-0 text-[#10b981]" size={20} /> : none ? <MinusCircle className="mt-0.5 shrink-0 text-amber-500" size={20} /> : <XCircle className="mt-0.5 shrink-0 text-rose-500" size={20} />}
+                <span>{bn(i + 1)}. {q.q}</span>
+              </p>
+              <p className="mt-2 text-sm">আপনার উত্তর: <b>{none ? 'উত্তর দেননি' : q.options[answers[i]]}</b></p>
+              {!ok && <p className="text-sm">সঠিক উত্তর: <b className="text-[#10b981]">{q.options[q.answer]}</b></p>}
+              {q.explain && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm leading-relaxed dark:bg-emerald-900/30"><strong>ব্যাখ্যা: </strong>{q.explain}</p>}
+              <p className="mt-2 text-[11px] font-semibold text-slate-400">{q.from}</p>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="sticky top-14 z-20 -mx-4 mb-4 flex items-center justify-between bg-slate-50/95 dark:bg-slate-900/95 px-4 py-2 backdrop-blur">
-        <span className="text-sm font-semibold">{bn(Object.keys(answers).length)}/{bn(questions.length)} উত্তর দেওয়া হয়েছে</span>
-        <span className={`inline-flex items-center gap-1 font-bold ${left < 60 ? 'text-rose-600' : 'text-emerald-700 dark:text-emerald-200'}`}><Clock size={16} /> {fmt(Math.max(left, 0))}</span>
+    <div className="mx-auto max-w-2xl">
+      <div className="sticky top-16 z-30 -mx-1 mb-4 rounded-2xl border border-emerald-300/40 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur-md dark:bg-slate-900/95 md:top-20">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold">{bn(answered)}/{bn(total)} উত্তর</span>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-extrabold ${left < 60 ? 'animate-pulse bg-rose-500/15 text-rose-500' : 'bg-emerald-600/15 text-emerald-700 dark:text-emerald-200'}`}><Clock size={15} /> {fmt(Math.max(left, 0))}</span>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${(answered / total) * 100}%` }} />
+        </div>
       </div>
-      <div className="space-y-5">
+      <div className="space-y-4">
         {questions.map((q, i) => (
-          <div key={i} className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-4">
+          <div key={i} className={`rounded-2xl border-2 bg-white p-4 transition dark:bg-white/5 ${answers[i] !== undefined ? 'border-emerald-300/60' : 'border-slate-200 dark:border-white/10'}`}>
+            <p className="mb-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{q.from}</p>
             <p className="mb-3 font-semibold leading-relaxed"><span className="text-emerald-600 dark:text-emerald-400">{bn(i + 1)}.</span> {q.q}</p>
             <div className="grid gap-2">
-              {q.options.map((o, oi) => (
-                <button key={oi} onClick={() => setAnswers({ ...answers, [i]: oi })} className={`flex items-start gap-3 rounded-xl border-2 px-3 py-2.5 text-left ${answers[i] === oi ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/40' : 'border-slate-200 dark:border-white/10'}`}>
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-white/10 text-xs font-bold">{LETTERS[oi]}</span>
-                  <span>{o}</span>
-                </button>
-              ))}
+              {q.options.map((o, oi) => {
+                const on = answers[i] === oi;
+                return (
+                  <button key={oi} onClick={() => setAnswers({ ...answers, [i]: oi })} className={`flex items-start gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition active:scale-[0.99] ${on ? 'border-emerald-400 bg-emerald-50 shadow-[0_0_12px_rgba(14,165,233,0.35)] dark:bg-emerald-900/40' : 'border-slate-200 hover:border-emerald-300 dark:border-white/10'}`}>
+                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${on ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-white/10 dark:text-emerald-200'}`}>{LETTERS[oi]}</span>
+                    <span className="flex-1">{o}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
-      <button onClick={() => { submitted.current = true; setDone(true); }} className="mt-6 w-full rounded-full bg-emerald-600 py-3 text-lg font-bold text-white">জমা দিন</button>
+      <button onClick={submit} className="mt-6 w-full rounded-full bg-emerald-600 py-3.5 text-lg font-bold text-white shadow-[0_0_20px_rgba(14,165,233,0.5)]">জমা দিন</button>
     </div>
   );
 }
@@ -81,14 +141,31 @@ export default function ExamPage() {
   const [selected, setSelected] = useState([]);
   const [count, setCount] = useState(20);
   const [qs, setQs] = useState(null);
-  const start = async () => setQs(await buildQuestions(selected, count));
+  const [busy, setBusy] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const start = async () => {
+    setBusy(true);
+    setQs(await buildQuestions(selected, count));
+    setAttempt((a) => a + 1);
+    setBusy(false);
+  };
 
-  if (qs) return <Exam questions={qs} onExit={() => setQs(null)} />;
+  if (qs) {
+    return (
+      <div>
+        <Exam key={attempt} questions={qs} onExit={() => setQs(null)} />
+      </div>
+    );
+  }
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">পরীক্ষা</h1>
-      <p className="mb-6 mt-1 text-slate-500 dark:text-slate-400">সময়সীমাসহ পরীক্ষা (প্রতি প্রশ্নে ১ মিনিট)। উত্তর ও ব্যাখ্যা দেখানো হবে জমা দেওয়ার পর।</p>
-      <DarsPicker selected={selected} setSelected={setSelected} count={count} setCount={setCount} onStart={start} startLabel="পরীক্ষা শুরু" />
+    <div className="mx-auto max-w-4xl">
+      <SectionHero
+        icon={Award}
+        title="পরীক্ষা"
+        subtitle="সময়সীমাসহ পরীক্ষা, প্রতি প্রশ্নে ১ মিনিট। উত্তর ও ব্যাখ্যা দেখানো হবে জমা দেওয়ার পর। যতগুলো দারস চান বেছে নিন।"
+        chips={['সময়সীমাসহ', 'প্রতি প্রশ্নে ১ মিনিট', 'শেষে পূর্ণ বিশ্লেষণ']}
+      />
+      <DarsPicker selected={selected} setSelected={setSelected} count={count} setCount={setCount} onStart={start} startLabel="পরীক্ষা শুরু" busy={busy} />
     </div>
   );
 }
