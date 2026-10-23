@@ -113,7 +113,7 @@ export default function PorboPage({ id, no, step, progress }) {
     <article className="mx-auto max-w-3xl">
       <a href={href(`/dars/${id}`)} className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">← দারস {meta.number}: {meta.title}</a>
       <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-slate-400">{no}/{meta.porbos.length}</p>
-      <h1 className="mb-4 text-xl font-bold leading-snug sm:text-2xl">{porbo.title.split(' • ')[0]}</h1>
+      <h1 translate="no" className="mb-4 text-xl font-bold leading-snug sm:text-2xl">{porbo.title.split(' • ')[0]}</h1>
 
       <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}>
         {steps.map((k) => {
@@ -140,7 +140,7 @@ export default function PorboPage({ id, no, step, progress }) {
               )}
             </div>
           )}
-          <div className="reader space-y-4">
+          <div translate="no" className="reader space-y-4">
             {porbo.blocks.map((b, i) => (b.type === 'sub' ? <Block key={i} b={b} /> : <NoteWrap key={i} b={b} idx={i} dars={id} porbo={no}><Block b={b} /></NoteWrap>))}
           </div>
           {porbo.footnotes.length > 0 && (
@@ -150,7 +150,7 @@ export default function PorboPage({ id, no, step, progress }) {
                 {porbo.footnotes.map((f) => (
                   <li key={f.n} id={`fn-${f.n}`} className="flex gap-2">
                     <a href={`#fnref-${f.n}`} onClick={(e) => { e.preventDefault(); document.getElementById(`fnref-${f.n}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="shrink-0 font-semibold text-emerald-600 dark:text-emerald-400">[{f.n}]</a>
-                    <span><Runs runs={f.runs} /></span>
+                    <span translate="no"><Runs runs={f.runs} /></span>
                   </li>
                 ))}
               </ol>

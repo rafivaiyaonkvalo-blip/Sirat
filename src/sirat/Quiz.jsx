@@ -97,7 +97,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
         {q.from && (q.darsId ? (
           <button type="button" onClick={() => { onClose?.(); window.dispatchEvent(new CustomEvent('sirat_goto_dars', { detail: q.darsId })); }} className="mb-2 text-left text-[11px] font-bold text-emerald-700 underline decoration-dotted underline-offset-2 dark:text-emerald-300">{q.from} ↗</button>
         ) : <p className="mb-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{q.from}</p>)}
-        <p className="mb-3 font-semibold leading-relaxed">{q.q}</p>
+        <p translate="no" className="mb-3 font-semibold leading-relaxed">{q.q}</p>
         <div className="grid gap-2">
           {order.map((oi, pos) => {
             const isAns = oi === q.answer;
@@ -111,7 +111,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
             return (
               <button key={oi} disabled={sel !== undefined} onClick={() => choose(oi)} className={`flex items-start gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition ${cls}`}>
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-white/10 text-xs font-bold text-emerald-700 dark:text-emerald-200">{LETTERS[pos]}</span>
-                <span className="flex-1">{q.options[oi]}</span>
+                <span translate="no" className="flex-1">{q.options[oi]}</span>
                 {sel !== undefined && isAns && <CheckCircle2 className="shrink-0 text-[#10b981]" size={20} />}
                 {sel !== undefined && isSel && !isAns && <XCircle className="shrink-0 text-rose-600" size={20} />}
               </button>
@@ -122,7 +122,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
         {sel !== undefined && q.explain && (
           <p className="mt-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
             <strong className="text-emerald-700 dark:text-emerald-200">ব্যাখ্যা: </strong>
-            {q.explain}
+            <span translate="no">{q.explain}</span>
           </p>
         )}
       </div>

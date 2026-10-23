@@ -54,9 +54,9 @@ export default function NotesModal({ onClose }) {
                   {g.rows.map((n) => (
                     <li key={n.block} className="rounded-xl border border-slate-200 bg-white p-2.5 dark:border-white/10 dark:bg-white/5">
                       <button type="button" onClick={() => go(n)} className="block w-full text-left">
-                        <p className={`line-clamp-3 text-sm leading-relaxed ${n.bookmark ? 'border-l-4 border-amber-400 pl-2' : ''}`}>{n.snippet}</p>
+                        <p translate="no" className={`line-clamp-3 text-sm leading-relaxed ${n.bookmark ? 'border-l-4 border-amber-400 pl-2' : ''}`}>{n.snippet}</p>
                       </button>
-                      {n.note && <p className="mt-1.5 whitespace-pre-wrap break-words rounded-lg bg-amber-400/10 px-2 py-1.5 text-xs">{n.note}</p>}
+                      {n.note && <p translate="no" className="mt-1.5 whitespace-pre-wrap break-words rounded-lg bg-amber-400/10 px-2 py-1.5 text-xs">{n.note}</p>}
                       <div className="mt-1.5 flex items-center justify-between">
                         <button type="button" onClick={() => go(n)} className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">সেখানে যান ↗</button>
                         <div className="flex gap-1">

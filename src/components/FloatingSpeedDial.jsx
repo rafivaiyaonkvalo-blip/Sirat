@@ -5,7 +5,7 @@ import {
   BookOpen, Award, ShieldCheck, Sparkles,
   Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send, StickyNote
 } from 'lucide-react';
-import { getShowEnglish, toggleShowEnglish } from '../utils/storage';
+import { toggleLang, useLang } from '../i18n';
 import { getVoiceProfile, setVoiceProfile, playArabicAudio } from '../utils/audio';
 import { getPendingMistakesCount } from '../utils/mistakesManager';
 import { getVolumeProgress } from '../utils/certificateManager';
@@ -74,15 +74,7 @@ export default function FloatingSpeedDial({
     };
   }, [isOpen]);
 
-  const [showEnglish, setShowEnglishState] = useState(() => getShowEnglish());
-
-  useEffect(() => {
-    const handleEngChange = (e) => {
-      setShowEnglishState(e.detail ? e.detail.showEnglish : getShowEnglish());
-    };
-    window.addEventListener('uls_english_preference_changed', handleEngChange);
-    return () => window.removeEventListener('uls_english_preference_changed', handleEngChange);
-  }, []);
+  const showEnglish = useLang() === 'en';
 
   // Voice Profile Handler
   const [voiceProfile, setVoiceProfileState] = useState(() => getVoiceProfile());
@@ -101,8 +93,7 @@ export default function FloatingSpeedDial({
   // English toggle handler
   const handleEnglishToggle = (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
-    const nextVal = toggleShowEnglish();
-    setShowEnglishState(nextVal);
+    toggleLang();
   };
 
   // Theme toggle handler
@@ -264,7 +255,7 @@ export default function FloatingSpeedDial({
     },
     {
       id: 'english_toggle',
-      label: showEnglish ? 'English' : 'ইংরেজি',
+      label: showEnglish ? 'বাংলা' : 'English',
       icon: Languages,
       gradient: showEnglish
         ? 'from-emerald-500 via-teal-600 to-cyan-500 shadow-emerald-500/35 ring-emerald-400/30'

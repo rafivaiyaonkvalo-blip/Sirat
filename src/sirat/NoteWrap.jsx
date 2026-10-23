@@ -18,7 +18,7 @@ export default function NoteWrap({ b, idx, dars, porbo, children }) {
   return (
     <div id={`blk-${idx}`} className={`group relative rounded-lg transition-colors ${n?.bookmark ? 'border-l-4 border-amber-400 bg-amber-400/5 pl-3' : ''}`}>
       {children}
-      <div className="mt-1 flex justify-end gap-1 opacity-60 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+      <div translate="yes" className="mt-1 flex justify-end gap-1 opacity-60 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
         <button type="button" onClick={() => toggleBookmark(meta)} aria-label={n?.bookmark ? 'বুকমার্ক সরান' : 'বুকমার্ক করুন'} title={n?.bookmark ? 'বুকমার্ক সরান' : 'বুকমার্ক করুন'} className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10">
           <Bookmark size={15} className={n?.bookmark ? 'fill-amber-400 text-amber-500' : ''} />
         </button>
@@ -28,16 +28,16 @@ export default function NoteWrap({ b, idx, dars, porbo, children }) {
       </div>
 
       {n?.note && !editing && (
-        <div className="mt-1 flex items-start gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm">
+        <div translate="yes" className="mt-1 flex items-start gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm">
           <StickyNote size={15} className="mt-0.5 shrink-0 text-amber-500" />
-          <p className="min-w-0 flex-1 whitespace-pre-wrap break-words">{n.note}</p>
+          <p translate="no" className="min-w-0 flex-1 whitespace-pre-wrap break-words">{n.note}</p>
           <button type="button" onClick={openEditor} aria-label="নোট সম্পাদনা" className="shrink-0 rounded-full p-1 text-slate-500 hover:bg-black/5 dark:hover:bg-white/10"><Pencil size={13} /></button>
           <button type="button" onClick={() => saveNote(meta, '')} aria-label="নোট মুছুন" className="shrink-0 rounded-full p-1 text-rose-500 hover:bg-black/5 dark:hover:bg-white/10"><Trash2 size={13} /></button>
         </div>
       )}
 
       {editing && (
-        <div className="mt-1 rounded-xl border border-amber-400/50 bg-white p-2 dark:bg-slate-900">
+        <div translate="yes" className="mt-1 rounded-xl border border-amber-400/50 bg-white p-2 dark:bg-slate-900">
           <textarea
             autoFocus
             value={draft}

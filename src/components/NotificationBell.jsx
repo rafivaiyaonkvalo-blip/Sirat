@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertCircle, Bell, BellRing, ExternalLink, Sparkles, Video, Megaphone, X } from 'lucide-react';
 import { fetchActiveAnnouncements } from '../services/announcementService';
 import { toBengaliNumber } from '../utils/gamification';
+import { getLang } from '../i18n';
 
 const SEEN_KEY = 'sirat_seen_notices';
 const POLL_MS = 5 * 60 * 1000;
@@ -14,7 +15,7 @@ const TYPE = {
   info: { label: 'ঘোষণা', icon: Megaphone, cls: 'bg-sky-500/15 text-sky-500' },
 };
 const fmtDate = (iso) => {
-  try { return new Date(iso).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long' }); } catch { return ''; }
+  try { return new Date(iso).toLocaleDateString(getLang() === 'en' ? 'en-GB' : 'bn-BD', { day: 'numeric', month: 'long' }); } catch { return ''; }
 };
 
 // ঘণ্টা-আইকন: সব সক্রিয় ঘোষণার তালিকা, না-পড়া সংখ্যা, আর অনুমতি দিলে নতুন ঘোষণায় ব্রাউজার-নোটিফিকেশন

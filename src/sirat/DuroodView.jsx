@@ -3,6 +3,7 @@ import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap 
 import { campaign } from './brand';
 import { bn } from './questions';
 import { auth } from '../services/firebase';
+import { t } from '../i18n';
 import { POINTS, addDurood, creditReferrer, ensureRefDoc, getMyCode, getPoints, refreshOwn, referralLink } from './points';
 import { addToGlobal, cloudEnabled, countryFlag, countryName, detectCountry, subscribeGlobal } from './duroodCloud';
 
@@ -277,7 +278,7 @@ export default function DuroodPage() {
         ))}
       </div>
 
-      <button onClick={() => { if (window.confirm('আজকের গণনা শূন্য করবেন?')) setState((s) => ({ total: s.total - todayCount, days: { ...s.days, [today()]: 0 } })); }} className="mt-6 inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"><RotateCcw size={12} /> আজকের গণনা রিসেট</button>
+      <button onClick={() => { if (window.confirm(t('আজকের গণনা শূন্য করবেন?'))) setState((s) => ({ total: s.total - todayCount, days: { ...s.days, [today()]: 0 } })); }} className="mt-6 inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"><RotateCcw size={12} /> আজকের গণনা রিসেট</button>
     </div>
   );
 }

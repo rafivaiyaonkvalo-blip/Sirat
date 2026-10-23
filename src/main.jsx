@@ -2,6 +2,7 @@ import React, { Component, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { initI18n } from './i18n'
 
 class GlobalErrorBoundary extends Component {
   constructor(props) {
@@ -89,6 +90,8 @@ class GlobalErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+initI18n()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

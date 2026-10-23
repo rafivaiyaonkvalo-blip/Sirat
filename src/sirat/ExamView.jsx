@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Clock, MinusCircle, RotateCcw, XCircle } from 'lucide-react';
 import { bn } from './questions';
+import { t } from '../i18n';
 import { addQuizAnswer } from './points';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
@@ -56,7 +57,7 @@ export function Exam({ questions, onExit }) {
     setDone(true);
   };
   const submit = () => {
-    if (answered < total && !window.confirm(`${bn(total - answered)}টি প্রশ্নের উত্তর দেওয়া হয়নি। জমা দেবেন?`)) return;
+    if (answered < total && !window.confirm(t(`${bn(total - answered)}টি প্রশ্নের উত্তর দেওয়া হয়নি। জমা দেবেন?`))) return;
     finish();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -93,11 +94,11 @@ export function Exam({ questions, onExit }) {
             <div key={i} className={`rounded-2xl border-2 bg-white p-4 dark:bg-white/5 ${ok ? 'border-[#10b981]/40' : 'border-rose-400/40'}`}>
               <p className="flex gap-2 font-semibold leading-relaxed">
                 {ok ? <CheckCircle2 className="mt-0.5 shrink-0 text-[#10b981]" size={20} /> : none ? <MinusCircle className="mt-0.5 shrink-0 text-amber-500" size={20} /> : <XCircle className="mt-0.5 shrink-0 text-rose-500" size={20} />}
-                <span>{bn(i + 1)}. {q.q}</span>
+                <span translate="no">{bn(i + 1)}. {q.q}</span>
               </p>
-              <p className="mt-2 text-sm">আপনার উত্তর: <b>{none ? 'উত্তর দেননি' : q.options[answers[i]]}</b></p>
-              {!ok && <p className="text-sm">সঠিক উত্তর: <b className="text-[#10b981]">{q.options[q.answer]}</b></p>}
-              {q.explain && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm leading-relaxed dark:bg-emerald-900/30"><strong>ব্যাখ্যা: </strong>{q.explain}</p>}
+              <p className="mt-2 text-sm">আপনার উত্তর: <b translate={none ? undefined : 'no'}>{none ? 'উত্তর দেননি' : q.options[answers[i]]}</b></p>
+              {!ok && <p className="text-sm">সঠিক উত্তর: <b translate="no" className="text-[#10b981]">{q.options[q.answer]}</b></p>}
+              {q.explain && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm leading-relaxed dark:bg-emerald-900/30"><strong>ব্যাখ্যা: </strong><span translate="no">{q.explain}</span></p>}
               <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('sirat_goto_dars', { detail: q.darsId }))} className="mt-2 text-left text-[11px] font-semibold text-slate-400 underline decoration-dotted underline-offset-2">{q.from} ↗</button>
             </div>
           ))}
@@ -121,14 +122,14 @@ export function Exam({ questions, onExit }) {
         {questions.map((q, i) => (
           <div key={i} className={`rounded-2xl border-2 bg-white p-4 transition dark:bg-white/5 ${answers[i] !== undefined ? 'border-emerald-300/60' : 'border-slate-200 dark:border-white/10'}`}>
             <p className="mb-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{q.from}</p>
-            <p className="mb-3 font-semibold leading-relaxed"><span className="text-emerald-600 dark:text-emerald-400">{bn(i + 1)}.</span> {q.q}</p>
+            <p className="mb-3 font-semibold leading-relaxed"><span className="text-emerald-600 dark:text-emerald-400">{bn(i + 1)}.</span> <span translate="no">{q.q}</span></p>
             <div className="grid gap-2">
               {q.options.map((o, oi) => {
                 const on = answers[i] === oi;
                 return (
                   <button key={oi} onClick={() => setAnswers({ ...answers, [i]: oi })} className={`flex items-start gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition active:scale-[0.99] ${on ? 'border-emerald-400 bg-emerald-50 shadow-[0_0_12px_rgba(14,165,233,0.35)] dark:bg-emerald-900/40' : 'border-slate-200 hover:border-emerald-300 dark:border-white/10'}`}>
                     <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${on ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-white/10 dark:text-emerald-200'}`}>{LETTERS[oi]}</span>
-                    <span className="flex-1">{o}</span>
+                    <span translate="no" className="flex-1">{o}</span>
                   </button>
                 );
               })}

@@ -3,6 +3,7 @@
 // নিরাপত্তা নিয়ম: firestore.rules (ফাইলটি Firebase কনসোলের Rules-এ বসাতে হয়)
 import { doc, increment, onSnapshot, setDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../services/firebase';
+import { getLang } from '../i18n';
 
 export const cloudEnabled = () => isFirebaseConfigured() && !!db;
 
@@ -57,6 +58,6 @@ export function detectCountry() {
 }
 
 export const countryName = (cc) => {
-  try { return new Intl.DisplayNames(['bn'], { type: 'region' }).of(cc) || cc; } catch { return cc; }
+  try { return new Intl.DisplayNames([getLang() === 'en' ? 'en' : 'bn'], { type: 'region' }).of(cc) || cc; } catch { return cc; }
 };
 export const countryFlag = (cc) => (/^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map((c) => 127397 + c.charCodeAt(0))) : '🌍');

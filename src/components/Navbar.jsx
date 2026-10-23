@@ -3,7 +3,7 @@ import { BookOpen, Heart, Library, Layers, Award, Menu, X, Download, LogIn, User
 import { isSuperUser } from '../utils/superUser';
 import DynamicLogo, { LOGO_VARIANTS } from './DynamicLogo';
 import { triggerHaptic } from '../utils/haptics';
-import { getShowEnglish, toggleShowEnglish } from '../utils/storage';
+import { toggleLang, useLang } from '../i18n';
 import NotificationBell from './NotificationBell';
 
 export default function Navbar({ 
@@ -19,20 +19,11 @@ export default function Navbar({
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [activeVariant, setActiveVariant] = useState(LOGO_VARIANTS[0]);
-  const [showEnglish, setShowEnglishState] = useState(() => getShowEnglish());
-
-  useEffect(() => {
-    const handleEngChange = (e) => {
-      setShowEnglishState(e.detail ? e.detail.showEnglish : getShowEnglish());
-    };
-    window.addEventListener('uls_english_preference_changed', handleEngChange);
-    return () => window.removeEventListener('uls_english_preference_changed', handleEngChange);
-  }, []);
+  const showEnglish = useLang() === 'en';
 
   const handleToggleEnglish = () => {
     triggerHaptic();
-    const nextVal = toggleShowEnglish();
-    setShowEnglishState(nextVal);
+    toggleLang();
   };
 
   const [superUnlocked, setSuperUnlocked] = useState(() => isSuperUser(user));
@@ -186,9 +177,9 @@ export default function Navbar({
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/30 ring-2 ring-emerald-500/30'
                     : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
-                title={showEnglish ? "ইংরেজি বন্ধ করুন (শুধু বাংলা দেখতে ট্যাপ করুন)" : "ইংরেজি অর্থ চালু করুন (বাংলার সাথে ইংরেজি দেখতে ট্যাপ করুন)"}
+                title={showEnglish ? 'বাংলায় ফিরুন' : 'Switch the website to English'}
               >
-                <span className="font-mono text-xs font-black tracking-wide">ENG</span>
+                <span className="font-mono text-xs font-black tracking-wide">{showEnglish ? 'বাং' : 'ENG'}</span>
                 <span className={`w-1.5 h-1.5 rounded-full ${showEnglish ? 'bg-white shadow-xs' : 'bg-slate-400 dark:bg-slate-500'}`} />
               </button>
 
