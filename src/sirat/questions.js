@@ -1,4 +1,5 @@
-import { loadDars } from '../data/loadDars';
+import { loadDarsLocalized } from '../data/loadTranslation';
+import { getLang } from '../i18n';
 import index from '../data/darsIndex.json';
 
 export const totalQuestions = (ids) => index.filter((d) => ids.includes(d.id)).reduce((a, d) => a + d.porbos.reduce((b, p) => b + p.quiz, 0), 0);
@@ -7,7 +8,7 @@ export const totalQuestions = (ids) => index.filter((d) => ids.includes(d.id)).r
 export async function buildQuestions(ids, count) {
   const all = [];
   for (const id of ids) {
-    const d = await loadDars(id);
+    const d = await loadDarsLocalized(id, getLang());
     if (!d) continue;
     for (const p of d.porbos) for (const q of p.quiz) all.push({ ...q, darsId: d.id, from: `দারস ${bn(d.number)} · ${d.title}` });
   }

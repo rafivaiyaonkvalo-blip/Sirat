@@ -3,7 +3,8 @@ import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Headph
 import { isUnlocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
-import { loadDars } from '../data/loadDars';
+import { loadDarsLocalized } from '../data/loadTranslation';
+import { useLang } from '../i18n';
 import { href } from './router';
 import Runs from './Runs';
 import VideoPlayer from './VideoPlayer';
@@ -56,14 +57,15 @@ export default function PorboPage({ id, no, step, progress }) {
   const meta = index.find((x) => x.id === id);
   const [dars, setDars] = useState(null);
   const [listen, setListen] = useState(false);
+  const lang = useLang();
   const { markVisited } = progress;
 
   useEffect(() => {
     let live = true;
     setDars(null);
-    loadDars(id).then((d) => live && setDars(d || false));
+    loadDarsLocalized(id, lang).then((d) => live && setDars(d || false));
     return () => { live = false; };
-  }, [id]);
+  }, [id, lang]);
   useEffect(() => { markVisited(id, no); }, [id, no, markVisited]);
 
   // নোট/বুকমার্ক থেকে এলে ওই অনুচ্ছেদে স্ক্রল ও কিছুক্ষণ জ্বলে ওঠা

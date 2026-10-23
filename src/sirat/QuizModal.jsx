@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import { loadDars } from '../data/loadDars';
+import { loadDarsLocalized } from '../data/loadTranslation';
+import { getLang } from '../i18n';
 import index from '../data/darsIndex.json';
 import { bn, pickQuiz } from './questions';
 import Quiz from './Quiz';
@@ -36,7 +37,7 @@ export default function QuizModal({ id, no, progress, onClose }) {
 
   useEffect(() => {
     let live = true;
-    loadDars(id).then((d) => {
+    loadDarsLocalized(id, getLang()).then((d) => {
       if (!live) return;
       setDars(d || false);
       if (d) setQs(pickQuiz(d.porbos[no - 1].quiz));
