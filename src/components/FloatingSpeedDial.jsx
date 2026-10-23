@@ -624,7 +624,7 @@ export default function FloatingSpeedDial({
                     সহায়তা ও ডেভেলপার সাপোর্ট
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    মারকাযুল ঈমান • ULS Arabic
+                    মারকাযুল ঈমান • সীরাত
                   </p>
                 </div>
               </div>
@@ -646,9 +646,11 @@ export default function FloatingSpeedDial({
                   <span>কীভাবে সহজে শিখবেন?</span>
                 </div>
                 <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pl-4 list-disc font-medium">
-                  <li><strong>দরস:</strong> ১ থেকে ৭০ পর্যন্ত পর্যায়ক্রমে পাঠ ও তামরীন অনুশীলন করুন।</li>
-                  <li><strong>ফ্ল্যাশকার্ড ও অডিও:</strong> বিশুদ্ধ হরকতযুক্ত আরবি উচ্চারণ বারবার শুনুন ও মুখস্থ করুন।</li>
-                  <li><strong>পরীক্ষা:</strong> প্রতিটি অধ্যায় শেষে গ্রিল মি এক্সামে মেধা যাচাই করুন।</li>
+                  <li><strong>দারস:</strong> প্রতিটি দারসে তিনটি পর্ব। প্রতি পর্বে ভিডিও দেখুন, লেখা পড়ুন, তারপর কুইজ দিন; কুইজ শেষ হলে পরের পর্ব খোলে।</li>
+                  <li><strong>দুরূদ:</strong> দুরূদ পাতায় বড় বোতামে চেপে হিসাব রাখুন। প্রতিটি দুরূদে ১০ XP। নিজের লিংক শেয়ার করে অন্যদেরও আমন্ত্রণ জানান।</li>
+                  <li><strong>অনুশীলন:</strong> পছন্দের দারস বেছে কুইজ বা সময়সহ পরীক্ষা দিন। সঠিক উত্তরে ১০, ভুলে ৫ XP।</li>
+                  <li><strong>নোট ও বুকমার্ক:</strong> লেখা পড়ার সময় অনুচ্ছেদের নিচের বাটনে নোট রাখুন; লগইন করলে সব ডিভাইসে পাবেন।</li>
+                  <li><strong>ভাষা:</strong> ওপরের ভাষা-বাটনে বাংলা, English ও আরবি বদলে নিন।</li>
                 </ul>
               </div>
 

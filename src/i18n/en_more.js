@@ -17,8 +17,8 @@ export const EXACT_MORE = {
   'বিশুদ্ধ হরকতযুক্ত আরবি উচ্চারণ বারবার শুনুন ও মুখস্থ করুন।': 'Listen repeatedly to the correct, fully vowelled Arabic pronunciation and memorise it.',
   'প্রতিটি অধ্যায় শেষে গ্রিল মি এক্সামে মেধা যাচাই করুন।': 'Test yourself with an exam at the end of every chapter.',
   'ডেভেলপার ও টেকনিক্যাল সেল': 'Developer & technical cell',
-  'এই প্ল্যাটফর্মটি': 'This platform is',
-  'এর ডিজিটাল লার্নিং সেল কর্তৃক পরিচালিত ও সার্বক্ষণিকভাবে রক্ষণাবেক্ষণ করা হয়।': 'run and continuously maintained by its digital learning cell.',
+  'এই প্ল্যাটফর্মটি': 'This platform:',
+  'এর ডিজিটাল লার্নিং সেল কর্তৃক পরিচালিত ও সার্বক্ষণিকভাবে রক্ষণাবেক্ষণ করা হয়।': '’s digital learning cell runs and continuously maintains it.',
   'অফিসিয়াল ওয়েবসাইট': 'Official website',
   'ডেভেলপার সহায়তা ও মেসেজ': 'Developer support & messages',
   'সরাসরি মেসেজ পাঠান': 'Send a direct message',
@@ -104,6 +104,19 @@ export const EXACT_MORE = {
   'গ': 'C',
   'ঘ': 'D',
   'Sirat - সীরাত': 'Sirat - Seerah',
+
+  // সাহায্য-পপআপ (সীরাত)
+  'মারকাযুল ঈমান • সীরাত': 'Markazul Iman • Seerah',
+  'দারস:': 'Dars:',
+  'প্রতিটি দারসে তিনটি পর্ব। প্রতি পর্বে ভিডিও দেখুন, লেখা পড়ুন, তারপর কুইজ দিন; কুইজ শেষ হলে পরের পর্ব খোলে।': 'Every dars has three parts. In each part watch the video, read the text, then take the quiz; when the quiz is finished the next part opens.',
+  'দুরূদ:': 'Durood:',
+  'দুরূদ পাতায় বড় বোতামে চেপে হিসাব রাখুন। প্রতিটি দুরূদে 10 XP। নিজের লিংক শেয়ার করে অন্যদেরও আমন্ত্রণ জানান।': 'Keep your count by tapping the big button on the Durood page. Every durood gives 10 XP. Share your own link to invite others too.',
+  'অনুশীলন:': 'Practice:',
+  'পছন্দের দারস বেছে কুইজ বা সময়সহ পরীক্ষা দিন। সঠিক উত্তরে 10, ভুলে 5 XP।': 'Choose the dars you like and take a quiz or a timed exam. Correct answers give 10 XP, wrong ones 5 XP.',
+  'নোট ও বুকমার্ক:': 'Notes & bookmarks:',
+  'লেখা পড়ার সময় অনুচ্ছেদের নিচের বাটনে নোট রাখুন; লগইন করলে সব ডিভাইসে পাবেন।': 'While reading, use the buttons under a paragraph to keep notes; if you log in you will have them on all your devices.',
+  'ভাষা:': 'Language:',
+  'ওপরের ভাষা-বাটনে বাংলা, English ও আরবি বদলে নিন।': 'Switch between Bengali, English and Arabic with the language button at the top.',
 
   // রিপোর্ট-পপআপ
   'সঠিক রূপটি কী বা আপনার মন্তব্য লিখুন:': 'What is the correct form, or write your comment:',

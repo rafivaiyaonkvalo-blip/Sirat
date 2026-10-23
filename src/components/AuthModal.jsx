@@ -263,7 +263,7 @@ export default function AuthModal({ isOpen, onClose, user, onUserChange }) {
                 )}
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                মারকাযুল ঈমান • ULS Arabic
+                মারকাযুল ঈমান • সীরাত
               </p>
             </div>
           </div>
