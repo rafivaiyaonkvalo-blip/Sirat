@@ -17,6 +17,7 @@ import { useLiveScreenBroadcaster } from './hooks/useLiveScreenBroadcaster';
 
 import SiratDars from './sirat/SiratDars';
 import DuroodView from './sirat/DuroodView';
+import { captureReferral, syncAccount } from './sirat/points';
 import QuizView from './sirat/QuizView';
 import ExamView from './sirat/ExamView';
 import BookView from './sirat/BookView';
@@ -95,6 +96,27 @@ export default function App() {
     return () => window.removeEventListener('uls_open_mistakes_modal', handleOpenMistakes);
   }, []);
 
+  // অন্যের রেফারেল-লিংকে (?ref=) এসে থাকলে মনে রাখা
+  useEffect(() => { captureReferral(); }, []);
+
+  // কুইজ/পরীক্ষার প্রশ্ন থেকে নির্দিষ্ট দারসে যাওয়া
+  useEffect(() => {
+    const go = (e) => {
+      setAuthModalOpen(false);
+      setCurrentTab('lessons');
+      window.location.hash = `#/dars/${e.detail}`;
+    };
+    window.addEventListener('sirat_goto_dars', go);
+    return () => window.removeEventListener('sirat_goto_dars', go);
+  }, []);
+
+  // অন্য পাতা (যেমন দুরূদ) থেকে লগইন-পপআপ খোলা
+  useEffect(() => {
+    const open = () => setAuthModalOpen(true);
+    window.addEventListener('sirat_open_auth', open);
+    return () => window.removeEventListener('sirat_open_auth', open);
+  }, []);
+
   // Listen for Open Leaderboard triggers
   useEffect(() => {
     const handleOpenLeaderboard = () => setLeaderboardModalOpen(true);
@@ -145,8 +167,10 @@ export default function App() {
         await loadUserDataFromCloud(currentUser);
         await loadMistakesFromCloud(currentUser);
         setUser(currentUser);
+        syncAccount(currentUser);
       } else {
         setUser(null);
+        syncAccount(null);
       }
     });
     return () => {

@@ -9,7 +9,7 @@ export async function buildQuestions(ids, count) {
   for (const id of ids) {
     const d = await loadDars(id);
     if (!d) continue;
-    for (const p of d.porbos) for (const q of p.quiz) all.push({ ...q, from: `দারস ${d.number} · ${d.title}` });
+    for (const p of d.porbos) for (const q of p.quiz) all.push({ ...q, darsId: d.id, from: `দারস ${bn(d.number)} · ${d.title}` });
   }
   for (let i = all.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

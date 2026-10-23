@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, PenLine } from 'lucide-react';
+import { PenLine } from 'lucide-react';
 import DarsPicker from './DarsPicker';
 import Quiz from './Quiz';
+import { QuizShell } from './QuizModal';
 import SectionHero from './SectionHero';
 import { buildQuestions } from './questions';
 
@@ -19,14 +20,6 @@ export default function QuizPage() {
     setBusy(false);
   };
 
-  if (qs) {
-    return (
-      <div className="mx-auto max-w-2xl">
-        <button onClick={() => setQs(null)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400"><ArrowLeft size={16} /> নতুন কুইজ বানান</button>
-        <Quiz key={attempt} questions={qs} title="কুইজ" onRetry={start} />
-      </div>
-    );
-  }
   return (
     <div className="mx-auto max-w-4xl">
       <SectionHero
@@ -36,6 +29,11 @@ export default function QuizPage() {
         chips={['একটি একটি প্রশ্ন', 'সঙ্গে সঙ্গে ব্যাখ্যা', 'যতবার খুশি']}
       />
       <DarsPicker selected={selected} setSelected={setSelected} count={count} setCount={setCount} onStart={start} startLabel={busy ? 'তৈরি হচ্ছে…' : 'কুইজ শুরু'} busy={busy} />
+      {qs && (
+        <QuizShell heading="কুইজ" onClose={() => setQs(null)}>
+          <Quiz key={attempt} questions={qs} title="কুইজ" onRetry={start} onClose={() => setQs(null)} />
+        </QuizShell>
+      )}
     </div>
   );
 }

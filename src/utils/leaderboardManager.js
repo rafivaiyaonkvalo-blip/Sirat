@@ -1,8 +1,8 @@
 import { db, auth } from '../services/firebase';
-import { collection, getDocs, query, limit, doc, setDoc } from 'firebase/firestore';
-import { getTotalXp, getXpHistory, getLevelInfo, toBengaliNumber } from './gamification';
-import { calculateMaxPlausibleXp } from './xpIntegrity';
+import { doc, setDoc } from 'firebase/firestore';
+import { toBengaliNumber } from './gamification';
 import { getAssetUrl } from './assetHelper';
+import { fetchLeaderboard } from '../sirat/points';
 
 // ইন-মেমোরি ক্যাশ (৯০ সেকেন্ড) — যেন বারবার ফায়ারস্টোর রিড বিল না বাড়ে
 let cachedUsers = null;
@@ -100,180 +100,45 @@ export function formatStudentPartialName(fullName) {
 }
 
 /**
- * ফায়ারস্টোর থেকে সকল শিক্ষার্থীর পাবলিক স্কোর সংগ্রহ করা (ফোন, ইমেইল ইত্যাদি গোপন রেখে)
+ * লিডারবোর্ড: যার দুরূদ (নিজের + রেফারেল-লিংকে আসা) বেশি, সে এগিয়ে।
+ * ডেটা পাবলিক leaderboard/{uid} থেকে আসে (ইমেইল/ফোন সেখানে থাকে না)।
  */
-export async function getRawLeaderboardUsers(forceRefresh = false) {
+export async function getLeaderboard(timeframe = 'all', forceRefresh = false) {
   const now = Date.now();
-  if (!forceRefresh && cachedUsers && (now - lastFetchTime < CACHE_TTL_MS)) {
-    return cachedUsers;
-  }
-
-  const rawList = [];
-
-  if (db) {
+  if (forceRefresh || !cachedUsers || now - lastFetchTime >= CACHE_TTL_MS) {
     try {
-      const q = query(collection(db, 'users'), limit(250));
-      const snap = await getDocs(q);
-      snap.forEach((docSnap) => {
-        const data = docSnap.data() || {};
-        const profile = data.studentProfile || {};
-        const rawName = data.displayName || profile.name || 'শিক্ষার্থী';
-        const hideName = Boolean(data.hideNameInLeaderboard || profile.hideNameInLeaderboard);
-        const rawPhoto = (data.photoURL || profile.photo || '').trim();
-        // ছবি থাকলে আসল ছবি, ফাঁকা থাকলে মদীনা শরীফের পবিত্র ছবি
-        const photoURL = rawPhoto ? rawPhoto : getAssetUrl('/madina.jpg');
-
-        const maxAllowed = calculateMaxPlausibleXp(data);
-        const rawXp = parseInt(data.totalXp || '0', 10) || 0;
-        // অ্যান্টি-চিট সিলিং: অসম্ভব বা ফেক XP হলে তা সিলিংয়ে নামিয়ে দেওয়া হয় যাতে প্রতারক লিডারবোর্ড দখল করতে না পারে
-        const cleanXp = Math.min(rawXp, maxAllowed);
-        const isCheat = rawXp > maxAllowed || Boolean(data.isXpSuspicious);
-
-        rawList.push({
-          uid: docSnap.id,
-          name: rawName,
-          hideName,
-          photoURL,
-          totalXp: cleanXp,
-          isSuspicious: isCheat,
-          xpHistory: data.xpHistory && typeof data.xpHistory === 'object' ? data.xpHistory : {},
-          streak: data.streakData?.count || 1,
-          updatedAt: data.updatedAt || ''
-        });
-      });
+      cachedUsers = await fetchLeaderboard(100);
+      lastFetchTime = now;
     } catch (err) {
-      console.warn('Leaderboard cloud fetch warning:', err);
+      console.warn('Leaderboard fetch warning:', err);
+      cachedUsers = cachedUsers || [];
     }
   }
-
-  // বর্তমান লোকাল ইউজারের সর্বশেষ স্কোর ও হিস্ট্রি ওভারলে করা (যাতে আজকের পয়েন্ট তাৎক্ষণিক দেখা যায়)
-  const currentAuthUid = auth?.currentUser?.uid || localStorage.getItem('uls_current_user_uid');
-  const localXp = getTotalXp();
-  const localHistory = getXpHistory();
-  const localProfile = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('uls_student_profile') || '{}');
-    } catch {
-      return {};
-    }
-  })();
-  const localName = localProfile.name || auth?.currentUser?.displayName || '';
-  const localBlur = getBlurMyNameSetting() || Boolean(localProfile.hideNameInLeaderboard);
-  const localRawPhoto = (auth?.currentUser?.photoURL || localProfile.photo || '').trim();
-  const localPhoto = localRawPhoto ? localRawPhoto : getAssetUrl('/madina.jpg');
-
-  if (currentAuthUid) {
-    const existingIdx = rawList.findIndex((u) => u.uid === currentAuthUid);
-    const existingName = existingIdx >= 0 ? rawList[existingIdx].name : '';
-    const resolvedName = localName || existingName || auth?.currentUser?.displayName || 'শিক্ষার্থী';
-
-    const updatedUser = {
-      uid: currentAuthUid,
-      name: resolvedName,
-      hideName: localBlur,
-      photoURL: localPhoto,
-      totalXp: Math.max(localXp, existingIdx >= 0 ? rawList[existingIdx].totalXp : 0),
-      xpHistory: {
-        ...(existingIdx >= 0 ? rawList[existingIdx].xpHistory : {}),
-        ...localHistory
-      },
-      streak: parseInt(JSON.parse(localStorage.getItem('uls_daily_streak_data') || '{}')?.count || '1', 10) || 1,
-      isCurrentUser: true
-    };
-
-    if (existingIdx >= 0) {
-      rawList[existingIdx] = { ...rawList[existingIdx], ...updatedUser };
-    } else if (localXp > 0) {
-      rawList.push(updatedUser);
-    }
-  } else if (localXp > 0) {
-    // গেস্ট ইউজার (লগইন ছাড়া)
-    rawList.push({
-      uid: 'guest_me',
-      name: localName || 'শিক্ষার্থী',
-      hideName: localBlur,
-      photoURL: localPhoto,
-      totalXp: localXp,
-      xpHistory: localHistory,
-      streak: 1,
-      isCurrentUser: true
-    });
-  }
-
-  cachedUsers = rawList;
-  lastFetchTime = now;
-  return rawList;
-}
-
-/**
- * ফিল্টার অনুযায়ী শিক্ষার্থীদের সাজানো তালিকা
- * @param {'today' | 'week' | 'all'} timeframe 
- * @param {boolean} forceRefresh 
- */
-export async function getLeaderboard(timeframe = 'today', forceRefresh = false) {
-  const users = await getRawLeaderboardUsers(forceRefresh);
-  const todayStr = getTodayString();
-  const weekDates = getLastNDateStrings(7);
-  const currentUid = auth?.currentUser?.uid || localStorage.getItem('uls_current_user_uid') || 'guest_me';
-
-  const scoredUsers = users.map((u) => {
-    let score = 0;
-    if (timeframe === 'today') {
-      score = u.xpHistory?.[todayStr] || 0;
-    } else if (timeframe === 'week') {
-      score = weekDates.reduce((sum, date) => sum + (u.xpHistory?.[date] || 0), 0);
-    } else {
-      score = u.totalXp || 0;
-    }
-
-    const isCurrent = u.isCurrentUser || u.uid === currentUid;
-    const levelInfo = getLevelInfo(u.totalXp);
-
+  const currentUid = auth?.currentUser?.uid || null;
+  const sorted = [...cachedUsers].sort((a, b) => b.total - a.total);
+  let rank = 1;
+  const items = sorted.map((u, i) => {
+    if (i > 0 && u.total < sorted[i - 1].total) rank = i + 1;
     return {
       uid: u.uid,
       name: u.name,
       hideName: u.hideName,
-      photoURL: u.photoURL,
-      score,
-      totalXp: u.totalXp,
-      level: levelInfo.level,
-      streak: u.streak,
-      isCurrentUser: isCurrent
+      photoURL: u.photoURL || getAssetUrl('/madina.jpg'),
+      score: u.total,
+      scoreBn: toBengaliNumber(u.total),
+      own: u.durood,
+      referred: u.referred,
+      referredPeople: u.referredPeople,
+      isCurrentUser: u.uid === currentUid,
+      rank,
+      rankBn: toBengaliNumber(rank),
     };
   });
-
-  // স্কোর অনুযায়ী বড় থেকে ছোট সাজানো (XP একই হলে লেভেল অনুযায়ী আগে যাবে)
-  scoredUsers.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    if (b.level !== a.level) return b.level - a.level;
-    return b.totalXp - a.totalXp;
-  });
-
-  // র‍্যাংক নম্বর বসানো (স্কোর ও লেভেল বিবেচনায় র‍্যাংক নির্ধারণ)
-  let currentRank = 1;
-  const rankedList = scoredUsers.map((item, idx) => {
-    if (idx > 0) {
-      const prev = scoredUsers[idx - 1];
-      if (item.score < prev.score || (item.score === prev.score && item.level < prev.level)) {
-        currentRank = idx + 1;
-      }
-    }
-    return {
-      ...item,
-      rank: currentRank,
-      rankBn: toBengaliNumber(currentRank),
-      scoreBn: toBengaliNumber(item.score)
-    };
-  });
-
-  // বর্তমান ইউজারের র‍্যাংক খোঁজা
-  const currentUserEntry = rankedList.find((u) => u.isCurrentUser) || null;
-
   return {
-    items: rankedList,
-    currentUser: currentUserEntry,
+    items,
+    currentUser: items.find((u) => u.isCurrentUser) || null,
     timeframe,
-    totalParticipants: rankedList.length,
-    activeParticipants: rankedList.filter((u) => u.score > 0).length
+    totalParticipants: items.length,
+    activeParticipants: items.length,
   };
 }

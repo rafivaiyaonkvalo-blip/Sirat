@@ -232,7 +232,8 @@ export function clearLocalUserData() {
     'uls_current_user_uid',
     'uls_eso_level',
     'uls_tamrin_part',
-    'uls_lessons_mode'
+    'uls_lessons_mode',
+    'sirat_points_v1'
   ];
   keysToRemove.forEach((k) => {
     try {

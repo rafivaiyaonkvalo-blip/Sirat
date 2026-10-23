@@ -18,6 +18,32 @@ service cloud.firestore {
         && (!('countries' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.countries.diff(resource.data.get('countries', {})).affectedKeys().size() == 1);
     }
 
+    // লিডারবোর্ড (পাবলিক: ইমেইল/ফোন নেই): সবাই পড়তে পারে।
+    // নিজের ডক নিজে লেখা যায় (দুরূদ/XP শুধু বাড়ে, total আর durood সমান হারে), আর অন্য যে-কেউ শুধু
+    // রেফারেলের referred (একবারে ১–২০০), total (সমান পরিমাণ) ও referredPeople (একবারে ১) বাড়াতে পারে।
+    match /leaderboard/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'photoURL', 'hideName', 'durood', 'xp', 'total', 'updatedAt'])
+        && request.resource.data.durood is int && request.resource.data.durood >= 0 && request.resource.data.durood <= 1000000
+        && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= 100000000
+        && request.resource.data.total == request.resource.data.durood;
+      allow update: if (signedIn() && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoURL', 'hideName', 'durood', 'xp', 'total', 'updatedAt'])
+          && request.resource.data.durood - resource.data.get('durood', 0) >= 0
+          && request.resource.data.durood - resource.data.get('durood', 0) <= 20000
+          && request.resource.data.xp - resource.data.get('xp', 0) >= 0
+          && request.resource.data.xp - resource.data.get('xp', 0) <= 1000000
+          && request.resource.data.total - resource.data.get('total', 0) == request.resource.data.durood - resource.data.get('durood', 0))
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['referred', 'referredPeople', 'total'])
+          && request.resource.data.referred - resource.data.get('referred', 0) >= 1
+          && request.resource.data.referred - resource.data.get('referred', 0) <= 200
+          && request.resource.data.total - resource.data.get('total', 0) == request.resource.data.referred - resource.data.get('referred', 0)
+          && (!('referredPeople' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.referredPeople - resource.data.get('referredPeople', 0) == 1))
+        || isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // শিক্ষার্থীর প্রোফাইল ও অগ্রগতি: প্রত্যেকে শুধু নিজেরটা পড়তে ও লিখতে পারে; অ্যাডমিন সবটা পারে।
     // (লিডারবোর্ড অন্যের তথ্য পড়ে, তাই সেটা চালু করতে আলাদা পাবলিক সংগ্রহ লাগবে।)
     match /users/{uid} {

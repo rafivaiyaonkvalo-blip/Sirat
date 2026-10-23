@@ -5,6 +5,7 @@ import {
   checkXpRateLimit, 
   calculateMaxPlausibleXp 
 } from './xpIntegrity';
+import { getXp, getXpDays } from '../sirat/points';
 
 const STREAK_KEY = 'uls_daily_streak_data';
 const XP_KEY = 'uls_total_xp';
@@ -64,11 +65,7 @@ export function getDateString(d) {
 // দিনভিত্তিক XP ইতিহাস { 'YYYY-MM-DD': xp } — স্ট্রিক ক্যালেন্ডার ও সাপ্তাহিক XP-র জন্য
 export function getXpHistory() {
   if (typeof window === 'undefined') return {};
-  try {
-    return JSON.parse(localStorage.getItem(XP_HISTORY_KEY) || '{}') || {};
-  } catch {
-    return {};
-  }
+  return getXpDays();
 }
 
 function addXpToHistory(date, xp) {
@@ -195,12 +192,7 @@ export function recordDailyActivity(earnedXp = 20) {
 
 export function getTotalXp() {
   if (typeof window === 'undefined') return 0;
-  try {
-    ensureXpScale();
-    return auditAndRecoverLocalXp();
-  } catch {
-    return 0;
-  }
+  return getXp();
 }
 
 const BENGALI_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];

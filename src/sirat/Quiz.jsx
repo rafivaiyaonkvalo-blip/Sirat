@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CheckCircle2, XCircle, RotateCcw, ChevronRight } from 'lucide-react';
 import { shuffleSeed } from './shuffle';
 import { bn } from './questions';
+import { addQuizAnswer } from './points';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
 
@@ -10,6 +11,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
   const [picked, setPicked] = useState({}); // qIndex -> option index (মূল ক্রম)
   const [idx, setIdx] = useState(0);
   const [round, setRound] = useState(0);
+  const [gain, setGain] = useState({}); // qIndex -> পাওয়া XP
   const total = questions.length;
   const score = questions.reduce((a, q, i) => a + (picked[i] === q.answer ? 1 : 0), 0);
   const finished = idx >= total;
@@ -20,6 +22,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
     if (sel !== undefined) return;
     const next = { ...picked, [idx]: oi };
     setPicked(next);
+    setGain((g) => ({ ...g, [idx]: addQuizAnswer(oi === q.answer) }));
     if (idx === total - 1) {
       const s = questions.reduce((a, qq, i) => a + (next[i] === qq.answer ? 1 : 0), 0);
       onFinish?.(s, total);
@@ -28,7 +31,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
 
   const retry = () => {
     if (onRetry) { onRetry(); return; }
-    setPicked({}); setIdx(0); setRound((r) => r + 1);
+    setPicked({}); setGain({}); setIdx(0); setRound((r) => r + 1);
   };
 
   if (finished) {
@@ -65,7 +68,9 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
         </div>
       </div>
       <div className="rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 sm:p-5">
-        {q.from && <p className="mb-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{q.from}</p>}
+        {q.from && (q.darsId ? (
+          <button type="button" onClick={() => { onClose?.(); window.dispatchEvent(new CustomEvent('sirat_goto_dars', { detail: q.darsId })); }} className="mb-2 text-left text-[11px] font-bold text-emerald-700 underline decoration-dotted underline-offset-2 dark:text-emerald-300">{q.from} ↗</button>
+        ) : <p className="mb-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{q.from}</p>)}
         <p className="mb-3 font-semibold leading-relaxed">{q.q}</p>
         <div className="grid gap-2">
           {order.map((oi, pos) => {
@@ -87,6 +92,7 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
             );
           })}
         </div>
+        {sel !== undefined && <p className="mt-3 text-sm font-extrabold text-amber-500">+{bn(gain[idx])} XP</p>}
         {sel !== undefined && q.explain && (
           <p className="mt-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 px-3 py-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
             <strong className="text-emerald-700 dark:text-emerald-200">ব্যাখ্যা: </strong>

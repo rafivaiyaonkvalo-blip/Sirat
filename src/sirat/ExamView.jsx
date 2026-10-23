@@ -3,6 +3,7 @@ import { ArrowLeft, Award, CheckCircle2, Clock, MinusCircle, RotateCcw, XCircle 
 import DarsPicker from './DarsPicker';
 import SectionHero from './SectionHero';
 import { buildQuestions, bn } from './questions';
+import { addQuizAnswer } from './points';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
 const fmt = (s) => `${bn(String(Math.floor(s / 60)).padStart(2, '0'))}:${bn(String(s % 60).padStart(2, '0'))}`;
@@ -45,15 +46,20 @@ function Exam({ questions, onExit }) {
     return () => clearInterval(t);
   }, [done]);
   useEffect(() => {
-    if (left <= 0 && !submitted.current) { submitted.current = true; setDone(true); }
+    if (left <= 0 && !submitted.current) finish();
   }, [left]);
 
   const answered = Object.keys(answers).length;
   const score = questions.reduce((a, q, i) => a + (answers[i] === q.answer ? 1 : 0), 0);
+  const finish = () => {
+    if (submitted.current && done) return;
+    submitted.current = true;
+    questions.forEach((q, i) => { if (answers[i] !== undefined) addQuizAnswer(answers[i] === q.answer); });
+    setDone(true);
+  };
   const submit = () => {
     if (answered < total && !window.confirm(`${bn(total - answered)}টি প্রশ্নের উত্তর দেওয়া হয়নি। জমা দেবেন?`)) return;
-    submitted.current = true;
-    setDone(true);
+    finish();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -94,7 +100,7 @@ function Exam({ questions, onExit }) {
               <p className="mt-2 text-sm">আপনার উত্তর: <b>{none ? 'উত্তর দেননি' : q.options[answers[i]]}</b></p>
               {!ok && <p className="text-sm">সঠিক উত্তর: <b className="text-[#10b981]">{q.options[q.answer]}</b></p>}
               {q.explain && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm leading-relaxed dark:bg-emerald-900/30"><strong>ব্যাখ্যা: </strong>{q.explain}</p>}
-              <p className="mt-2 text-[11px] font-semibold text-slate-400">{q.from}</p>
+              <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('sirat_goto_dars', { detail: q.darsId }))} className="mt-2 text-left text-[11px] font-semibold text-slate-400 underline decoration-dotted underline-offset-2">{q.from} ↗</button>
             </div>
           ))}
         </div>

@@ -15,6 +15,7 @@ import StudentIdCard from './StudentIdCard';
 import StudentCertificate from './StudentCertificate';
 import { getCertificateData, getVolumeProgress } from '../utils/certificateManager';
 import ReportModal from './ReportModal';
+import darsIndex from '../data/darsIndex.json';
 
 const TABS = [
   { id: 'progress', label: 'অগ্রগতি' },
@@ -113,6 +114,67 @@ export function ProfileAvatar({ user, photo, className = 'w-12 h-12 rounded-2xl 
   );
 }
 
+// দারস-সেকশনের অগ্রগতির মানচিত্র: ৩২ দারস, প্রতিটিতে পর্ব-অনুযায়ী ভরা/ফাঁকা দাগ; একনজরে বোঝা যায় কোনটা বাকি
+function DarsProgressMap() {
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem('sirat_progress_v2'))?.done || {}; } catch { /* পড়া যায়নি */ }
+  const total = darsIndex.reduce((a, d) => a + d.porbos.length, 0);
+  const doneCount = darsIndex.reduce((a, d) => a + d.porbos.filter((p) => done[`${d.id}-${p.no}`]).length, 0);
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  const fullDars = darsIndex.filter((d) => d.porbos.every((p) => done[`${d.id}-${p.no}`])).length;
+  const next = darsIndex.find((d) => d.porbos.some((p) => !done[`${d.id}-${p.no}`]));
+  const goto = (id) => window.dispatchEvent(new CustomEvent('sirat_goto_dars', { detail: id }));
+
+  return (
+    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-bold text-xs text-slate-900 dark:text-white">দারস-সেকশনের অগ্রগতি</h4>
+        <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{toBengaliNumber(doneCount)}/{toBengaliNumber(total)} পর্ব • {toBengaliNumber(pct)}%</span>
+      </div>
+      <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: '#10b981' }} />
+      </div>
+      <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">{toBengaliNumber(fullDars)}টি দারস সম্পূর্ণ • বাকি {toBengaliNumber(darsIndex.length - fullDars)}টি দারস</p>
+
+      <div className="mt-2.5 grid grid-cols-6 sm:grid-cols-8 gap-1.5">
+        {darsIndex.map((d) => {
+          const n = d.porbos.filter((p) => done[`${d.id}-${p.no}`]).length;
+          const full = n === d.porbos.length;
+          const isNext = next && next.id === d.id;
+          return (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => goto(d.id)}
+              title={`দারস ${toBengaliNumber(d.number)}: ${d.title} — ${toBengaliNumber(n)}/${toBengaliNumber(d.porbos.length)} পর্ব`}
+              className={`rounded-lg border px-1 py-1 text-center transition active:scale-95 ${full ? 'border-[#10b981]/60 bg-[#10b981]/15' : n > 0 ? 'border-sky-400/60 bg-sky-400/10' : 'border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/40'} ${isNext ? 'ring-2 ring-amber-400' : ''}`}
+            >
+              <span className={`block text-[11px] font-extrabold leading-tight ${full ? 'text-[#10b981]' : 'text-slate-700 dark:text-slate-200'}`}>{toBengaliNumber(d.number)}</span>
+              <span className="mt-0.5 flex gap-0.5">
+                {d.porbos.map((p) => (
+                  <span key={p.no} className="h-1.5 flex-1 rounded-full" style={{ background: done[`${d.id}-${p.no}`] ? '#10b981' : 'rgba(148,163,184,0.45)' }} />
+                ))}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: '#10b981' }} /> সম্পূর্ণ</span>
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-sky-400" /> চলছে</span>
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-400/60" /> বাকি</span>
+        {next && <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full ring-2 ring-amber-400" /> পরের দারস</span>}
+      </div>
+      {next && (
+        <button type="button" onClick={() => goto(next.id)} className="mt-2.5 w-full rounded-xl bg-emerald-600 py-2 text-xs font-bold text-white">
+          দারস {toBengaliNumber(next.number)}: {next.title} — চালিয়ে যান
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ProgressTab({ totalXp, streakDays, completedDars, history, vol1Progress }) {
   const week = lastDays(7);
   const weekXp = week.map(d => history[getDateString(d)] || 0);
@@ -157,6 +219,8 @@ function ProgressTab({ totalXp, streakDays, completedDars, history, vol1Progress
           ))}
         </div>
       </div>
+
+      <DarsProgressMap />
 
       <button
         type="button"

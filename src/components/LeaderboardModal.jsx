@@ -61,7 +61,7 @@ const MOSQUE_BACKGROUNDS = [
 ];
 
 export default function LeaderboardModal({ isOpen, onClose, user }) {
-  const [timeframe, setTimeframe] = useState('today'); // 'today' | 'week' | 'all'
+  const timeframe = 'all'; // শুধু মোট দুরূদ-গণনা
   const [data, setData] = useState({ items: [], currentUser: null, totalParticipants: 0, activeParticipants: 0 });
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -190,12 +190,12 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
         {/* Level & Score (১ম, ২য়, ৩য় দের লেভেল ও XP প্রদর্শন) */}
         <div className="mt-1 flex flex-col items-center gap-0.5">
           <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.2 rounded-full border border-emerald-500/35 backdrop-blur-xs">
-            লেভেল {toBengaliNumber(entry.level)}
+            নিজে {toBengaliNumber(entry.own)} • রেফারেল {toBengaliNumber(entry.referred)}
           </span>
           <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-slate-700/80 shadow-xs backdrop-blur-xs">
             <Zap size={11} className="text-amber-400 fill-amber-400" />
             <span className="text-[11px] sm:text-xs font-black text-amber-200">
-              {entry.scoreBn} XP
+              {entry.scoreBn} দুরূদ
             </span>
           </div>
         </div>
@@ -263,56 +263,20 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
           </div>
         </div>
 
-        {/* Timeframe Filter Tabs (আজকের | সাপ্তাহিক | সর্বমোট) */}
-        <div className="px-4 py-2.5 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
-          <div className="flex items-center p-1 rounded-2xl bg-slate-200/70 dark:bg-slate-800/70 gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic();
-                setTimeframe('today');
-              }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                timeframe === 'today'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              আজকের
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic();
-                setTimeframe('week');
-              }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                timeframe === 'week'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              সাপ্তাহিক
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic();
-                setTimeframe('all');
-              }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                timeframe === 'all'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              সর্বমোট
-            </button>
-          </div>
+        <div className="px-4 py-2 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800/80 shrink-0 text-center">
+          <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+            র‍্যাংক হয় দুরূদ-গণনায়: নিজের পড়া + আপনার রেফারেল-লিংকে আসাদের পড়া
+          </p>
         </div>
 
         {/* Scrollable Content: Podium + List */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 [scrollbar-width:thin]">
+          {!user && (
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-3 py-2">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">তালিকায় নাম আসতে লগইন করুন।</p>
+              <button type="button" onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('sirat_open_auth')); }} className="shrink-0 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white">লগইন</button>
+            </div>
+          )}
           {loading ? (
             <div className="py-16 flex flex-col items-center justify-center gap-2 text-slate-400">
               <RefreshCw size={24} className="animate-spin text-emerald-600" />
@@ -324,10 +288,10 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                 <Trophy size={24} />
               </div>
               <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                এখনো কোনো স্কোর নেই
+                এখনো কেউ তালিকায় নেই
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                দারস ও তামরীন অনুশীলন করে পয়েন্ট অর্জন করুন।
+                লগইন করে দুরূদ পাতায় দুরূদ পড়লে আপনার নাম এখানে আসবে।
               </p>
             </div>
           ) : (
@@ -387,7 +351,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                 <div className="space-y-2 pt-1">
                   <div className="flex items-center justify-between px-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
                     <span>ক্রম ও শিক্ষার্থী</span>
-                    <span>অর্জিত পয়েন্ট</span>
+                    <span>মোট দুরূদ</span>
                   </div>
 
                   {restOfList.map((entry) => {
@@ -444,11 +408,10 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                             </div>
 
                             <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
-                              <span>লেভেল {toBengaliNumber(entry.level)}</span>
-                              {entry.streak > 1 && (
+                              <span>নিজে {toBengaliNumber(entry.own)}</span>
+                              {entry.referred > 0 && (
                                 <span className="flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-medium">
-                                  <Flame size={10} className="fill-amber-500" />
-                                  {toBengaliNumber(entry.streak)} দিন
+                                  রেফারেল {toBengaliNumber(entry.referred)}
                                 </span>
                               )}
                             </div>
@@ -505,7 +468,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                     </button>
                   </div>
                   <span className="text-[10px] text-emerald-100">
-                    লেভেল {toBengaliNumber(data.currentUser.level)} • {timeframe === 'today' ? 'আজকের স্কোর' : timeframe === 'week' ? 'সাপ্তাহিক স্কোর' : 'মোট স্কোর'}
+                    নিজে {toBengaliNumber(data.currentUser.own)} • রেফারেল {toBengaliNumber(data.currentUser.referred)}
                   </span>
                 </div>
               </div>
@@ -513,7 +476,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
               <div className="flex items-center gap-1 bg-white/20 backdrop-blur-md px-3 py-1 rounded-xl">
                 <Zap size={13} className="text-amber-300 fill-amber-300" />
                 <span className="text-xs font-black tracking-wide">
-                  {data.currentUser.scoreBn} XP
+                  {data.currentUser.scoreBn} দুরূদ
                 </span>
               </div>
             </div>
