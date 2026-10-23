@@ -9,7 +9,9 @@ const KEY = 'sirat_points_v1';
 const REF_KEY = 'sirat_ref';
 const REF_JOINED_KEY = 'sirat_ref_joined';
 const MY_CODE_KEY = 'sirat_refcode';
-const CODE_LEN = 12;
+const OWNED_KEY = 'sirat_refcode_owned';
+const NEW_CODE_LEN = 7; // ছোট লিংকের জন্য; আগের ১২ অক্ষরের কোডও চলে
+const validCode = (c) => typeof c === 'string' && (c.length === NEW_CODE_LEN || c.length === 12);
 const HISTORY_DAYS = 60;
 const FLUSH_MS = 3000;
 
@@ -53,7 +55,7 @@ export const getXpDays = () => ({ ...read().history });
 // ---- রেফারেল-কোড (লগইন ছাড়াই) ----
 const randomCode = () => {
   const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
-  const bytes = new Uint8Array(CODE_LEN);
+  const bytes = new Uint8Array(NEW_CODE_LEN);
   (window.crypto || window.msCrypto).getRandomValues(bytes);
   return Array.from(bytes, (b) => chars[b % chars.length]).join('');
 };
@@ -62,23 +64,36 @@ const randomCode = () => {
 export function getMyCode() {
   try {
     let c = localStorage.getItem(MY_CODE_KEY);
-    if (!c || c.length !== CODE_LEN) { c = randomCode(); localStorage.setItem(MY_CODE_KEY, c); }
+    if (!validCode(c)) { c = randomCode(); localStorage.setItem(MY_CODE_KEY, c); }
     return c;
   } catch {
     return '';
   }
 }
 
-export const referralLink = (code) => `${window.location.origin}${import.meta.env.BASE_URL}?ref=${code}`;
+// ছোট লিংক: .../sirat/?r=abc1234
+export const referralLink = (code) => `${window.location.origin}${import.meta.env.BASE_URL}?r=${code}`;
 
 // কোডের গণনা-ডক না থাকলে বানায় (যেন অন্যদের দুরূদ জমা হতে পারে)
 export async function ensureRefDoc() {
-  const code = getMyCode();
+  let code = getMyCode();
   if (!code || !cloud()) return code;
   try {
-    const ref = doc(db, 'refcodes', code);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) await setDoc(ref, { referred: 0, referredPeople: 0 });
+    for (let i = 0; i < 5; i += 1) {
+      const ref = doc(db, 'refcodes', code);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        await setDoc(ref, { referred: 0, referredPeople: 0 });
+        try { localStorage.setItem(OWNED_KEY, code); } catch { /* ignore */ }
+        break;
+      }
+      // ডক আগে থেকেই আছে: আমাদের নিজের (বা আগের ১২ অক্ষরের) হলে ঠিক; নইলে অন্য কারও কোডের সাথে মিলে গেছে, নতুন কোড নিই
+      let owned = false;
+      try { owned = localStorage.getItem(OWNED_KEY) === code; } catch { /* ignore */ }
+      if (owned || code.length === 12) break;
+      code = randomCode();
+      try { localStorage.setItem(MY_CODE_KEY, code); } catch { /* ignore */ }
+    }
   } catch { /* অফলাইন/নিয়ম-ত্রুটি: পরের বার আবার চেষ্টা */ }
   return code;
 }
@@ -161,16 +176,18 @@ export async function syncAccount(user) {
       cur.uid = user.uid;
       cur.durood = (Number(d.durood) || 0) + cur.pend.durood;
       cur.xp = (Number(d.xp) || 0) + cur.pend.xp;
-      if (d.refCode && d.refCode.length === CODE_LEN) {
-        try { localStorage.setItem(MY_CODE_KEY, d.refCode); } catch { /* ignore */ }
+      if (validCode(d.refCode)) {
+        try { localStorage.setItem(MY_CODE_KEY, d.refCode); localStorage.setItem(OWNED_KEY, d.refCode); } catch { /* ignore */ }
       } else {
-        try { await updateDoc(ref, { refCode: getMyCode() }); } catch { /* ignore */ }
+        const mine = await ensureRefDoc();
+        try { await updateDoc(ref, { refCode: mine }); } catch { /* ignore */ }
       }
       save();
       await flushPoints();
     } else {
       const { durood, xp } = cur.pend;
-      await setDoc(ref, { ...profileFields(), durood, xp, total: durood, week: weekId(), weekDurood: 0, refCode: getMyCode(), updatedAt: new Date().toISOString() });
+      const mine = await ensureRefDoc();
+      await setDoc(ref, { ...profileFields(), durood, xp, total: durood, week: weekId(), weekDurood: 0, refCode: mine, updatedAt: new Date().toISOString() });
       cur.uid = user.uid;
       cur.pend = { durood: 0, xp: 0 };
       save();
@@ -214,8 +231,9 @@ export function addQuizAnswer(correct) {
 // ---- রেফারেল (আসা দর্শকের দিক) ----
 export function captureReferral() {
   try {
-    const ref = new URLSearchParams(window.location.search).get('ref');
-    if (ref && /^[A-Za-z0-9]{10,64}$/.test(ref) && !localStorage.getItem(REF_KEY)) localStorage.setItem(REF_KEY, ref);
+    const q = new URLSearchParams(window.location.search);
+    const ref = q.get('r') || q.get('ref');
+    if (ref && /^[A-Za-z0-9]{7,64}$/.test(ref) && !localStorage.getItem(REF_KEY)) localStorage.setItem(REF_KEY, ref);
   } catch { /* ignore */ }
 }
 
@@ -265,7 +283,7 @@ export async function fetchLeaderboard(max = 100) {
       xp: Number(x.xp) || 0,
     };
   });
-  const codes = [...new Set(rows.map((r) => r.refCode).filter((c) => c.length === CODE_LEN))];
+  const codes = [...new Set(rows.map((r) => r.refCode).filter((c) => validCode(c)))];
   const byCode = {};
   for (let i = 0; i < codes.length; i += 30) {
     try {
