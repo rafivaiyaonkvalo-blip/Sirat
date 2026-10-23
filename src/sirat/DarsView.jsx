@@ -94,7 +94,7 @@ function Roadmap({ progress, mode, focusId }) {
       {/* Top Hero Banner */}
       <div className={`p-6 sm:p-8 rounded-3xl text-white shadow-xl mb-6 relative overflow-hidden transition-all duration-500 ${'bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-800'}`}>
         {/* ছবি আসল মাপের কাছাকাছি, ডান দিকে ফেড করে, যাতে ঝাপসা না হয় */}
-        <img src={getAssetUrl('/hero-madinah.jpg')} alt="" aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 h-full w-[58%] sm:w-[42%] object-cover" style={{ objectPosition: 'center 68%', WebkitMaskImage: 'linear-gradient(to left, #000 35%, transparent)', maskImage: 'linear-gradient(to left, #000 35%, transparent)' }} />
+        <img src={getAssetUrl('/hero-madinah.jpg')} alt="" aria-hidden="true" className="hero-img pointer-events-none absolute inset-y-0 right-0 h-full w-[58%] sm:w-[42%] object-cover" style={{ objectPosition: 'center 68%', WebkitMaskImage: 'linear-gradient(to left, #000 35%, transparent)', maskImage: 'linear-gradient(to left, #000 35%, transparent)' }} />
         <div className="relative z-10">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <a href="https://markazuliman.com" target="_blank" rel="noopener noreferrer" title="মারকাযুল ঈমান অফিসিয়াল ওয়েবসাইট (markazuliman.com)" className="px-3.5 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/30 transition-all inline-flex items-center gap-1 cursor-pointer">

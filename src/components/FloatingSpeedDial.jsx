@@ -5,7 +5,7 @@ import {
   BookOpen, Award, ShieldCheck, Sparkles,
   Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send, StickyNote
 } from 'lucide-react';
-import { toggleLang, useLang } from '../i18n';
+import { langLabel, nextLang, toggleLang, useLang } from '../i18n';
 import { getVoiceProfile, setVoiceProfile, playArabicAudio } from '../utils/audio';
 import { getPendingMistakesCount } from '../utils/mistakesManager';
 import { getVolumeProgress } from '../utils/certificateManager';
@@ -74,7 +74,8 @@ export default function FloatingSpeedDial({
     };
   }, [isOpen]);
 
-  const showEnglish = useLang() === 'en';
+  const lang = useLang();
+  const showEnglish = lang !== 'bn';
 
   // Voice Profile Handler
   const [voiceProfile, setVoiceProfileState] = useState(() => getVoiceProfile());
@@ -255,7 +256,7 @@ export default function FloatingSpeedDial({
     },
     {
       id: 'english_toggle',
-      label: showEnglish ? 'বাংলা' : 'English',
+      label: langLabel(nextLang(lang)).long,
       icon: Languages,
       gradient: showEnglish
         ? 'from-emerald-500 via-teal-600 to-cyan-500 shadow-emerald-500/35 ring-emerald-400/30'

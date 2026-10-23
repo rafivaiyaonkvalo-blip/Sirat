@@ -486,3 +486,20 @@ a[class*="bg-teal-600"] {
   20%, 70% { background-color: rgba(251, 191, 36, 0.28); }
 }
 .note-flash { animation: noteFlash 2.6s ease-in-out; border-radius: 0.5rem; }
+
+/* আরবি ইন্টারফেস: ডান-থেকে-বাঁয়ে ও নাসখ ফন্ট (হরকতসহ) */
+html[lang='ar'] body,
+html[lang='ar'] button,
+html[lang='ar'] input,
+html[lang='ar'] textarea {
+  font-family: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+}
+html[lang='ar'] body { line-height: 1.75; }
+
+/* আরবি (ডান-থেকে-বাঁয়ে): ব্যানারের ছবি বাঁ দিকে, ফেড ডান দিকে */
+html[dir='rtl'] .hero-img {
+  right: auto;
+  left: 0;
+  -webkit-mask-image: linear-gradient(to right, #000 35%, transparent) !important;
+  mask-image: linear-gradient(to right, #000 35%, transparent) !important;
+}
