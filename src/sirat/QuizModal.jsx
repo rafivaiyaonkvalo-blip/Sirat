@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { loadDars } from '../data/loadDars';
+import index from '../data/darsIndex.json';
 import { bn, pickQuiz } from './questions';
 import Quiz from './Quiz';
 
@@ -43,6 +44,14 @@ export default function QuizModal({ id, no, progress, onClose }) {
     return () => { live = false; };
   }, [id, no]);
 
+  // পরের পর্ব: একই দারসের পরেরটি, নইলে পরের দারসের প্রথমটি
+  const nextHref = (() => {
+    const d = index.find((x) => x.id === id);
+    if (!d) return null;
+    if (no < d.porbos.length) return `#/dars/${id}/${no + 1}/video`;
+    return index.some((x) => x.id === id + 1) ? `#/dars/${id + 1}/1/video` : null;
+  })();
+
   const retry = () => {
     setQs(pickQuiz(dars.porbos[no - 1].quiz));
     setAttempt((a) => a + 1);
@@ -59,6 +68,8 @@ export default function QuizModal({ id, no, progress, onClose }) {
             previous={progress.scores[`${id}-${no}`]}
             onRetry={retry}
             onClose={onClose}
+            celebrate
+            nextHref={nextHref}
             onFinish={(s, t) => { progress.saveScore(id, no, s, t); progress.markDone(id, no); }}
           />
         )}

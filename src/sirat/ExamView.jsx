@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Award, CheckCircle2, Clock, MinusCircle, RotateCcw, XCircle } from 'lucide-react';
-import DarsPicker from './DarsPicker';
-import SectionHero from './SectionHero';
-import { buildQuestions, bn } from './questions';
+import { CheckCircle2, Clock, MinusCircle, RotateCcw, XCircle } from 'lucide-react';
+import { bn } from './questions';
 import { addQuizAnswer } from './points';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
@@ -32,7 +30,7 @@ function ScoreRing({ pct, color, score, total }) {
   );
 }
 
-function Exam({ questions, onExit }) {
+export function Exam({ questions, onExit }) {
   const [answers, setAnswers] = useState({});
   const [left, setLeft] = useState(questions.length * 60);
   const [done, setDone] = useState(false);
@@ -139,39 +137,6 @@ function Exam({ questions, onExit }) {
         ))}
       </div>
       <button onClick={submit} className="mt-6 w-full rounded-full bg-emerald-600 py-3.5 text-lg font-bold text-white shadow-[0_0_20px_rgba(14,165,233,0.5)]">জমা দিন</button>
-    </div>
-  );
-}
-
-export default function ExamPage() {
-  const [selected, setSelected] = useState([]);
-  const [count, setCount] = useState(20);
-  const [qs, setQs] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const start = async () => {
-    setBusy(true);
-    setQs(await buildQuestions(selected, count));
-    setAttempt((a) => a + 1);
-    setBusy(false);
-  };
-
-  if (qs) {
-    return (
-      <div>
-        <Exam key={attempt} questions={qs} onExit={() => setQs(null)} />
-      </div>
-    );
-  }
-  return (
-    <div className="mx-auto max-w-4xl">
-      <SectionHero
-        icon={Award}
-        title="পরীক্ষা"
-        subtitle="সময়সীমাসহ পরীক্ষা, প্রতি প্রশ্নে ১ মিনিট। উত্তর ও ব্যাখ্যা দেখানো হবে জমা দেওয়ার পর। যতগুলো দারস চান বেছে নিন।"
-        chips={['সময়সীমাসহ', 'প্রতি প্রশ্নে ১ মিনিট', 'শেষে পূর্ণ বিশ্লেষণ']}
-      />
-      <DarsPicker selected={selected} setSelected={setSelected} count={count} setCount={setCount} onStart={start} startLabel="পরীক্ষা শুরু" busy={busy} />
     </div>
   );
 }

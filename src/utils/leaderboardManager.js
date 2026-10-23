@@ -103,11 +103,11 @@ export function formatStudentPartialName(fullName) {
  * লিডারবোর্ড: যার দুরূদ (নিজের + রেফারেল-লিংকে আসা) বেশি, সে এগিয়ে।
  * ডেটা পাবলিক leaderboard/{uid} থেকে আসে (ইমেইল/ফোন সেখানে থাকে না)।
  */
-export async function getLeaderboard(timeframe = 'all', forceRefresh = false) {
+export async function getLeaderboard(timeframe = 'week', forceRefresh = false) {
   const now = Date.now();
   if (forceRefresh || !cachedUsers || now - lastFetchTime >= CACHE_TTL_MS) {
     try {
-      cachedUsers = await fetchLeaderboard(100);
+      cachedUsers = await fetchLeaderboard(200);
       lastFetchTime = now;
     } catch (err) {
       console.warn('Leaderboard fetch warning:', err);
@@ -115,19 +115,21 @@ export async function getLeaderboard(timeframe = 'all', forceRefresh = false) {
     }
   }
   const currentUid = auth?.currentUser?.uid || null;
-  const sorted = [...cachedUsers].sort((a, b) => b.total - a.total);
+  const weekly = timeframe === 'week';
+  const scoreOf = (u) => (weekly ? u.weekTotal : u.total);
+  const sorted = cachedUsers.filter((u) => scoreOf(u) > 0).sort((a, b) => scoreOf(b) - scoreOf(a)).slice(0, 100);
   let rank = 1;
   const items = sorted.map((u, i) => {
-    if (i > 0 && u.total < sorted[i - 1].total) rank = i + 1;
+    if (i > 0 && scoreOf(u) < scoreOf(sorted[i - 1])) rank = i + 1;
     return {
       uid: u.uid,
       name: u.name,
       hideName: u.hideName,
       photoURL: u.photoURL || getAssetUrl('/madina.jpg'),
-      score: u.total,
-      scoreBn: toBengaliNumber(u.total),
-      own: u.durood,
-      referred: u.referred,
+      score: scoreOf(u),
+      scoreBn: toBengaliNumber(scoreOf(u)),
+      own: weekly ? u.weekOwn : u.durood,
+      referred: weekly ? u.weekRef : u.referred,
       referredPeople: u.referredPeople,
       isCurrentUser: u.uid === currentUid,
       rank,

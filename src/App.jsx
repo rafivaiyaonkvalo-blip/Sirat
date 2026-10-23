@@ -18,8 +18,9 @@ import { useLiveScreenBroadcaster } from './hooks/useLiveScreenBroadcaster';
 import SiratDars from './sirat/SiratDars';
 import DuroodView from './sirat/DuroodView';
 import { captureReferral, syncAccount } from './sirat/points';
+import { syncNotesAccount } from './sirat/notes';
+import NotesModal from './sirat/NotesModal';
 import QuizView from './sirat/QuizView';
-import ExamView from './sirat/ExamView';
 import BookView from './sirat/BookView';
 import { isSuperUser, applySuperUserUnlock, setVerifiedSuperUser } from './utils/superUser';
 
@@ -39,7 +40,7 @@ const getInitialTab = () => {
       const hash = window.location.hash.replace('#', '');
       const paramTab = params.get('tab');
       if (paramTab && validTabs.includes(paramTab)) {
-        return paramTab;
+        return paramTab === 'exam' ? 'quiz' : paramTab;
       }
       if (hash && validTabs.includes(hash)) {
         return hash;
@@ -47,7 +48,7 @@ const getInitialTab = () => {
 
       const savedTab = localStorage.getItem('uls_active_tab');
       if (savedTab && validTabs.includes(savedTab)) {
-        return savedTab;
+        return savedTab === 'exam' ? 'quiz' : savedTab;
       }
     } catch (e) {
       console.warn('Error reading initial tab:', e);
@@ -64,6 +65,7 @@ export default function App() {
   const [mistakesModalOpen, setMistakesModalOpen] = useState(false);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [certificateModalOpen, setCertificateModalOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState('original');
   const [user, setUser] = useState(null);
   const [isSuper, setIsSuper] = useState(() => isSuperUser(null));
@@ -108,6 +110,23 @@ export default function App() {
     };
     window.addEventListener('sirat_goto_dars', go);
     return () => window.removeEventListener('sirat_goto_dars', go);
+  }, []);
+
+  // নোট ও বুকমার্কের তালিকা খোলা, আর সেখান থেকে নির্দিষ্ট পর্বের অনুচ্ছেদে যাওয়া
+  useEffect(() => {
+    const open = () => setNotesOpen(true);
+    const go = (e) => {
+      const { dars, porbo, block } = e.detail;
+      setAuthModalOpen(false);
+      setCurrentTab('lessons');
+      try { sessionStorage.setItem('sirat_jump_block', String(block)); } catch { /* ignore */ }
+      const target = `#/dars/${dars}/${porbo}/text`;
+      if (window.location.hash === target) window.dispatchEvent(new CustomEvent('sirat_jump_block'));
+      else window.location.hash = target;
+    };
+    window.addEventListener('sirat_open_notes', open);
+    window.addEventListener('sirat_goto_porbo', go);
+    return () => { window.removeEventListener('sirat_open_notes', open); window.removeEventListener('sirat_goto_porbo', go); };
   }, []);
 
   // অন্য পাতা (যেমন দুরূদ) থেকে লগইন-পপআপ খোলা
@@ -168,6 +187,7 @@ export default function App() {
         await loadMistakesFromCloud(currentUser);
         setUser(currentUser);
         syncAccount(currentUser);
+        syncNotesAccount(currentUser);
       } else {
         setUser(null);
         syncAccount(null);
@@ -259,7 +279,7 @@ export default function App() {
       const tab = params.get('tab') || 'lessons';
       const validTabs = ['lessons', 'durood', 'quiz', 'exam', 'book'];
       if (validTabs.includes(tab)) {
-        setCurrentTab(tab);
+        setCurrentTab(tab === 'exam' ? 'quiz' : tab);
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -463,10 +483,9 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 pb-12 md:pb-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
-          {(currentTab === 'lessons' || !['durood', 'quiz', 'exam', 'book'].includes(currentTab)) && <SiratDars />}
+          {(currentTab === 'lessons' || !['durood', 'quiz', 'book'].includes(currentTab)) && <SiratDars />}
           {currentTab === 'durood' && <DuroodView />}
           {currentTab === 'quiz' && <QuizView />}
-          {currentTab === 'exam' && <ExamView />}
           {currentTab === 'book' && <BookView />}
         </div>
       </main>
@@ -505,6 +524,7 @@ export default function App() {
         vocabulary={EMPTY_LIST}
       />
       {/* "লিডারবোর্ড" (Leaderboard) Modal */}
+      {notesOpen && <NotesModal onClose={() => setNotesOpen(false)} />}
       <LeaderboardModal
         isOpen={leaderboardModalOpen}
         onClose={() => setLeaderboardModalOpen(false)}

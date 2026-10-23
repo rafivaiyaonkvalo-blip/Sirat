@@ -479,3 +479,10 @@ a[class*="bg-teal-600"] {
   100% { opacity: 0; transform: translateY(-110px) scale(1); }
 }
 .durood-bubble { animation: duroodFloat 2.4s ease-out forwards; }
+
+/* নোট/বুকমার্ক থেকে লাফ দিলে অনুচ্ছেদ কিছুক্ষণ জ্বলে ওঠে */
+@keyframes noteFlash {
+  0%, 100% { background-color: transparent; }
+  20%, 70% { background-color: rgba(251, 191, 36, 0.28); }
+}
+.note-flash { animation: noteFlash 2.6s ease-in-out; border-radius: 0.5rem; }

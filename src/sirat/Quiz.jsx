@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { CheckCircle2, XCircle, RotateCcw, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
+import { CheckCircle2, XCircle, RotateCcw, ChevronRight, PartyPopper } from 'lucide-react';
 import { shuffleSeed } from './shuffle';
 import { bn } from './questions';
 import { addQuizAnswer } from './points';
@@ -7,7 +8,16 @@ import { addQuizAnswer } from './points';
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
 
 // একবারে একটি প্রশ্ন; উত্তর দিলেই সঠিক উত্তর ও ব্যাখ্যা দেখায়
-export default function Quiz({ questions, onFinish, previous, onRetry, onClose, title = 'পাঠ-কুইজ' }) {
+// স্কোর অনুযায়ী অভিনন্দন-বাণী
+const messageFor = (pct) => {
+  if (pct === 100) return 'মাশা আল্লাহ! পূর্ণ নম্বর। আল্লাহ আপনার ইলমে বরকত দিন।';
+  if (pct >= 80) return 'চমৎকার! খুব ভালো করেছেন।';
+  if (pct >= 60) return 'ভালো হয়েছে, এভাবেই এগিয়ে চলুন।';
+  return 'উৎসাহ হারাবেন না। লেখাটা আরেকবার পড়ে আবার চেষ্টা করলে আরও ভালো হবে।';
+};
+
+// celebrate: পর্বের কুইজ শেষে "পর্ব সম্পন্ন" অভিনন্দন; nextHref: পরের পর্বে যাওয়ার লিংক
+export default function Quiz({ questions, onFinish, previous, onRetry, onClose, title = 'পাঠ-কুইজ', celebrate = false, nextHref = null }) {
   const [picked, setPicked] = useState({}); // qIndex -> option index (মূল ক্রম)
   const [idx, setIdx] = useState(0);
   const [round, setRound] = useState(0);
@@ -17,6 +27,16 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
   const finished = idx >= total;
   const q = questions[idx];
   const sel = picked[idx];
+  const pct = total ? Math.round((score / total) * 100) : 0;
+
+  // ভালো স্কোরে কনফেটি
+  useEffect(() => {
+    if (!finished || pct < 60) return;
+    try {
+      confetti({ particleCount: pct === 100 ? 160 : 90, spread: 75, origin: { y: 0.55 }, zIndex: 200 });
+      if (pct === 100) setTimeout(() => confetti({ particleCount: 90, spread: 100, origin: { x: 0.15, y: 0.6 }, zIndex: 200 }), 350);
+    } catch { /* ইফেক্ট না চললে সমস্যা নেই */ }
+  }, [finished, pct]);
 
   const choose = (oi) => {
     if (sel !== undefined) return;
@@ -38,13 +58,19 @@ export default function Quiz({ questions, onFinish, previous, onRetry, onClose, 
     return (
       <section className="mt-2 text-center">
         <div className="rounded-2xl bg-emerald-600 p-6 text-white">
-          <p className="text-sm font-semibold opacity-90">আপনার ফল</p>
+          {celebrate && <PartyPopper size={38} className="mx-auto mb-1 text-amber-300" />}
+          <p className="text-lg font-extrabold">{celebrate ? 'অভিনন্দন! পর্ব সম্পন্ন' : 'আপনার ফল'}</p>
           <p className="mt-1 text-4xl font-extrabold">{bn(score)}/{bn(total)}</p>
+          <p className="mt-0.5 text-sm font-bold opacity-90">{bn(pct)}%</p>
+          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-emerald-50">{messageFor(pct)}</p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            {celebrate && nextHref && (
+              <a href={nextHref} onClick={() => onClose?.()} className="inline-flex items-center gap-1 rounded-full bg-white px-5 py-2 text-sm font-extrabold text-emerald-700">পরের পর্বে যান <ChevronRight size={16} /></a>
+            )}
             <button onClick={retry} className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/25">
               <RotateCcw size={16} /> আবার চেষ্টা করুন
             </button>
-            {onClose && <button onClick={onClose} className="rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700">বন্ধ করুন</button>}
+            {onClose && <button onClick={onClose} className={celebrate && nextHref ? 'rounded-full bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/25' : 'rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700'}>বন্ধ করুন</button>}
           </div>
         </div>
       </section>

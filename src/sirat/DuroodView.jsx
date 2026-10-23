@@ -163,6 +163,7 @@ export default function DuroodPage() {
     <div className="mx-auto max-w-2xl text-center">
       <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">দুরূদ</h1>
       <p className="mt-1 text-slate-500 dark:text-slate-400">{campaign.title}: নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।</p>
+      <p className="font-arabic mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-200 sm:text-xl" dir="rtl">بَيْنَكَ أَنْتَ وَبَيْنَ اللَّهِ</p>
 
       <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
         <div className="flex items-center justify-between text-sm font-semibold">

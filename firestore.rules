@@ -23,36 +23,53 @@ service cloud.firestore {
     match /leaderboard/{uid} {
       allow read: if true;
       allow create: if signedIn() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['name', 'photoURL', 'hideName', 'durood', 'xp', 'total', 'refCode', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['name', 'photoURL', 'hideName', 'durood', 'xp', 'total', 'refCode', 'week', 'weekDurood', 'updatedAt'])
         && request.resource.data.durood is int && request.resource.data.durood >= 0 && request.resource.data.durood <= 1000000
         && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= 100000000
         && request.resource.data.total == request.resource.data.durood
-        && (!('refCode' in request.resource.data) || request.resource.data.refCode.size() == 12);
+        && (!('refCode' in request.resource.data) || request.resource.data.refCode.size() == 12)
+        && (!('week' in request.resource.data) || (request.resource.data.week.size() == 10 && request.resource.data.weekDurood is int && request.resource.data.weekDurood >= 0 && request.resource.data.weekDurood <= request.resource.data.durood));
       allow update: if (signedIn() && request.auth.uid == uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoURL', 'hideName', 'durood', 'xp', 'total', 'refCode', 'updatedAt'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoURL', 'hideName', 'durood', 'xp', 'total', 'refCode', 'week', 'weekDurood', 'updatedAt'])
           && request.resource.data.durood - resource.data.get('durood', 0) >= 0
           && request.resource.data.durood - resource.data.get('durood', 0) <= 20000
           && request.resource.data.xp - resource.data.get('xp', 0) >= 0
           && request.resource.data.xp - resource.data.get('xp', 0) <= 1000000
           && request.resource.data.total - resource.data.get('total', 0) == request.resource.data.durood - resource.data.get('durood', 0)
           && (!('refCode' in resource.data) || request.resource.data.refCode == resource.data.refCode)
-          && (!('refCode' in request.resource.data) || request.resource.data.refCode.size() == 12))
+          && (!('refCode' in request.resource.data) || request.resource.data.refCode.size() == 12)
+          && (!('week' in request.resource.data) || (request.resource.data.week.size() == 10 && request.resource.data.weekDurood is int && request.resource.data.weekDurood >= 0 && request.resource.data.weekDurood <= request.resource.data.durood
+            && (request.resource.data.week == resource.data.get('week', '')
+              ? request.resource.data.weekDurood - resource.data.get('weekDurood', 0) >= 0 && request.resource.data.weekDurood - resource.data.get('weekDurood', 0) <= 20000
+              : request.resource.data.weekDurood <= 20000))))
         || isAdmin();
       allow delete: if isAdmin();
     }
 
     // রেফারেল-কোড (লগইন ছাড়াই): প্রতিটি কোডের গণনা। যে-কেউ ১২ অক্ষরের কোডে শূন্য-ডক বানাতে পারে,
-    // আর লিংকে আসা দর্শকের দুরূদ referred (একবারে ১–২০০) ও referredPeople (একবারে ১) বাড়াতে পারে।
+    // আর লিংকে আসা দর্শকের দুরূদ referred (একবারে ১–২০০) ও referredPeople (একবারে ১) বাড়াতে পারে;
+    // সাপ্তাহিক weekReferred ওই বাড়তির সমান (সপ্তাহ বদলালে নতুন করে শুরু)।
     match /refcodes/{code} {
       allow read: if true;
       allow create: if code.size() == 12 && request.resource.data.keys().hasOnly(['referred', 'referredPeople'])
         && request.resource.data.referred == 0 && request.resource.data.referredPeople == 0;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['referred', 'referredPeople'])
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['referred', 'referredPeople', 'week', 'weekReferred'])
         && request.resource.data.referred - resource.data.get('referred', 0) >= 1
         && request.resource.data.referred - resource.data.get('referred', 0) <= 200
         && request.resource.data.referredPeople - resource.data.get('referredPeople', 0) >= 0
-        && request.resource.data.referredPeople - resource.data.get('referredPeople', 0) <= 1;
+        && request.resource.data.referredPeople - resource.data.get('referredPeople', 0) <= 1
+        && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['referred', 'referredPeople'])
+          || (request.resource.data.week.size() == 10
+            && (request.resource.data.week == resource.data.get('week', '')
+              ? request.resource.data.weekReferred - resource.data.get('weekReferred', 0) == request.resource.data.referred - resource.data.get('referred', 0)
+              : request.resource.data.weekReferred == request.resource.data.referred - resource.data.get('referred', 0))));
       allow delete: if isAdmin();
+    }
+
+    // নোট ও বুকমার্ক: শুধু নিজে পড়তে-লিখতে পারে (সর্বোচ্চ ৪০০টি)
+    match /notes/{uid} {
+      allow read, delete: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid && request.resource.data.keys().hasOnly(['items', 'updatedAt']) && request.resource.data.items.size() <= 400;
     }
 
     // শিক্ষার্থীর প্রোফাইল ও অগ্রগতি: প্রত্যেকে শুধু নিজেরটা পড়তে ও লিখতে পারে; অ্যাডমিন সবটা পারে।

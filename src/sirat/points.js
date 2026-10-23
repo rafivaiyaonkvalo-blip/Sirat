@@ -1,6 +1,6 @@
 // XP, দুরূদ-গণনা ও রেফারেল: ডিভাইসে জমা থাকে, লগইন থাকলে Firestore-এর পাবলিক ডক leaderboard/{uid}-এ যায়
 // (ইমেইল/ফোন ছাড়া শুধু নাম, ছবি ও সংখ্যা)। রেফারেল-কোড লগইন ছাড়াই পাওয়া যায়: refcodes/{code}। নিয়ম: firestore.rules
-import { collection, doc, documentId, getDoc, getDocs, increment, limit, orderBy, query, setDoc, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, documentId, getDoc, getDocs, increment, limit, orderBy, query, runTransaction, setDoc, updateDoc, where } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../services/firebase';
 
 export const POINTS = { perDurood: 10, quizCorrect: 10, quizWrong: 5 };
@@ -16,6 +16,13 @@ const FLUSH_MS = 3000;
 const fresh = () => ({ uid: null, xp: 0, durood: 0, referred: 0, referredPeople: 0, history: {}, pend: { durood: 0, xp: 0 } });
 const today = () => new Date().toISOString().slice(0, 10);
 const cloud = () => isFirebaseConfigured() && !!db;
+
+// সাপ্তাহিক লিডারবোর্ডের সপ্তাহ: শনিবার শুরু (UTC), আইডি = ওই শনিবারের তারিখ "YYYY-MM-DD"
+export const weekId = (d = new Date()) => {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 1) % 7));
+  return t.toISOString().slice(0, 10);
+};
 
 let state = null;
 let lastRaw;
@@ -111,7 +118,13 @@ export async function flushPoints() {
     const ref = doc(db, 'leaderboard', user.uid);
     const base = { ...profileFields(), updatedAt: new Date().toISOString() };
     if (durood || xp) {
-      await updateDoc(ref, { ...base, durood: increment(durood), total: increment(durood), xp: increment(xp) });
+      const wk = weekId();
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        const d = snap.exists() ? snap.data() : {};
+        const weekDurood = d.week === wk ? (Number(d.weekDurood) || 0) + durood : durood;
+        tx.update(ref, { ...base, durood: increment(durood), total: increment(durood), xp: increment(xp), week: wk, weekDurood });
+      });
       s.pend = { durood: 0, xp: 0 };
       save();
     } else {
@@ -157,7 +170,7 @@ export async function syncAccount(user) {
       await flushPoints();
     } else {
       const { durood, xp } = cur.pend;
-      await setDoc(ref, { ...profileFields(), durood, xp, total: durood, refCode: getMyCode(), updatedAt: new Date().toISOString() });
+      await setDoc(ref, { ...profileFields(), durood, xp, total: durood, week: weekId(), weekDurood: 0, refCode: getMyCode(), updatedAt: new Date().toISOString() });
       cur.uid = user.uid;
       cur.pend = { durood: 0, xp: 0 };
       save();
@@ -214,9 +227,17 @@ export async function creditReferrer(n) {
   if (!amount || !ref || !cloud() || ref === getMyCode()) return false;
   const first = (() => { try { return localStorage.getItem(REF_JOINED_KEY) !== '1'; } catch { return false; } })();
   try {
-    const data = { referred: increment(amount) };
-    if (first) data.referredPeople = increment(1);
-    await updateDoc(doc(db, 'refcodes', ref), data);
+    const r = doc(db, 'refcodes', ref);
+    const wk = weekId();
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(r);
+      if (!snap.exists()) throw new Error('no ref doc');
+      const d = snap.data();
+      const weekReferred = d.week === wk ? (Number(d.weekReferred) || 0) + amount : amount;
+      const data = { referred: increment(amount), week: wk, weekReferred };
+      if (first) data.referredPeople = increment(1);
+      tx.update(r, data);
+    });
     if (first) { try { localStorage.setItem(REF_JOINED_KEY, '1'); } catch { /* ignore */ } }
     return true;
   } catch {
@@ -240,6 +261,7 @@ export async function fetchLeaderboard(max = 100) {
       refCode: x.refCode || '',
       referred: 0,
       referredPeople: 0,
+      weekOwn: x.week === weekId() ? Number(x.weekDurood) || 0 : 0,
       xp: Number(x.xp) || 0,
     };
   });
@@ -255,9 +277,8 @@ export async function fetchLeaderboard(max = 100) {
     .map((r) => {
       const c = byCode[r.refCode] || {};
       const referred = Number(c.referred) || 0;
-      return { ...r, referred, referredPeople: Number(c.referredPeople) || 0, total: r.durood + referred };
+      const weekRef = c.week === weekId() ? Number(c.weekReferred) || 0 : 0;
+      return { ...r, referred, referredPeople: Number(c.referredPeople) || 0, weekRef, total: r.durood + referred, weekTotal: r.weekOwn + weekRef };
     })
-    .filter((r) => r.total > 0)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, max);
+    .filter((r) => r.total > 0);
 }

@@ -61,7 +61,7 @@ const MOSQUE_BACKGROUNDS = [
 ];
 
 export default function LeaderboardModal({ isOpen, onClose, user }) {
-  const timeframe = 'all'; // শুধু মোট দুরূদ-গণনা
+  const [timeframe, setTimeframe] = useState('week'); // 'week' | 'all'
   const [data, setData] = useState({ items: [], currentUser: null, totalParticipants: 0, activeParticipants: 0 });
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -263,9 +263,21 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
           </div>
         </div>
 
-        <div className="px-4 py-2 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800/80 shrink-0 text-center">
-          <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-            র‍্যাংক হয় দুরূদ-গণনায়: নিজের পড়া + আপনার রেফারেল-লিংকে আসাদের পড়া
+        <div className="px-4 py-2.5 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
+          <div className="flex items-center p-1 rounded-2xl bg-slate-200/70 dark:bg-slate-800/70 gap-1">
+            {[['week', 'এই সপ্তাহ'], ['all', 'সর্বমোট']].map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => { triggerHaptic(); setTimeframe(k); }}
+                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${timeframe === k ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+            র‍্যাংক হয় দুরূদ-গণনায়: নিজের পড়া + আপনার রেফারেল-লিংকে আসাদের পড়া{timeframe === 'week' ? ' • সপ্তাহ শুরু শনিবার' : ''}
           </p>
         </div>
 

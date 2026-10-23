@@ -4,6 +4,7 @@ import { isSuperUser } from '../utils/superUser';
 import DynamicLogo, { LOGO_VARIANTS } from './DynamicLogo';
 import { triggerHaptic } from '../utils/haptics';
 import { getShowEnglish, toggleShowEnglish } from '../utils/storage';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar({ 
   currentTab, 
@@ -84,8 +85,7 @@ export default function Navbar({
   const navItems = [
     { id: 'lessons', label: 'দারস', icon: BookOpen },
     { id: 'durood', label: 'দুরূদ', icon: Heart },
-    { id: 'quiz', label: 'কুইজ', icon: PenTool },
-    { id: 'exam', label: 'পরীক্ষা', icon: Award },
+    { id: 'quiz', label: 'অনুশীলন', icon: PenTool },
     { id: 'book', label: 'বই', icon: Library },
   ];
 
@@ -175,6 +175,8 @@ export default function Navbar({
 
             {/* Right Action Buttons */}
             <div className="flex items-center gap-2">
+              <NotificationBell />
+
               {/* English (ENG) Toggle Button */}
               <button
                 type="button"

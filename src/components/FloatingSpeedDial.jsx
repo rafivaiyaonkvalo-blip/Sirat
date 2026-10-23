@@ -3,7 +3,7 @@ import {
   Sun, Moon, User, Share2, MessageSquare, Flag, 
   HelpCircle, ArrowDown, ArrowUp, X, Check, ExternalLink, 
   BookOpen, Award, ShieldCheck, Sparkles,
-  Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send
+  Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send, StickyNote
 } from 'lucide-react';
 import { getShowEnglish, toggleShowEnglish } from '../utils/storage';
 import { getVoiceProfile, setVoiceProfile, playArabicAudio } from '../utils/audio';
@@ -342,6 +342,16 @@ export default function FloatingSpeedDial({
       icon: BookOpen,
       gradient: 'from-emerald-600 via-teal-600 to-emerald-500 shadow-emerald-600/35 ring-emerald-400/30',
       onClick: handleBookClick
+    },
+    {
+      id: 'notes',
+      label: 'নোট',
+      icon: StickyNote,
+      gradient: 'from-amber-500 via-orange-400 to-amber-600 shadow-amber-500/35 ring-amber-400/30',
+      onClick: () => {
+        window.dispatchEvent(new CustomEvent('sirat_open_notes'));
+        setIsOpen(false);
+      }
     },
     {
       id: 'intro',

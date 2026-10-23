@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Clapperboard, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { Clapperboard, Headphones, Maximize, Minimize, Pause, Play, RotateCcw, Video, Volume2, VolumeX } from 'lucide-react';
 import { bn } from './questions';
 import { getAssetUrl } from '../utils/assetHelper';
 
@@ -50,7 +50,7 @@ function Placeholder() {
 }
 
 // নিজস্ব কন্ট্রোলসহ প্লেয়ার (YouTube-এর নিজের বাটন/লিংক ঢাকা থাকে)
-function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title, autoplay, onEnd }) {
+function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title, autoplay, onEnd, audioOnly }) {
   const box = useRef(null);
   const mount = useRef(null);
   const media = useRef(null); // { play, pause, seek, time, duration, rate, mute, muted }
@@ -63,6 +63,8 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
   const [err, setErr] = useState('');
   const [started, setStarted] = useState(false);
   const [full, setFull] = useState(false);
+  const [audioMode, setAudioMode] = useState(false); // শুধু শব্দ: ভিডিও ঢাকা, ছোট বার
+  const audio = !!audioOnly || audioMode;
   const [pseudo, setPseudo] = useState(false); // ব্রাউজার ফুলস্ক্রিন না দিলে (যেমন আইফোন) পুরো স্ক্রিন জুড়ে ফিক্সড
 
   const from = startProp ?? (frac && dur ? Math.floor(frac[0] * dur) : 0);
@@ -225,11 +227,17 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
   }
 
   return (
-    <div ref={box} className={`overflow-hidden bg-black shadow-lg select-none ${pseudo && full ? 'fixed inset-0 z-[100] h-screen w-screen' : 'relative aspect-video w-full rounded-2xl [&:fullscreen]:aspect-auto [&:fullscreen]:rounded-none'}`} aria-label={title}>
-      <div ref={mount} className={`absolute inset-x-0 [&_iframe]:h-full [&_iframe]:w-full ${kind === 'yt' ? '-top-[64px] -bottom-[64px]' : 'inset-y-0'}`} />
+    <div ref={box} className={`overflow-hidden bg-black shadow-lg select-none ${pseudo && full ? 'fixed inset-0 z-[100] h-screen w-screen' : audio ? 'relative h-28 w-full rounded-2xl' : 'relative aspect-video w-full rounded-2xl [&:fullscreen]:aspect-auto [&:fullscreen]:rounded-none'}`} aria-label={title}>
+      <div ref={mount} className={`absolute inset-x-0 [&_iframe]:h-full [&_iframe]:w-full ${kind === 'yt' ? '-top-[64px] -bottom-[64px]' : 'inset-y-0'} ${audio ? 'pointer-events-none opacity-0' : ''}`} />
       {/* YouTube-এর শিরোনাম/লোগো ক্রপ করে বাদ; থামা অবস্থায় ঢাকনা অস্বচ্ছ, যাতে "আরও ভিডিও" না দেখা যায়; চাপলে চালু/বন্ধ */}
-      <button type="button" onClick={toggle} aria-label={playing ? 'বিরতি' : 'চালান'} className={`absolute inset-0 z-10 flex items-center justify-center ${playing ? 'bg-transparent' : started || kind !== 'yt' ? 'bg-slate-950' : 'bg-slate-950/95'}`}>
-        {!playing && (
+      <button type="button" onClick={toggle} aria-label={playing ? 'বিরতি' : 'চালান'} className={`absolute inset-0 z-10 flex items-center justify-center ${audio ? 'bg-gradient-to-r from-teal-900 via-slate-900 to-slate-950' : playing ? 'bg-transparent' : started || kind !== 'yt' ? 'bg-slate-950' : 'bg-slate-950/95'}`}>
+        {audio && (
+          <span className="flex items-center gap-3 text-white">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-500/90 shadow-[0_0_24px_rgba(14,165,233,0.7)]">{ended ? <RotateCcw size={20} /> : playing ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}</span>
+            <span className="text-left"><span className="flex items-center gap-1.5 text-sm font-extrabold"><Headphones size={15} /> অডিও মোড</span><span className="text-[11px] text-slate-300">{playing ? 'চলছে… পড়তে পড়তে শুনুন' : 'চালাতে চাপুন'}</span></span>
+          </span>
+        )}
+        {!audio && !playing && (
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-500/90 text-white shadow-[0_0_30px_rgba(14,165,233,0.8)]">
             {ended ? <RotateCcw size={28} /> : <Play size={30} className="ml-1" />}
           </span>
@@ -244,7 +252,8 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
           <span className="w-12 shrink-0 text-right text-[11px] tabular-nums">{fmt(len)}</span>
           <button type="button" onClick={cycleRate} className="!animate-none rounded-md px-1.5 py-0.5 text-[11px] font-bold hover:bg-white/15">{bn(rate)}x</button>
           <button type="button" onClick={toggleMute} aria-label="শব্দ" className="!animate-none rounded-full p-1.5 hover:bg-white/15">{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}</button>
-          <button type="button" onClick={toggleFull} aria-label="ফুলস্ক্রিন" className="!animate-none rounded-full p-1.5 hover:bg-white/15">{full ? <Minimize size={16} /> : <Maximize size={16} />}</button>
+          {!audioOnly && <button type="button" onClick={() => setAudioMode((a) => !a)} aria-label={audio ? 'ভিডিও মোড' : 'অডিও মোড'} title={audio ? 'ভিডিও মোডে ফিরুন' : 'শুধু শব্দ (অডিও মোড)'} className="!animate-none rounded-full p-1.5 hover:bg-white/15">{audio ? <Video size={16} /> : <Headphones size={16} />}</button>}
+          {!audio && <button type="button" onClick={toggleFull} aria-label="ফুলস্ক্রিন" className="!animate-none rounded-full p-1.5 hover:bg-white/15">{full ? <Minimize size={16} /> : <Maximize size={16} />}</button>}
         </div>
       )}
     </div>
@@ -252,24 +261,24 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 }
 
 // একটি পাঠ দুই ভিডিওতে ছড়ানো থাকলে অংশগুলো পরপর চলে
-function Sequence({ entries, title }) {
+function Sequence({ entries, title, audioOnly }) {
   const [i, setI] = useState(0);
   const next = useCallback(() => setI((x) => (x < entries.length - 1 ? x + 1 : x)), [entries.length]);
-  return <SingleVideo key={i} entry={entries[i]} title={title} autoplay={i > 0} onEnd={i < entries.length - 1 ? next : undefined} />;
+  return <SingleVideo key={i} entry={entries[i]} title={title} autoplay={i > 0} onEnd={i < entries.length - 1 ? next : undefined} audioOnly={audioOnly} />;
 }
 
-export default function VideoPlayer({ entry, entries, title, frac }) {
-  if (entries?.length > 1) return <Sequence entries={entries} title={title} />;
-  return <SingleVideo entry={entries?.[0] || entry} title={title} frac={frac} />;
+export default function VideoPlayer({ entry, entries, title, frac, audioOnly }) {
+  if (entries?.length > 1) return <Sequence entries={entries} title={title} audioOnly={audioOnly} />;
+  return <SingleVideo entry={entries?.[0] || entry} title={title} frac={frac} audioOnly={audioOnly} />;
 }
 
-function SingleVideo({ entry, title, frac, autoplay, onEnd }) {
+function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly }) {
   const cfg = typeof entry === 'string' ? { url: entry } : entry;
   if (!cfg?.url) return <Placeholder />;
   const start = toSec(cfg.start);
   const end = toSec(cfg.end);
   const id = ytId(cfg.url);
-  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} />;
+  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} audioOnly={audioOnly} />;
 
   const vimeo = cfg.url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   const drive = cfg.url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
@@ -281,5 +290,5 @@ function SingleVideo({ entry, title, frac, autoplay, onEnd }) {
       </div>
     );
   }
-  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} />;
+  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} audioOnly={audioOnly} />;
 }

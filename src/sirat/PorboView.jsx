@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Lightbulb, Lock, PenLine } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Headphones, Lightbulb, Lock, PenLine } from 'lucide-react';
 import { isUnlocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
@@ -9,6 +9,7 @@ import Runs from './Runs';
 import VideoPlayer from './VideoPlayer';
 import QuizModal from './QuizModal';
 import NotFound from './NotFound';
+import NoteWrap from './NoteWrap';
 
 function Block({ b }) {
   switch (b.type) {
@@ -54,6 +55,7 @@ function videoFor(meta, id, no) {
 export default function PorboPage({ id, no, step, progress }) {
   const meta = index.find((x) => x.id === id);
   const [dars, setDars] = useState(null);
+  const [listen, setListen] = useState(false);
   const { markVisited } = progress;
 
   useEffect(() => {
@@ -63,6 +65,25 @@ export default function PorboPage({ id, no, step, progress }) {
     return () => { live = false; };
   }, [id]);
   useEffect(() => { markVisited(id, no); }, [id, no, markVisited]);
+
+  // নোট/বুকমার্ক থেকে এলে ওই অনুচ্ছেদে স্ক্রল ও কিছুক্ষণ জ্বলে ওঠা
+  useEffect(() => {
+    if (!dars || step === 'video') return undefined;
+    const jump = () => {
+      let v = null;
+      try { v = sessionStorage.getItem('sirat_jump_block'); } catch { /* ignore */ }
+      if (v === null) return;
+      const el = document.getElementById(`blk-${v}`);
+      if (!el) return;
+      try { sessionStorage.removeItem('sirat_jump_block'); } catch { /* ignore */ }
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.classList.add('note-flash');
+      setTimeout(() => el.classList.remove('note-flash'), 2600);
+    };
+    const t = setTimeout(jump, 250);
+    window.addEventListener('sirat_jump_block', jump);
+    return () => { clearTimeout(t); window.removeEventListener('sirat_jump_block', jump); };
+  }, [dars, step, id, no]);
 
   if (!meta || no < 1 || no > meta.porbos.length || !STEP_META[step]) return <NotFound />;
   if (dars === null) return <p className="py-20 text-center text-slate-500">লোড হচ্ছে…</p>;
@@ -107,8 +128,20 @@ export default function PorboPage({ id, no, step, progress }) {
 
       {view === 'text' && (
         <>
+          {videos[String(id)] && (
+            <div className="mb-4">
+              {!listen ? (
+                <button type="button" onClick={() => setListen(true)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200"><Headphones size={16} /> পড়ার সাথে শুনুন</button>
+              ) : (
+                <div className="sticky top-16 z-30 md:top-20">
+                  <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
+                  <button type="button" onClick={() => setListen(false)} className="mt-1 text-xs font-semibold text-slate-500 underline">অডিও বার বন্ধ করুন</button>
+                </div>
+              )}
+            </div>
+          )}
           <div className="reader space-y-4">
-            {porbo.blocks.map((b, i) => <Block key={i} b={b} />)}
+            {porbo.blocks.map((b, i) => (b.type === 'sub' ? <Block key={i} b={b} /> : <NoteWrap key={i} b={b} idx={i} dars={id} porbo={no}><Block b={b} /></NoteWrap>))}
           </div>
           {porbo.footnotes.length > 0 && (
             <aside className="mt-8 border-t border-slate-200 dark:border-white/10 pt-4 text-sm text-slate-600 dark:text-slate-300">
