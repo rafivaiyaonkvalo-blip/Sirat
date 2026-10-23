@@ -1,6 +1,6 @@
 // XP, দুরূদ-গণনা ও রেফারেল: ডিভাইসে জমা থাকে, লগইন থাকলে Firestore-এর পাবলিক ডক leaderboard/{uid}-এ যায়
-// (ইমেইল/ফোন ছাড়া শুধু নাম, ছবি ও সংখ্যা)। নিয়ম: firestore.rules
-import { collection, doc, getDoc, getDocs, increment, limit, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
+// (ইমেইল/ফোন ছাড়া শুধু নাম, ছবি ও সংখ্যা)। রেফারেল-কোড লগইন ছাড়াই পাওয়া যায়: refcodes/{code}। নিয়ম: firestore.rules
+import { collection, doc, documentId, getDoc, getDocs, increment, limit, orderBy, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../services/firebase';
 
 export const POINTS = { perDurood: 10, quizCorrect: 10, quizWrong: 5 };
@@ -8,6 +8,8 @@ export const POINTS = { perDurood: 10, quizCorrect: 10, quizWrong: 5 };
 const KEY = 'sirat_points_v1';
 const REF_KEY = 'sirat_ref';
 const REF_JOINED_KEY = 'sirat_ref_joined';
+const MY_CODE_KEY = 'sirat_refcode';
+const CODE_LEN = 12;
 const HISTORY_DAYS = 60;
 const FLUSH_MS = 3000;
 
@@ -40,6 +42,53 @@ const save = () => {
 export const getPoints = () => ({ ...read() });
 export const getXp = () => read().xp;
 export const getXpDays = () => ({ ...read().history });
+
+// ---- রেফারেল-কোড (লগইন ছাড়াই) ----
+const randomCode = () => {
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+  const bytes = new Uint8Array(CODE_LEN);
+  (window.crypto || window.msCrypto).getRandomValues(bytes);
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('');
+};
+
+// এই ব্যক্তির নিজস্ব কোড: প্রথমবার ডিভাইসে বানানো হয়; লগইন থাকলে অ্যাকাউন্টের কোড বসে যায় (সব ডিভাইসে একই লিংক)
+export function getMyCode() {
+  try {
+    let c = localStorage.getItem(MY_CODE_KEY);
+    if (!c || c.length !== CODE_LEN) { c = randomCode(); localStorage.setItem(MY_CODE_KEY, c); }
+    return c;
+  } catch {
+    return '';
+  }
+}
+
+export const referralLink = (code) => `${window.location.origin}${import.meta.env.BASE_URL}?ref=${code}`;
+
+// কোডের গণনা-ডক না থাকলে বানায় (যেন অন্যদের দুরূদ জমা হতে পারে)
+export async function ensureRefDoc() {
+  const code = getMyCode();
+  if (!code || !cloud()) return code;
+  try {
+    const ref = doc(db, 'refcodes', code);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) await setDoc(ref, { referred: 0, referredPeople: 0 });
+  } catch { /* অফলাইন/নিয়ম-ত্রুটি: পরের বার আবার চেষ্টা */ }
+  return code;
+}
+
+// নিজের কোডে এ পর্যন্ত কত দুরূদ ও কতজন এসেছেন
+export async function refreshOwn() {
+  if (!cloud()) return;
+  const code = getMyCode();
+  if (!code) return;
+  try {
+    const snap = await getDoc(doc(db, 'refcodes', code));
+    const s = read();
+    s.referred = snap.exists() ? Number(snap.data().referred) || 0 : 0;
+    s.referredPeople = snap.exists() ? Number(snap.data().referredPeople) || 0 : 0;
+    save();
+  } catch { /* ignore */ }
+}
 
 // ---- ক্লাউডে পাঠানো ----
 const profileFields = () => {
@@ -80,7 +129,7 @@ const scheduleFlush = () => {
   timer = setTimeout(flushPoints, FLUSH_MS);
 };
 
-// লগইনের পর: ক্লাউডের সংখ্যা এনে লোকালে বসায়; অতিথি অবস্থায় জমানো সংখ্যা নতুন অ্যাকাউন্টে যোগ হয়
+// লগইনের পর: ক্লাউডের সংখ্যা এনে লোকালে বসায়; অতিথি অবস্থায় জমানো সংখ্যা ও রেফারেল-কোড অ্যাকাউন্টে যোগ হয়
 export async function syncAccount(user) {
   const s = read();
   if (!user) {
@@ -99,33 +148,23 @@ export async function syncAccount(user) {
       cur.uid = user.uid;
       cur.durood = (Number(d.durood) || 0) + cur.pend.durood;
       cur.xp = (Number(d.xp) || 0) + cur.pend.xp;
-      cur.referred = Number(d.referred) || 0;
-      cur.referredPeople = Number(d.referredPeople) || 0;
+      if (d.refCode && d.refCode.length === CODE_LEN) {
+        try { localStorage.setItem(MY_CODE_KEY, d.refCode); } catch { /* ignore */ }
+      } else {
+        try { await updateDoc(ref, { refCode: getMyCode() }); } catch { /* ignore */ }
+      }
       save();
       await flushPoints();
     } else {
       const { durood, xp } = cur.pend;
-      await setDoc(ref, { ...profileFields(), durood, xp, total: durood, updatedAt: new Date().toISOString() });
+      await setDoc(ref, { ...profileFields(), durood, xp, total: durood, refCode: getMyCode(), updatedAt: new Date().toISOString() });
       cur.uid = user.uid;
       cur.pend = { durood: 0, xp: 0 };
       save();
     }
+    await ensureRefDoc();
+    await refreshOwn();
   } catch { /* অফলাইন/নিয়ম-ত্রুটি: লোকালেই থাকে, পরে আবার চেষ্টা */ }
-}
-
-// নিজের ডকের লাইভ সংখ্যা (রেফারেল থেকে আসা সহ) নিতে
-export async function refreshOwn() {
-  const user = auth?.currentUser;
-  if (!cloud() || !user) return;
-  try {
-    const snap = await getDoc(doc(db, 'leaderboard', user.uid));
-    if (!snap.exists()) return;
-    const d = snap.data();
-    const s = read();
-    s.referred = Number(d.referred) || 0;
-    s.referredPeople = Number(d.referredPeople) || 0;
-    save();
-  } catch { /* ignore */ }
 }
 
 // ---- XP/দুরূদ যোগ ----
@@ -159,7 +198,7 @@ export function addQuizAnswer(correct) {
   return gain;
 }
 
-// ---- রেফারেল ----
+// ---- রেফারেল (আসা দর্শকের দিক) ----
 export function captureReferral() {
   try {
     const ref = new URLSearchParams(window.location.search).get('ref');
@@ -167,19 +206,17 @@ export function captureReferral() {
   } catch { /* ignore */ }
 }
 
-export const referralLink = (uid) => `${window.location.origin}${import.meta.env.BASE_URL}?ref=${uid}`;
-
-// এই দর্শক অন্যের লিংকে এসে থাকলে তার পড়া দুরূদ ওই ব্যক্তির হিসাবে জমা হয় (একবারে সর্বোচ্চ ২০০)
+// এই দর্শক অন্যের লিংকে এসে থাকলে তার পড়া দুরূদ ওই কোডের হিসাবে জমা হয় (একবারে সর্বোচ্চ ২০০)
 export async function creditReferrer(n) {
   const amount = Math.min(Math.max(Math.floor(n), 0), 200);
   let ref = null;
   try { ref = localStorage.getItem(REF_KEY); } catch { /* ignore */ }
-  if (!amount || !ref || !cloud() || auth?.currentUser?.uid === ref) return false;
+  if (!amount || !ref || !cloud() || ref === getMyCode()) return false;
   const first = (() => { try { return localStorage.getItem(REF_JOINED_KEY) !== '1'; } catch { return false; } })();
   try {
-    const data = { referred: increment(amount), total: increment(amount) };
+    const data = { referred: increment(amount) };
     if (first) data.referredPeople = increment(1);
-    await updateDoc(doc(db, 'leaderboard', ref), data);
+    await updateDoc(doc(db, 'refcodes', ref), data);
     if (first) { try { localStorage.setItem(REF_JOINED_KEY, '1'); } catch { /* ignore */ } }
     return true;
   } catch {
@@ -188,23 +225,39 @@ export async function creditReferrer(n) {
 }
 
 // ---- লিডারবোর্ড ----
+// leaderboard/{uid}-এর নিজের দুরূদ + ওই ব্যক্তির রেফারেল-কোডে জমা দুরূদ (refcodes/{code}) মিলিয়ে মোট
 export async function fetchLeaderboard(max = 100) {
   if (!cloud()) return [];
-  const snap = await getDocs(query(collection(db, 'leaderboard'), orderBy('total', 'desc'), limit(max)));
-  return snap.docs
-    .map((d) => {
-      const x = d.data();
-      return {
-        uid: d.id,
-        name: x.name || 'শিক্ষার্থী',
-        hideName: Boolean(x.hideName),
-        photoURL: x.photoURL || '',
-        durood: Number(x.durood) || 0,
-        referred: Number(x.referred) || 0,
-        referredPeople: Number(x.referredPeople) || 0,
-        total: Number(x.total) || 0,
-        xp: Number(x.xp) || 0,
-      };
+  const snap = await getDocs(query(collection(db, 'leaderboard'), orderBy('total', 'desc'), limit(max * 2)));
+  const rows = snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      uid: d.id,
+      name: x.name || 'শিক্ষার্থী',
+      hideName: Boolean(x.hideName),
+      photoURL: x.photoURL || '',
+      durood: Number(x.durood) || 0,
+      refCode: x.refCode || '',
+      referred: 0,
+      referredPeople: 0,
+      xp: Number(x.xp) || 0,
+    };
+  });
+  const codes = [...new Set(rows.map((r) => r.refCode).filter((c) => c.length === CODE_LEN))];
+  const byCode = {};
+  for (let i = 0; i < codes.length; i += 30) {
+    try {
+      const part = await getDocs(query(collection(db, 'refcodes'), where(documentId(), 'in', codes.slice(i, i + 30))));
+      part.forEach((d) => { byCode[d.id] = d.data(); });
+    } catch { /* এই অংশ ছাড়াই চলবে */ }
+  }
+  return rows
+    .map((r) => {
+      const c = byCode[r.refCode] || {};
+      const referred = Number(c.referred) || 0;
+      return { ...r, referred, referredPeople: Number(c.referredPeople) || 0, total: r.durood + referred };
     })
-    .filter((x) => x.total > 0);
+    .filter((r) => r.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, max);
 }

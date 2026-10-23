@@ -3,7 +3,7 @@ import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap 
 import { campaign } from './brand';
 import { bn } from './questions';
 import { auth } from '../services/firebase';
-import { POINTS, addDurood, creditReferrer, getPoints, refreshOwn, referralLink } from './points';
+import { POINTS, addDurood, creditReferrer, ensureRefDoc, getMyCode, getPoints, refreshOwn, referralLink } from './points';
 import { addToGlobal, cloudEnabled, countryFlag, countryName, detectCountry, subscribeGlobal } from './duroodCloud';
 
 const DUROODS = [
@@ -122,10 +122,11 @@ export default function DuroodPage() {
   useEffect(() => {
     const sync = () => setPts(getPoints());
     window.addEventListener('sirat_points_changed', sync);
-    const off = auth ? auth.onAuthStateChanged((u) => { setMe(u); if (u) refreshOwn(); }) : null;
+    const off = auth ? auth.onAuthStateChanged((u) => { setMe(u); refreshOwn(); }) : null;
     return () => { window.removeEventListener('sirat_points_changed', sync); if (off) off(); };
   }, []);
-  const myLink = me ? referralLink(me.uid) : '';
+  const myLink = referralLink(getMyCode());
+  useEffect(() => { ensureRefDoc().then(refreshOwn); }, []);
   const [copied, setCopied] = useState(false);
   const copyLink = async () => {
     try {
@@ -148,7 +149,7 @@ export default function DuroodPage() {
 
   const [shareMsg, setShareMsg] = useState('');
   const share = async () => {
-    const url = me ? referralLink(me.uid) : window.location.href.split('#')[0];
+    const url = myLink;
     const text = `${campaign.title}: নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।`;
     try {
       if (navigator.share) { await navigator.share({ title: campaign.title, text, url }); return; }
@@ -223,24 +224,24 @@ export default function DuroodPage() {
           <button onClick={() => window.dispatchEvent(new CustomEvent('uls_open_leaderboard'))} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 px-3 py-1 text-xs font-bold dark:border-white/20"><Trophy size={13} /> লিডারবোর্ড</button>
         </div>
         <p className="mt-1 text-xs text-slate-500">প্রতিটি দুরূদে {bn(POINTS.perDurood)} XP। লিডারবোর্ডে যার দুরূদ বেশি, সে এগিয়ে।</p>
-        {me ? (
-          <div className="mt-3">
-            <p className="text-sm font-semibold">আপনার রেফারেল লিংক</p>
-            <div className="mt-1 flex items-center gap-2">
-              <input readOnly value={myLink} onFocus={(e) => e.target.select()} className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs dark:border-white/10 dark:bg-slate-900" />
-              <button onClick={copyLink} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white"><Copy size={13} /> {copied ? 'কপি হয়েছে' : 'কপি / শেয়ার'}</button>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-center">
-              <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{bn(pts.referredPeople)}</p><p className="text-[11px] text-slate-500">আপনার লিংকে এসেছেন</p></div>
-              <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{bn(pts.referred)}</p><p className="text-[11px] text-slate-500">তাঁদের পড়া দুরূদ (আপনার হিসাবে জমা)</p></div>
-            </div>
+        <div className="mt-3">
+          <p className="text-sm font-semibold">আপনার রেফারেল লিংক {!me && <span className="text-[11px] font-normal text-slate-500">(লগইন ছাড়াই)</span>}</p>
+          <div className="mt-1 flex items-center gap-2">
+            <input readOnly value={myLink} onFocus={(e) => e.target.select()} className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs dark:border-white/10 dark:bg-slate-900" />
+            <button onClick={copyLink} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white"><Copy size={13} /> {copied ? 'কপি হয়েছে' : 'কপি / শেয়ার'}</button>
           </div>
-        ) : (
-          <div className="mt-3 rounded-xl bg-emerald-50 p-3 dark:bg-white/5">
-            <p className="text-sm">লগইন করলে আপনার নিজের লিংক পাবেন। সেই লিংকে যাঁরা ওয়েবসাইটে এসে দুরূদ পড়বেন, তাঁদের দুরূদও আপনার হিসাবে জমা হবে এবং লিডারবোর্ডে যোগ হবে।</p>
-            <button onClick={() => window.dispatchEvent(new CustomEvent('sirat_open_auth'))} className="mt-2 rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-bold text-white">লগইন করুন</button>
+          <p className="mt-1.5 text-[11px] text-slate-500">এই লিংকে যাঁরা ওয়েবসাইটে এসে দুরূদ পড়বেন, তাঁদের দুরূদ আপনার হিসাবে জমা হবে।</p>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-center">
+            <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{bn(pts.referredPeople)}</p><p className="text-[11px] text-slate-500">আপনার লিংকে এসেছেন</p></div>
+            <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{bn(pts.referred)}</p><p className="text-[11px] text-slate-500">তাঁদের পড়া দুরূদ (আপনার হিসাবে জমা)</p></div>
           </div>
-        )}
+          {!me && (
+            <div className="mt-3 rounded-xl bg-emerald-50 p-3 dark:bg-white/5">
+              <p className="text-sm">লিডারবোর্ডে আপনার নাম আসতে লগইন করুন। লগইনের পর আপনার এই লিংক ও আজ পর্যন্ত জমা সব সংখ্যা অ্যাকাউন্টে যোগ হবে।</p>
+              <button onClick={() => window.dispatchEvent(new CustomEvent('sirat_open_auth'))} className="mt-2 rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-bold text-white">লগইন করুন</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {topCountries.length > 0 && (

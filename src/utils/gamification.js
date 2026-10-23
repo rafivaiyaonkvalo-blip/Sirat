@@ -201,19 +201,27 @@ export const toBengaliNumber = (num) => {
   return String(num).replace(/\d/g, d => BENGALI_DIGITS[d]);
 };
 
-// সংখ্যার লেভেল: প্রতি লেভেলে সমান ৩০০ XP — কোনো সীমা নেই
-const XP_PER_LEVEL = 300;
+// সংখ্যার লেভেল: প্রথম লেভেল ৩০০ XP-তে, তারপর প্রতি লেভেলে আগেরটার চেয়ে ১০০ XP বেশি লাগে
+// (১→২: ৩০০, ২→৩: ৪০০, ৩→৪: ৫০০ ...) — কোনো সীমা নেই
+const XP_FIRST_LEVEL = 300;
+const XP_LEVEL_STEP = 100;
 
 export function getLevelInfo(xp = 0) {
-  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
-  const levelStartXp = (level - 1) * XP_PER_LEVEL;
-  const nextLevelXp = level * XP_PER_LEVEL;
+  let level = 1;
+  let levelStartXp = 0;
+  let span = XP_FIRST_LEVEL;
+  while (xp >= levelStartXp + span) {
+    levelStartXp += span;
+    span += XP_LEVEL_STEP;
+    level += 1;
+  }
+  const nextLevelXp = levelStartXp + span;
   return {
     level,
     levelStartXp,
     nextLevelXp,
     remainingXp: nextLevelXp - xp,
-    progressPercent: Math.floor(((xp - levelStartXp) / XP_PER_LEVEL) * 100)
+    progressPercent: Math.floor(((xp - levelStartXp) / span) * 100)
   };
 }
 
