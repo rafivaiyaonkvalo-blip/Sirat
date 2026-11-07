@@ -19,6 +19,11 @@
 - (রা.) → (RA); (রহ.) → (RH); (আ.) → (AS).
 - নাম: Urwah ibn Mas‘ud, Abu Sufyan, Talha ibn ‘Ubaydillah, Abu Talha, Zayd ibn al-Dathinna, ‘Umar ibn al-Khattab, ‘Amr ibn al-‘As, Hamzah, Wahshi, Hind, Khalid, ‘Ikrimah, Abu Jahl. ‘ আইন; ’ হামযা (দরকারে).
 - পরিভাষা: ওহী = revelation (wahy); ঈমান = faith (iman); মুহাব্বত = love/devotion; দরূদ = durood (salutations upon the Prophet); সীরাত = the Seerah; সোহবত = suhbah (companionship); মুজিযা = miracle (mu‘jizah); ফিতরাত = fitrah (innate nature); জাহিলিয়্যাত = Jahiliyyah; হুদাইবিয়া = Hudaybiyyah; উহুদ = Uhud; বদর = Badr; খন্দক = the Trench (Khandaq); রাজী‘ = al-Raji‘.
+- আরও: কুরআন = Qur’an (Noble Qur’an); আল্লাহ = Allah; ইত্তিবা = following (ittiba‘); আনুগত্য = obedience; দাওয়াত = da‘wah (call to faith); শাফাআত = intercession; হাশর = the (Day of) Gathering; সহীহ/হাসান/যঈফ/মাওযূ = sahih (sound)/hasan (good)/da‘if (weak)/mawdu‘ (fabricated); মাগাযী = Maghazi; আনসার = the Ansar; হুনাইন = Hunayn; কা‘বা = the Ka‘bah; মুয়াযযিন = muadhdhin; আযান = adhan; ‘Urwah ও ‘Umar নামে শুরুতে ‘ থাকবে (‘Urwah, ‘Umar)।
+- দরূদ: প্রতি পর্বে প্রথমবার gloss (“durood, the prayer of blessing upon him”), পরে শুধু durood; আয়াতে “send durood”।
+- ‘পর্ব’ (UI) = Part; ‘অনুচ্ছেদ’ = passage; ‘অধ্যায়’ = chapter (কুইজে সংখ্যাসহ ‘chapter 6’)।
+- কুইজ-ব্যাখ্যায় দারসের উদ্ধৃতি ব্লকের অনুবাদের সঙ্গে হুবহু মেলাতে হবে।
+- আয়াতের অনুবাদ-ব্লক (quote) আরবিতে মূল আয়াত ﴿ ﴾ চিহ্নে, পূর্ণ হরকতসহ; হাদীসের বাংলা অনুবাদ-ব্লক আরবিতে সহীহ শব্দে « » চিহ্নে।
 - গ্রন্থসূত্র: সহীহ বুখারী = Sahih al-Bukhari; সহীহ মুসলিম = Sahih Muslim; ইবনু হিশাম, আস-সীরাতুন নববিয়্যা = Ibn Hisham, al-Sirah al-Nabawiyyah; ইবনু কাছীর, আল-বিদায়া ওয়ান নিহায়া = Ibn Kathir, al-Bidayah wa al-Nihayah; কিতাব = Book of; বাব = Chapter; হাদীস = hadith no.
 
 ## আরবি (পূর্ণ হরকত বাধ্যতামূলক)
@@ -29,3 +34,4 @@
 - গ্রন্থসূত্র: صَحِيحُ الْبُخَارِيِّ، صَحِيحُ مُسْلِمٍ، ابْنُ هِشَامٍ «السِّيرَةُ النَّبَوِيَّةُ»، ابْنُ كَثِيرٍ «الْبِدَايَةُ وَالنِّهَايَةُ»؛ كِتَابُ، بَابُ، حَدِيثُ رَقْمِ.
 - সব আরবি শব্দে হরকত (শেষ বর্ণসহ, ব্যাকরণ অনুযায়ী); ইংরেজি/ল্যাটিন অক্ষর নয় (শুধু XP-জাতীয় ব্যতিক্রম)।
 - সংখ্যা ল্যাটিন অঙ্কে লিখলে সাইট আরবি-ইন্ডিক অঙ্কে দেখায়; অনুবাদে ল্যাটিন (0-9) রাখুন।
+- ⚠ {{k}}: ব্লকের ভেতরে বিশেষ-অংশের ক্রম (১,২,৩…); পাদটীকা-নম্বর নয়। dump-এ {{1:fn7}} মানে k=1।

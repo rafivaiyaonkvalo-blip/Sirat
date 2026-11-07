@@ -11,7 +11,7 @@ const ids = process.argv.slice(3).length
 
 const BN = /[ঀ-৿]/;
 const ARW = /[ء-ي]/g;
-const HARAKAT = /[ً-ْٰ]/;
+const HARAKAT = /[ً-ٰٓ]/; // harakat + maddah (U+0653)
 const plain = (runs = []) => runs.map((r) => (r.fn ? '' : r.t || '')).join('');
 const specialCount = (runs = []) => runs.filter((r) => r.fn || r.ar).length;
 const tokens = (s) => [...String(s).matchAll(/\{\{(\d+)\}\}/g)].map((m) => Number(m[1]));
@@ -53,6 +53,7 @@ for (const id of ids) {
   };
 
   src.porbos.forEach((p, pi) => {
+    if (process.env.ONLY && String(p.no) !== process.env.ONLY) return; // ONLY=2 → শুধু ২য় পর্ব যাচাই
     const t = tr.porbos?.[pi];
     if (!t) { issues.push(`পর্ব ${p.no}: নেই`); return; }
     if (!t.title) issues.push(`পর্ব ${p.no}: শিরোনাম নেই`);
@@ -70,7 +71,7 @@ for (const id of ids) {
       const tl = textOf(v).replace(/\{\{\d+\}\}/g, '').length;
       srcChars += sl;
       trChars += tl;
-      if (sl > 120) {
+      if (sl > 120 && !/﴿/.test(textOf(v))) {
         const ratio = tl / sl;
         const [lo, hi] = lang === 'ar' ? [0.55, 2.6] : [0.7, 2.3];
         if (ratio < lo || ratio > hi) issues.push(`${where}: দৈর্ঘ্য সন্দেহজনক (অনুপাত ${ratio.toFixed(2)})`);
