@@ -68,6 +68,18 @@
     <title>Sirat - সীরাত</title>
     <meta name="description" content="সীরাত — নবীজী ﷺ-এর পূর্ণাঙ্গ জীবনী। ৩২টি দারস, ভিডিও, লেখা ও কুইজ, সঙ্গে সম্মিলিত দুরূদ ক্যাম্পেইন। মারকাযুল ঈমান।" />
     <!-- লিংক শেয়ার করলে (হোয়াটসঅ্যাপ, ফেসবুক, টেলিগ্রাম) যে প্রিভিউ-কার্ড দেখায় -->
+    <link rel="canonical" href="https://www.markazuliman.com/sirat/" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "সীরাত — মারকাযুল ঈমান",
+        "alternateName": "Sirat",
+        "url": "https://www.markazuliman.com/sirat/",
+        "inLanguage": ["bn", "en", "ar"],
+        "publisher": { "@type": "Organization", "name": "মারকাযুল ঈমান", "url": "https://www.markazuliman.com" }
+      }
+    </script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="মারকাযুল ঈমান" />
     <meta property="og:locale" content="bn_BD" />
@@ -148,10 +160,13 @@
     <!-- Google Fonts: Amiri, Scheherazade New (Arabic) & Hind Siliguri (Bengali) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ফন্টের CSS রেন্ডার আটকে রাখে না (display=swap, তাই লেখা সঙ্গে সঙ্গে দেখা যায়) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
   </head>
   <body class="bg-slate-50 text-slate-800 dark:bg-[#0A0D12] dark:text-slate-100 min-h-screen font-bengali">
     <div id="root"></div>
+    <noscript>এই সাইট চালাতে জাভাস্ক্রিপ্ট চালু থাকা দরকার। / This site needs JavaScript to run.</noscript>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       // Automatically refresh when a new build deployment updates asset chunk hashes

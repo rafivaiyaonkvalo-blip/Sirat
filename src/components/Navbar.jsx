@@ -104,9 +104,17 @@ export default function Navbar({
                 className="shrink-0" 
               />
               <div>
-                <div 
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent('uls_replay_intro'));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      window.dispatchEvent(new CustomEvent('uls_replay_intro'));
+                    }
                   }}
                   className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-none cursor-pointer flex items-center gap-1.5"
                   title="কালেমা ক্যালিগ্রাফি অ্যানিমেশন দেখুন"
@@ -138,13 +146,14 @@ export default function Navbar({
             </div>
 
             {/* Desktop Nav - Clean Single Word Buttons */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav aria-label="প্রধান মেনু" className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentTab === item.id;
                 return (
                   <button
                     key={item.id}
+                    aria-current={isActive ? 'page' : undefined}
                     onClick={() => setCurrentTab(item.id)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       isActive
@@ -179,6 +188,7 @@ export default function Navbar({
                     : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
                 title={`${langLabel(nextLang(lang)).long} / Language`}
+                aria-label={`${langLabel(nextLang(lang)).long} / Language`}
               >
                 <span className="font-mono text-xs font-black tracking-wide">{langLabel(nextLang(lang)).short}</span>
                 <span className={`w-1.5 h-1.5 rounded-full ${showEnglish ? 'bg-white shadow-xs' : 'bg-slate-400 dark:bg-slate-500'}`} />
@@ -236,13 +246,14 @@ export default function Navbar({
         }}
         className="md:hidden sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors shadow-xs"
       >
-        <nav className="flex items-center justify-around py-1 px-0.5">
+        <nav aria-label="প্রধান মেনু" className="flex items-center justify-around py-1 px-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
             return (
               <button
                 key={item.id}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => {
                   triggerHaptic('light');
                   setCurrentTab(item.id);

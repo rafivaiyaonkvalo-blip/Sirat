@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import ReportModal from './components/ReportModal';
 import Footer from './components/Footer';
 import FloatingSpeedDial from './components/FloatingSpeedDial';
-import AdminPortal from './components/admin/AdminPortal';
 import AnimatedSplashIntro from './components/AnimatedSplashIntro';
 import GlobalAnnouncementBanner from './components/GlobalAnnouncementBanner';
-import MistakesNotebookModal from './components/MistakesNotebookModal';
-import LeaderboardModal from './components/LeaderboardModal';
-import CertificateModal from './components/CertificateModal';
 import { subscribeToAuth, loadUserDataFromCloud, syncUserDataToCloud } from './services/firebase';
 import { loadMistakesFromCloud } from './utils/mistakesManager';
 import { initAnalyticsTracker, updateTrackerUser, trackPageView } from './services/analyticsTracker';
@@ -23,6 +19,19 @@ import NotesModal from './sirat/NotesModal';
 import QuizView from './sirat/QuizView';
 import BookView from './sirat/BookView';
 import { isSuperUser, applySuperUserUnlock, setVerifiedSuperUser } from './utils/superUser';
+
+// অ্যাডমিন পোর্টাল ও কম-ব্যবহৃত মোডাল প্রথম পেজ-লোডে লাগে না — দরকারের সময় আলাদা ফাইল থেকে আসে
+const AdminPortal = lazy(() => import('./components/admin/AdminPortal'));
+const MistakesNotebookModal = lazy(() => import('./components/MistakesNotebookModal'));
+const LeaderboardModal = lazy(() => import('./components/LeaderboardModal'));
+const CertificateModal = lazy(() => import('./components/CertificateModal'));
+
+// প্রথমবার খোলার আগে পর্যন্ত মোডালের কোডই লোড হয় না; একবার খুললে মাউন্ট থাকে (বন্ধ হলে নিজেই null দেয়)
+function LazyOnceOpen({ open, children }) {
+  const [seen, setSeen] = useState(open);
+  if (open && !seen) setSeen(true);
+  return seen ? <Suspense fallback={null}>{children}</Suspense> : null;
+}
 
 const EMPTY_LIST = [];
 const EMPTY_LESSONS = { lessons: [] };
@@ -428,26 +437,28 @@ export default function App() {
   if (currentTab === 'admin') {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-100">
-        <AdminPortal
-          lessonsData={EMPTY_LESSONS}
-          vocabularyData={EMPTY_LIST}
-          chaptersData={EMPTY_LIST}
-          onExitAdmin={() => {
-            if (typeof window !== 'undefined') {
-              const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
-              window.history.pushState(null, '', baseRoot);
-            }
-            setCurrentTab('lessons');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateToLesson={(lessonId) => {
-            if (typeof window !== 'undefined') {
-              const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
-              window.history.pushState(null, '', baseRoot);
-            }
-            setCurrentTab('lessons');
-          }}
-        />
+        <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+          <AdminPortal
+            lessonsData={EMPTY_LESSONS}
+            vocabularyData={EMPTY_LIST}
+            chaptersData={EMPTY_LIST}
+            onExitAdmin={() => {
+              if (typeof window !== 'undefined') {
+                const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
+                window.history.pushState(null, '', baseRoot);
+              }
+              setCurrentTab('lessons');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onNavigateToLesson={(lessonId) => {
+              if (typeof window !== 'undefined') {
+                const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
+                window.history.pushState(null, '', baseRoot);
+              }
+              setCurrentTab('lessons');
+            }}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -517,25 +528,31 @@ export default function App() {
         context={reportContext}
       />
       {/* "ভুল" (My Mistakes Notebook) Modal */}
-      <MistakesNotebookModal
-        isOpen={mistakesModalOpen}
-        onClose={() => setMistakesModalOpen(false)}
-        user={user}
-        vocabulary={EMPTY_LIST}
-      />
+      <LazyOnceOpen open={mistakesModalOpen}>
+        <MistakesNotebookModal
+          isOpen={mistakesModalOpen}
+          onClose={() => setMistakesModalOpen(false)}
+          user={user}
+          vocabulary={EMPTY_LIST}
+        />
+      </LazyOnceOpen>
       {/* "লিডারবোর্ড" (Leaderboard) Modal */}
       {notesOpen && <NotesModal onClose={() => setNotesOpen(false)} />}
-      <LeaderboardModal
-        isOpen={leaderboardModalOpen}
-        onClose={() => setLeaderboardModalOpen(false)}
-        user={user}
-      />
+      <LazyOnceOpen open={leaderboardModalOpen}>
+        <LeaderboardModal
+          isOpen={leaderboardModalOpen}
+          onClose={() => setLeaderboardModalOpen(false)}
+          user={user}
+        />
+      </LazyOnceOpen>
       {/* "সনদপত্র" (Certificate) Modal */}
-      <CertificateModal
-        isOpen={certificateModalOpen}
-        onClose={() => setCertificateModalOpen(false)}
-        user={user}
-      />
+      <LazyOnceOpen open={certificateModalOpen}>
+        <CertificateModal
+          isOpen={certificateModalOpen}
+          onClose={() => setCertificateModalOpen(false)}
+          user={user}
+        />
+      </LazyOnceOpen>
       {/* Expandable Floating Action Menu (Right Corner Speed Dial) */}
       <FloatingSpeedDial
         darkMode={darkMode}

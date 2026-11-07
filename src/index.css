@@ -35,6 +35,11 @@
   html, body, button, input, select, textarea {
     font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
+  /* কিবোর্ড (Tab) দিয়ে চালালে ফোকাস দেখা যাবে; মাউস/টাচে কিছু বদলায় না */
+  :focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+  }
 }
 
 .font-arabic {

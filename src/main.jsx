@@ -52,7 +52,8 @@ class GlobalErrorBoundary extends Component {
         }
       }
     } catch (e) {}
-    window.location.replace('/');
+    // সাবপাথে (/sirat/) থাকলে মূল সাইটের রুটে নয়, সীরাতের নিজের রুটে ফেরা
+    window.location.replace(import.meta.env.BASE_URL || '/');
   };
 
   render() {
