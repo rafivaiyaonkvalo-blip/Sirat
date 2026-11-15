@@ -7,7 +7,8 @@ import { getAssetUrl } from '../utils/assetHelper';
 import { bn } from './questions';
 import { href } from './router';
 import { PathNode } from './PathNode';
-import { isUnlocked } from './progress';
+import { isUnlocked, isDarsLocked } from './progress';
+import { isSuperUser } from '../utils/superUser';
 import QuizModal from './QuizModal';
 
 const TABS = [
@@ -34,6 +35,7 @@ const SIDES = ['right', 'right', 'left', 'left', 'left', 'right'];
 function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, setQuiz, focus }) {
   const rowRef = useRef(null);
   const doneCount = d.porbos.filter((p) => progress.done[`${d.id}-${p.no}`]).length;
+  const lockedDars = isDarsLocked(d.id);
 
   useEffect(() => {
     if (focus) rowRef.current?.scrollIntoView({ block: 'start' });
@@ -41,12 +43,12 @@ function DarsRow({ d, start, progress, current, currentNo, openKey, setOpenKey, 
 
   return (
     <section ref={rowRef} id={`dars-row-${d.id}`} className="scroll-mt-32">
-      <div className="relative mx-auto mb-3 flex max-w-sm items-center justify-center rounded-2xl border border-emerald-200/70 bg-white px-4 py-2 shadow-xs dark:border-emerald-700/40 dark:bg-slate-900">
+      <div className={`relative mx-auto mb-3 flex max-w-sm items-center justify-center rounded-2xl border px-4 py-2 shadow-xs transition-colors ${lockedDars ? 'border-slate-300 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800/60 opacity-90' : 'border-emerald-200/70 bg-white dark:border-emerald-700/40 dark:bg-slate-900'}`}>
         <div className="min-w-0 px-9 text-center">
-          <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-300">দারস {bn(d.number)}</p>
+          <p className={`text-[11px] font-black ${lockedDars ? 'text-slate-500 dark:text-slate-400' : 'text-emerald-700 dark:text-emerald-300'}`}>দারস {bn(d.number)} {lockedDars ? '• 🔒 তালাবদ্ধ' : ''}</p>
           <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{d.title}</p>
         </div>
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-500 dark:text-slate-400">{bn(doneCount)}/{bn(d.porbos.length)}</span>
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-500 dark:text-slate-400">{lockedDars ? '🔒' : `${bn(doneCount)}/${bn(d.porbos.length)}`}</span>
       </div>
       <div className="relative flex flex-col items-center gap-6 pb-6 sm:gap-7">
         {d.porbos.map((p, i) => {
@@ -85,7 +87,9 @@ function Roadmap({ progress, mode, focusId }) {
   const total = index.reduce((a, x) => a + x.porbos.length, 0);
   const doneTotal = index.reduce((a, x) => a + x.porbos.filter((p) => progress.done[`${x.id}-${p.no}`]).length, 0);
   const pct = Math.round((doneTotal / total) * 100);
-  const lastDars = progress.last?.dars || index.find((x) => x.porbos.some((p) => !progress.done[`${x.id}-${p.no}`]))?.id || 1;
+  const availableIndex = isSuperUser(null) ? index : index.filter((x) => !isDarsLocked(x.id));
+  const uncompleted = availableIndex.find((x) => x.porbos.some((p) => !progress.done[`${x.id}-${p.no}`])) || availableIndex[0];
+  const lastDars = (progress.last?.dars && !isDarsLocked(progress.last.dars)) ? progress.last.dars : uncompleted.id;
   const cur = index.find((x) => x.id === lastDars) || index[0];
   const currentNo = (progress.last?.dars === cur.id && progress.last.porbo) || cur.porbos.find((p) => !progress.done[`${cur.id}-${p.no}`])?.no || 1;
 

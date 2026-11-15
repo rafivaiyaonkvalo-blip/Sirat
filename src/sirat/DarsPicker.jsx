@@ -1,13 +1,17 @@
-import { Check, Play } from 'lucide-react';
+import { Check, Lock, Play } from 'lucide-react';
 import index from '../data/darsIndex.json';
 import { totalQuestions, bn } from './questions';
+import { isDarsLocked } from './progress';
 
 // কুইজ/পরীক্ষার জন্য দারস বাছাই: কার্ডে দারসের নম্বর, নাম ও প্রশ্ন-সংখ্যা; নিচে স্টিকি শুরু-বার
 export default function DarsPicker({ selected, setSelected, count, setCount, onStart, startLabel, extra, busy }) {
   const qCount = (d) => d.porbos.reduce((a, p) => a + p.quiz, 0);
-  const ready = index.filter((d) => qCount(d) > 0).map((d) => d.id);
-  const toggle = (id) => setSelected(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
-  const total = totalQuestions(selected);
+  const ready = index.filter((d) => qCount(d) > 0 && !isDarsLocked(d.id)).map((d) => d.id);
+  const toggle = (id) => {
+    if (isDarsLocked(id)) return;
+    setSelected(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
+  };
+  const total = totalQuestions(selected.filter((id) => !isDarsLocked(id)));
   const counts = [10, 20, 30, 50].filter((c) => c < total);
   const pick = count > total ? total : count;
 
@@ -21,23 +25,25 @@ export default function DarsPicker({ selected, setSelected, count, setCount, onS
 
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {index.map((d) => {
+          const locked = isDarsLocked(d.id);
           const n = qCount(d);
           const on = selected.includes(d.id);
+          const disabled = !n || locked;
           return (
             <button
               key={d.id}
-              disabled={!n}
+              disabled={disabled}
               onClick={() => toggle(d.id)}
-              className={`group relative flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${on ? 'border-emerald-400 bg-emerald-50 shadow-[0_0_18px_rgba(14,165,233,0.35)] dark:bg-emerald-900/40' : 'border-slate-200 bg-white hover:border-emerald-300 dark:border-white/10 dark:bg-white/5'}`}
+              className={`group relative flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition active:scale-[0.98] disabled:cursor-not-allowed ${locked ? 'opacity-50 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5' : on ? 'border-emerald-400 bg-emerald-50 shadow-[0_0_18px_rgba(14,165,233,0.35)] dark:bg-emerald-900/40' : 'border-slate-200 bg-white hover:border-emerald-300 dark:border-white/10 dark:bg-white/5'}`}
             >
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-black text-white ${on ? 'bg-gradient-to-br from-emerald-400 via-emerald-600 to-teal-700' : 'bg-slate-400 dark:bg-slate-600'}`}>
-                {on ? <Check size={20} strokeWidth={3} /> : bn(d.number)}
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-black text-white ${locked ? 'bg-slate-400 dark:bg-slate-600' : on ? 'bg-gradient-to-br from-emerald-400 via-emerald-600 to-teal-700' : 'bg-slate-400 dark:bg-slate-600'}`}>
+                {locked ? <Lock size={18} /> : on ? <Check size={20} strokeWidth={3} /> : bn(d.number)}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[11px] font-black text-emerald-700 dark:text-emerald-300">দারস {bn(d.number)}</span>
+                <span className="block text-[11px] font-black text-emerald-700 dark:text-emerald-300">দারস {bn(d.number)} {locked ? '🔒' : ''}</span>
                 <span className="line-clamp-2 text-sm font-bold leading-snug">{d.title}</span>
               </span>
-              <span className="shrink-0 text-[11px] font-bold text-slate-500 dark:text-slate-400">{n ? `${bn(n)}টি` : 'শিগগির'}</span>
+              <span className="shrink-0 text-[11px] font-bold text-slate-500 dark:text-slate-400">{locked ? 'লক' : n ? `${bn(n)}টি` : 'শিগগির'}</span>
             </button>
           );
         })}

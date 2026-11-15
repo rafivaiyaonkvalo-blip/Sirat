@@ -4,6 +4,7 @@ import { loadDarsLocalized } from '../data/loadTranslation';
 import { getLang } from '../i18n';
 import index from '../data/darsIndex.json';
 import { bn, pickQuiz } from './questions';
+import { isDarsLocked } from './progress';
 import Quiz from './Quiz';
 
 // কুইজের পপআপ-খোলস: কালো ব্যাকড্রপ, Esc/বাইরে চাপলে বন্ধ
@@ -50,7 +51,9 @@ export default function QuizModal({ id, no, progress, onClose }) {
     const d = index.find((x) => x.id === id);
     if (!d) return null;
     if (no < d.porbos.length) return `#/dars/${id}/${no + 1}/video`;
-    return index.some((x) => x.id === id + 1) ? `#/dars/${id + 1}/1/video` : null;
+    const nextId = id + 1;
+    if (isDarsLocked(nextId)) return null;
+    return index.some((x) => x.id === nextId) ? `#/dars/${nextId}/1/video` : null;
   })();
 
   const retry = () => {

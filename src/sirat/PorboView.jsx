@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Headphones, Lightbulb, Lock, PenLine } from 'lucide-react';
-import { isUnlocked } from './progress';
+import { isUnlocked, isDarsLocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
 import { loadDarsLocalized } from '../data/loadTranslation';
@@ -96,12 +96,13 @@ export default function PorboPage({ id, no, step, progress }) {
   const steps = ['video', 'text', ...(porbo.quiz.length ? ['quiz'] : [])];
   if (!steps.includes(step)) return <NotFound />;
   if (!isUnlocked(progress.done, id, no)) {
+    const lockedDars = isDarsLocked(id);
     return (
       <div className="mx-auto max-w-md py-16 text-center">
         <Lock size={44} className="mx-auto text-slate-400" />
-        <p className="mt-4 text-lg font-bold">এই ধাপ এখনও বন্ধ</p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">আগের ধাপ সম্পন্ন করলে এটি খুলবে।</p>
-        <a href={href(`/dars/${id}/${no - 1}/video`)} className="mt-5 inline-flex rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">আগের ধাপে যান</a>
+        <p className="mt-4 text-lg font-bold">{lockedDars ? 'এই দারসটি এখনও বন্ধ রয়েছে' : 'এই ধাপ এখনও বন্ধ'}</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{lockedDars ? 'দারস ২৫ থেকে ৩২ শীঘ্রই আসছে, ইন শা আল্লাহ।' : 'আগের ধাপ সম্পন্ন করলে এটি খুলবে।'}</p>
+        <a href={href(lockedDars ? '/dars' : (no > 1 ? `/dars/${id}/${no - 1}/video` : `/dars/${id - 1}/1/video`))} className="mt-5 inline-flex rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">{lockedDars ? 'পাঠ্যক্রমে ফিরুন' : 'আগের ধাপে যান'}</a>
       </div>
     );
   }
@@ -109,7 +110,7 @@ export default function PorboPage({ id, no, step, progress }) {
   const si = steps.indexOf(step);
   const go = (p) => href(p);
   const prevHref = si > 0 ? `/dars/${id}/${no}/${steps[si - 1]}` : null;
-  const nextLessonHref = no < meta.porbos.length ? `/dars/${id}/${no + 1}/video` : id < index.length ? `/dars/${id + 1}/1/video` : null;
+  const nextLessonHref = no < meta.porbos.length ? `/dars/${id}/${no + 1}/video` : (id < index.length && !isDarsLocked(id + 1)) ? `/dars/${id + 1}/1/video` : null;
 
   return (
     <article className="mx-auto max-w-3xl">

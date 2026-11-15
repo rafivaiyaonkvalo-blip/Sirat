@@ -5,8 +5,14 @@ import index from '../data/darsIndex.json';
 const KEY = 'sirat_progress_v2';
 const OLD_KEY = 'sirat_progress_v1';
 
-// পাঠ N খোলা: প্রথম পাঠ সবসময়; অন্যগুলো আগের পাঠের কুইজ/সম্পন্ন হলে (সুপার ইউজারের জন্য সব খোলা)
-export const isUnlocked = (done, darsId, no) => no <= 1 || !!done[`${darsId}-${no - 1}`] || isSuperUser(null);
+// দারস ২৫ থেকে ৩২ লক রাখা হয়েছে (শীঘ্রই উন্মুক্ত করা হবে, সুপার ইউজারের জন্য খোলা)
+export const isDarsLocked = (darsId) => (darsId >= 25 && darsId <= 32) && !isSuperUser(null);
+
+// পাঠ N খোলা: প্রথম পাঠ সবসময় (যদি পুরো দারস লক না থাকে); অন্যগুলো আগের পাঠের কুইজ/সম্পন্ন হলে (সুপার ইউজারের জন্য সব খোলা)
+export const isUnlocked = (done, darsId, no) => {
+  if (isDarsLocked(darsId)) return false;
+  return no <= 1 || !!done[`${darsId}-${no - 1}`] || isSuperUser(null);
+};
 
 // আগের (ছোট ছোট ভাগের) অগ্রগতি নতুন ৩-ভাগে রূপান্তর: নতুন পাঠের সব পুরনো পাঠ সম্পন্ন হলেই সেটি সম্পন্ন
 const migrate = (old) => {

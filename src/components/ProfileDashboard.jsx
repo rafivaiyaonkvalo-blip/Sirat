@@ -16,6 +16,7 @@ import StudentCertificate from './StudentCertificate';
 import { getCertificateData, getVolumeProgress } from '../utils/certificateManager';
 import ReportModal from './ReportModal';
 import darsIndex from '../data/darsIndex.json';
+import { isDarsLocked } from '../sirat/progress';
 
 const TABS = [
   { id: 'progress', label: 'অগ্রগতি' },
@@ -138,6 +139,7 @@ function DarsProgressMap() {
 
       <div className="mt-2.5 grid grid-cols-6 sm:grid-cols-8 gap-1.5">
         {darsIndex.map((d) => {
+          const locked = isDarsLocked(d.id);
           const n = d.porbos.filter((p) => done[`${d.id}-${p.no}`]).length;
           const full = n === d.porbos.length;
           const isNext = next && next.id === d.id;
@@ -145,14 +147,15 @@ function DarsProgressMap() {
             <button
               key={d.id}
               type="button"
-              onClick={() => goto(d.id)}
-              title={`দারস ${toBengaliNumber(d.number)}: ${d.title} — ${toBengaliNumber(n)}/${toBengaliNumber(d.porbos.length)} পর্ব`}
-              className={`rounded-lg border px-1 py-1 text-center transition active:scale-95 ${full ? 'border-[#10b981]/60 bg-[#10b981]/15' : n > 0 ? 'border-sky-400/60 bg-sky-400/10' : 'border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/40'} ${isNext ? 'ring-2 ring-amber-400' : ''}`}
+              disabled={locked}
+              onClick={() => !locked && goto(d.id)}
+              title={`দারস ${toBengaliNumber(d.number)}: ${d.title} — ${locked ? 'লক করা' : `${toBengaliNumber(n)}/${toBengaliNumber(d.porbos.length)} পর্ব`}`}
+              className={`rounded-lg border px-1 py-1 text-center transition active:scale-95 ${locked ? 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/20' : full ? 'border-[#10b981]/60 bg-[#10b981]/15' : n > 0 ? 'border-sky-400/60 bg-sky-400/10' : 'border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/40'} ${isNext && !locked ? 'ring-2 ring-amber-400' : ''}`}
             >
-              <span className={`block text-[11px] font-extrabold leading-tight ${full ? 'text-[#10b981]' : 'text-slate-700 dark:text-slate-200'}`}>{toBengaliNumber(d.number)}</span>
+              <span className={`block text-[11px] font-extrabold leading-tight ${locked ? 'text-slate-400 dark:text-slate-500' : full ? 'text-[#10b981]' : 'text-slate-700 dark:text-slate-200'}`}>{toBengaliNumber(d.number)}{locked ? '🔒' : ''}</span>
               <span className="mt-0.5 flex gap-0.5">
                 {d.porbos.map((p) => (
-                  <span key={p.no} className="h-1.5 flex-1 rounded-full" style={{ background: done[`${d.id}-${p.no}`] ? '#10b981' : 'rgba(148,163,184,0.45)' }} />
+                  <span key={p.no} className="h-1.5 flex-1 rounded-full" style={{ background: locked ? 'rgba(148,163,184,0.2)' : done[`${d.id}-${p.no}`] ? '#10b981' : 'rgba(148,163,184,0.45)' }} />
                 ))}
               </span>
             </button>
