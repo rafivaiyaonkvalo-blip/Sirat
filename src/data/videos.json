@@ -438,5 +438,63 @@
       }
     ]
   },
+  "24": {
+    "url": "https://www.youtube.com/watch?v=izBUtOHOtdI",
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=mOGJ0vTaDgo"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=TbsPMyPErhs"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=EB7k47I0WCk"
+      }
+    ]
+  },
+  "25": {
+    "url": "https://www.youtube.com/watch?v=C3prsD-Gruo",
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=BbiL0lGVOg0"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=i0IJDG4njH4"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=_492xzfsq8Q"
+      }
+    ]
+  },
+  "26": {
+    "url": "https://www.youtube.com/watch?v=iJ8HInXLvf4",
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=iJ8HInXLvf4"
+      }
+    ]
+  },
+  "27": {
+    "url": "https://www.youtube.com/watch?v=tuM6xiD6NYg",
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=3U8N9QEqxG0"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=ZJYfgckHfEo"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=QEqHT-qMhXU"
+      }
+    ]
+  },
+  "28": {
+    "url": "https://www.youtube.com/watch?v=J7pz0I9q8bw",
+    "parts": [
+      {
+        "url": "https://www.youtube.com/watch?v=J7pz0I9q8bw"
+      }
+    ]
+  },
   "_help": "প্রতিটি দারসের একটি ভিডিও: \"দারস-নম্বর\": \"লিংক\"। ভিডিওটি দারসের ৩টি পাঠে লেখার দৈর্ঘ্য অনুযায়ী স্বয়ংক্রিয়ভাবে ভাগ হয়। নির্দিষ্ট সময় বসাতে চাইলে: \"1\": { \"url\": \"লিংক\", \"parts\": [ {\"start\":\"0:00\",\"end\":\"12:30\"}, {\"start\":\"12:30\",\"end\":\"25:10\"}, {\"start\":\"25:10\",\"end\":\"38:00\"} ] } (সময় ঘণ্টা:মিনিট:সেকেন্ড, মিনিট:সেকেন্ড বা সেকেন্ডে)। YouTube / সরাসরি .mp4 নিজস্ব প্লেয়ারে; Vimeo / Drive সাধারণ প্লেয়ারে।"
 }

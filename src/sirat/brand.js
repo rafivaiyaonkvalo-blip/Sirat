@@ -17,9 +17,9 @@ export const book = {
   cover: '', // '/book-cover.jpg' — public ফোল্ডারে রাখুন
 };
 
-// সম্মিলিত দুরূদ ক্যাম্পেইন
+// সম্মিলিত দুরূদ ক্যাম্পেইন (sirat.markazuliman.com-এর সাথে রিয়েল-টাইমে সংযুক্ত)
 export const campaign = {
-  title: 'সম্মিলিত দুরূদ ক্যাম্পেইন',
-  target: 1000000,
+  title: 'একসাথে ১ লক্ষ দরূদ',
+  target: 100000,
   endDate: null, // যেমন: '2026-12-31' দিলে "দিন বাকি" দেখাবে
 };

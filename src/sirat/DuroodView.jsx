@@ -164,9 +164,11 @@ export default function DuroodPage() {
   const hasGlobal = remote !== null;
   const globalCount = hasGlobal ? remote.count + pending : 0;
   const target = (hasGlobal && remote.target) || campaign.target;
-  const pct = hasGlobal ? Math.min(100, (globalCount / target) * 100) : 0;
+  const pct = hasGlobal && target ? (globalCount / target) * 100 : 0;
+  const progressWidth = Math.min(100, pct);
+  const remaining = Math.max(0, target - globalCount);
   const daysLeft = campaign.endDate ? Math.max(0, Math.ceil((new Date(campaign.endDate) - new Date()) / 86400000)) : null;
-  const topCountries = hasGlobal ? Object.entries(remote.countries).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
+  const topCountries = hasGlobal ? Object.entries(remote.countries || {}).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
 
   const resetToday = () => {
     if (window.confirm('আজকের দুরূদ কাউন্টার শূন্য (০) করতে চান?')) {
@@ -222,12 +224,12 @@ export default function DuroodPage() {
 
       <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
         <div className="flex items-center justify-between text-sm font-semibold">
-          <span className="inline-flex items-center gap-1.5">{hasGlobal && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>}{hasGlobal ? 'লাইভ সম্মিলিত দুরূদ' : 'ক্যাম্পেইন লক্ষ্য'}</span>
-          <span>{bn(target)}</span>
+          <span className="inline-flex items-center gap-1.5">{hasGlobal && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>}{hasGlobal ? (remote.title || 'লাইভ সম্মিলিত দুরূদ') : 'ক্যাম্পেইন লক্ষ্য'}</span>
+          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">লক্ষ্য: {bn(target)}</span>
         </div>
         {hasGlobal && <p className="mt-1 text-3xl font-extrabold tabular-nums text-emerald-700 dark:text-emerald-200">{bn(globalCount)}</p>}
-        <div className="mt-2 h-3 rounded-full bg-emerald-100 dark:bg-white/10"><div className="h-full rounded-full bg-emerald-500 progress-fill" style={{ width: `${pct}%` }} /></div>
-        <p className="mt-2 text-xs text-slate-500">{hasGlobal ? `লক্ষ্যের ${bn(pct.toFixed(1))}% পূর্ণ • বাকি ${bn(Math.max(0, target - globalCount))}` : 'সম্মিলিত গণনা শিগগিরই চালু হবে, ইন শা আল্লাহ। আপাতত আপনার নিজের গণনা চলবে।'}</p>
+        <div className="mt-2 h-3 rounded-full bg-emerald-100 dark:bg-white/10"><div className="h-full rounded-full bg-emerald-500 progress-fill" style={{ width: `${progressWidth}%` }} /></div>
+        <p className="mt-2 text-xs text-slate-500">{hasGlobal ? (remaining > 0 ? `লক্ষ্যের ${bn(pct.toFixed(1))}% পূর্ণ • বাকি ${bn(remaining)}` : `লক্ষ্যের ${bn(pct.toFixed(1))}% অর্জিত • আলহামদুলিল্লাহ লক্ষ্যমাত্রা পূর্ণ হয়েছে!`) : 'সম্মিলিত গণনা লোড হচ্ছে...'}</p>
         {hasGlobal && (
           <div className="mt-3 grid grid-cols-2 gap-2 text-center">
             <div className="rounded-xl bg-emerald-50 dark:bg-white/5 px-3 py-2"><Users size={16} className="mx-auto text-emerald-600" /><p className="mt-0.5 text-lg font-bold">{bn(remote.participants)}</p><p className="text-[11px] text-slate-500">অংশগ্রহণকারী</p></div>
