@@ -5,7 +5,8 @@ import Quiz from './Quiz';
 import SectionHero from './SectionHero';
 import { QuizShell } from './QuizModal';
 import { Exam } from './ExamView';
-import { buildQuestions } from './questions';
+import { buildQuestions, bn } from './questions';
+import { saveQuizResult } from '../utils/quizHistoryManager';
 
 const MODES = [
   { key: 'quiz', label: 'কুইজ', hint: 'একটি একটি প্রশ্ন, সঙ্গে সঙ্গে ব্যাখ্যা', icon: PenLine },
@@ -28,6 +29,16 @@ export default function QuizPage() {
     setBusy(false);
   };
 
+  const handleQuizFinish = (s, t) => {
+    saveQuizResult({
+      title: `কুইজ (দারস ${selected.map(bn).join(', ')})`,
+      type: 'quiz',
+      score: s,
+      total: t,
+      earnedXp: (s * 10) + ((t - s) * 5)
+    });
+  };
+
   if (qs && mode === 'exam') return <Exam key={attempt} questions={qs} onExit={() => setQs(null)} />;
 
   return (
@@ -40,7 +51,7 @@ export default function QuizPage() {
       />
       <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-1 dark:border-white/10 dark:bg-white/5">
         {MODES.map(({ key, label, hint, icon: Icon }) => (
-          <button key={key} onClick={() => setMode(key)} className={`rounded-xl px-3 py-2.5 text-left transition ${mode === key ? 'bg-emerald-600 text-white shadow-[0_0_18px_rgba(14,165,233,0.5)]' : 'text-slate-600 dark:text-slate-300'}`}>
+          <button key={key} onClick={() => setMode(key)} className={`rounded-xl px-3 py-2.5 text-left transition cursor-pointer ${mode === key ? 'bg-emerald-600 text-white shadow-[0_0_18px_rgba(14,165,233,0.5)]' : 'text-slate-600 dark:text-slate-300'}`}>
             <span className="flex items-center gap-1.5 text-sm font-extrabold"><Icon size={16} /> {label}</span>
             <span className={`mt-0.5 block text-[11px] ${mode === key ? 'text-emerald-100' : 'text-slate-400'}`}>{hint}</span>
           </button>
@@ -49,7 +60,15 @@ export default function QuizPage() {
       <DarsPicker selected={selected} setSelected={setSelected} count={count} setCount={setCount} onStart={start} startLabel={busy ? 'তৈরি হচ্ছে…' : mode === 'exam' ? 'পরীক্ষা শুরু' : 'কুইজ শুরু'} busy={busy} />
       {qs && mode === 'quiz' && (
         <QuizShell heading="কুইজ" onClose={() => setQs(null)}>
-          <Quiz key={attempt} questions={qs} title="কুইজ" onRetry={start} onClose={() => setQs(null)} />
+          <Quiz 
+            key={attempt} 
+            questions={qs} 
+            sessionKey={`quiz_view_${selected.join('_')}`}
+            title="কুইজ" 
+            onRetry={start} 
+            onClose={() => setQs(null)} 
+            onFinish={handleQuizFinish}
+          />
         </QuizShell>
       )}
     </div>

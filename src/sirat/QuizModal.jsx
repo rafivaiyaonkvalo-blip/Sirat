@@ -5,6 +5,7 @@ import { getLang } from '../i18n';
 import index from '../data/darsIndex.json';
 import { bn, pickQuiz } from './questions';
 import { isDarsLocked } from './progress';
+import { saveQuizResult } from '../utils/quizHistoryManager';
 import Quiz from './Quiz';
 
 // কুইজের পপআপ-খোলস: কালো ব্যাকড্রপ, Esc/বাইরে চাপলে বন্ধ
@@ -18,11 +19,11 @@ export function QuizShell({ heading, onClose, children }) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4 animate-fade-in" onClick={onClose} role="dialog" aria-modal="true">
       <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-emerald-300/40 bg-slate-50 p-4 shadow-2xl dark:bg-slate-900 sm:rounded-3xl sm:p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <p className="text-xs font-black text-emerald-700 dark:text-emerald-300">{heading}</p>
-          <button onClick={onClose} aria-label="বন্ধ" className="rounded-full p-1.5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10"><X size={20} /></button>
+          <button onClick={onClose} aria-label="বন্ধ" className="rounded-full p-1.5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10 cursor-pointer"><X size={20} /></button>
         </div>
         {children}
       </div>
@@ -61,6 +62,20 @@ export default function QuizModal({ id, no, progress, onClose }) {
     setAttempt((a) => a + 1);
   };
 
+  const handleFinish = (s, t, details) => {
+    progress.saveScore(id, no, s, t);
+    progress.markDone(id, no);
+    saveQuizResult({
+      title: dars ? `দারস ${bn(dars.number)} (পর্ব ${bn(no)}) - পাঠ-কুইজ` : 'পাঠ-কুইজ',
+      type: 'quiz',
+      darsId: id,
+      porboNo: no,
+      score: s,
+      total: t,
+      earnedXp: (s * 10) + ((t - s) * 5)
+    });
+  };
+
   return (
     <QuizShell heading={dars ? `দারস ${bn(dars.number)} · ${dars.title}` : ''} onClose={onClose}>
         {dars === null && <p className="py-10 text-center text-slate-500">লোড হচ্ছে…</p>}
@@ -69,12 +84,13 @@ export default function QuizModal({ id, no, progress, onClose }) {
           <Quiz
             key={attempt}
             questions={qs}
+            sessionKey={`porbo_quiz_${id}_${no}`}
             previous={progress.scores[`${id}-${no}`]}
             onRetry={retry}
             onClose={onClose}
             celebrate
             nextHref={nextHref}
-            onFinish={(s, t) => { progress.saveScore(id, no, s, t); progress.markDone(id, no); }}
+            onFinish={handleFinish}
           />
         )}
     </QuizShell>

@@ -3,7 +3,7 @@
 import { collection, doc, documentId, getDoc, getDocs, increment, limit, orderBy, query, runTransaction, setDoc, updateDoc, where } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../services/firebase';
 
-export const POINTS = { perDurood: 10, quizCorrect: 10, quizWrong: 5 };
+export const POINTS = { perDurood: 0, quizCorrect: 10, quizWrong: 5, quizComplete: 20, perfectBonus: 30 };
 
 const KEY = 'sirat_points_v1';
 const REF_KEY = 'sirat_ref';
@@ -214,7 +214,7 @@ export function addDurood(n) {
   const s = read();
   s.durood += amount;
   s.pend.durood += amount;
-  addXp(amount * POINTS.perDurood);
+  // লিডারবোর্ড আপাতত দরূদের ওপর না করে কুইজ/অনুশীলন XP-র ওপর করা হয়েছে
   save();
   scheduleFlush();
 }
@@ -226,6 +226,15 @@ export function addQuizAnswer(correct) {
   save();
   scheduleFlush();
   return gain;
+}
+
+// কুইজ/পরীক্ষা সম্পূর্ণ করার বোনাস
+export function addQuizBonus(bonusXp) {
+  if (!bonusXp || bonusXp <= 0) return 0;
+  addXp(bonusXp);
+  save();
+  scheduleFlush();
+  return bonusXp;
 }
 
 // ---- রেফারেল (আসা দর্শকের দিক) ----
@@ -264,10 +273,10 @@ export async function creditReferrer(n) {
 }
 
 // ---- লিডারবোর্ড ----
-// leaderboard/{uid}-এর নিজের দুরূদ + ওই ব্যক্তির রেফারেল-কোডে জমা দুরূদ (refcodes/{code}) মিলিয়ে মোট
+// লিডারবোর্ড এখন অনুশীলন ও কুইজ XP-র ওপর ভিত্তি করে নির্ধারিত হয়
 export async function fetchLeaderboard(max = 100) {
   if (!cloud()) return [];
-  const snap = await getDocs(query(collection(db, 'leaderboard'), orderBy('total', 'desc'), limit(max * 2)));
+  const snap = await getDocs(query(collection(db, 'leaderboard'), limit(max * 2)));
   const rows = snap.docs.map((d) => {
     const x = d.data();
     return {
@@ -296,7 +305,14 @@ export async function fetchLeaderboard(max = 100) {
       const c = byCode[r.refCode] || {};
       const referred = Number(c.referred) || 0;
       const weekRef = c.week === weekId() ? Number(c.weekReferred) || 0 : 0;
-      return { ...r, referred, referredPeople: Number(c.referredPeople) || 0, weekRef, total: r.durood + referred, weekTotal: r.weekOwn + weekRef };
+      return { 
+        ...r, 
+        referred, 
+        referredPeople: Number(c.referredPeople) || 0, 
+        weekRef, 
+        total: r.xp, // Rank score is XP
+        weekTotal: r.xp 
+      };
     })
-    .filter((r) => r.total > 0);
+    .filter((r) => r.xp > 0 || r.durood > 0);
 }

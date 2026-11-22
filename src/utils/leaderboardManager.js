@@ -100,7 +100,7 @@ export function formatStudentPartialName(fullName) {
 }
 
 /**
- * লিডারবোর্ড: যার দুরূদ (নিজের + রেফারেল-লিংকে আসা) বেশি, সে এগিয়ে।
+ * লিডারবোর্ড: অনুশীলন ও কুইজে যার অর্জিত XP বেশি, সে এগিয়ে।
  * ডেটা পাবলিক leaderboard/{uid} থেকে আসে (ইমেইল/ফোন সেখানে থাকে না)।
  */
 export async function getLeaderboard(timeframe = 'week', forceRefresh = false) {
@@ -115,9 +115,13 @@ export async function getLeaderboard(timeframe = 'week', forceRefresh = false) {
     }
   }
   const currentUid = auth?.currentUser?.uid || null;
-  const weekly = timeframe === 'week';
-  const scoreOf = (u) => (weekly ? u.weekTotal : u.total);
-  const sorted = cachedUsers.filter((u) => scoreOf(u) > 0).sort((a, b) => scoreOf(b) - scoreOf(a)).slice(0, 100);
+  // লিডারবোর্ড এখন অনুশীলন ও কুইজ XP-র ওপর ভিত্তি করে সাজানো হয়
+  const scoreOf = (u) => Number(u.xp) || 0;
+  const sorted = (cachedUsers || [])
+    .filter((u) => scoreOf(u) > 0)
+    .sort((a, b) => scoreOf(b) - scoreOf(a))
+    .slice(0, 100);
+
   let rank = 1;
   const items = sorted.map((u, i) => {
     if (i > 0 && scoreOf(u) < scoreOf(sorted[i - 1])) rank = i + 1;
@@ -128,9 +132,10 @@ export async function getLeaderboard(timeframe = 'week', forceRefresh = false) {
       photoURL: u.photoURL || getAssetUrl('/madina.jpg'),
       score: scoreOf(u),
       scoreBn: toBengaliNumber(scoreOf(u)),
-      own: weekly ? u.weekOwn : u.durood,
-      referred: weekly ? u.weekRef : u.referred,
-      referredPeople: u.referredPeople,
+      xp: u.xp,
+      own: u.durood || 0,
+      referred: u.referred || 0,
+      referredPeople: u.referredPeople || 0,
       isCurrentUser: u.uid === currentUid,
       rank,
       rankBn: toBengaliNumber(rank),

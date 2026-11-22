@@ -190,12 +190,12 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
         {/* Level & Score (১ম, ২য়, ৩য় দের লেভেল ও XP প্রদর্শন) */}
         <div className="mt-1 flex flex-col items-center gap-0.5">
           <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.2 rounded-full border border-emerald-500/35 backdrop-blur-xs">
-            নিজে {toBengaliNumber(entry.own)} • রেফারেল {toBengaliNumber(entry.referred)}
+            লেভেল {toBengaliNumber(Math.floor((entry.score || 0) / 100) + 1)}
           </span>
           <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-slate-700/80 shadow-xs backdrop-blur-xs">
             <Zap size={11} className="text-amber-400 fill-amber-400" />
             <span className="text-[11px] sm:text-xs font-black text-amber-200">
-              {entry.scoreBn} দুরূদ
+              {entry.scoreBn} XP
             </span>
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
             ))}
           </div>
           <p className="mt-1.5 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-            র‍্যাংক হয় দুরূদ-গণনায়: নিজের পড়া + আপনার রেফারেল-লিংকে আসাদের পড়া{timeframe === 'week' ? ' • সপ্তাহ শুরু শনিবার' : ''}
+            র‍্যাংক নির্ধারিত হয় অনুশীলন ও কুইজের স্কোরের (XP) ওপর ভিত্তি করে
           </p>
         </div>
 
@@ -303,7 +303,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                 এখনো কেউ তালিকায় নেই
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                লগইন করে দুরূদ পাতায় দুরূদ পড়লে আপনার নাম এখানে আসবে।
+                লগইন করে কুইজ ও অনুশীলন সম্পন্ন করলে আপনার অর্জিত XP দিয়ে নাম এখানে আসবে।
               </p>
             </div>
           ) : (
@@ -363,7 +363,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                 <div className="space-y-2 pt-1">
                   <div className="flex items-center justify-between px-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
                     <span>ক্রম ও শিক্ষার্থী</span>
-                    <span>মোট দুরূদ</span>
+                    <span>অর্জিত XP</span>
                   </div>
 
                   {restOfList.map((entry) => {
@@ -420,12 +420,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                             </div>
 
                             <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
-                              <span>নিজে {toBengaliNumber(entry.own)}</span>
-                              {entry.referred > 0 && (
-                                <span className="flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-medium">
-                                  রেফারেল {toBengaliNumber(entry.referred)}
-                                </span>
-                              )}
+                              <span>লেভেল {toBengaliNumber(Math.floor((entry.score || 0) / 100) + 1)}</span>
                             </div>
                           </div>
                         </div>
@@ -434,7 +429,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                         <div className="flex items-center gap-1 pl-2 shrink-0">
                           <Zap size={12} className="text-amber-500 fill-amber-500" />
                           <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">
-                            {entry.scoreBn}
+                            {entry.scoreBn} XP
                           </span>
                         </div>
                       </div>
@@ -480,7 +475,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
                     </button>
                   </div>
                   <span className="text-[10px] text-emerald-100">
-                    নিজে {toBengaliNumber(data.currentUser.own)} • রেফারেল {toBengaliNumber(data.currentUser.referred)}
+                    লেভেল {toBengaliNumber(Math.floor((data.currentUser.score || 0) / 100) + 1)} • মোট {data.currentUser.scoreBn} XP
                   </span>
                 </div>
               </div>
@@ -488,7 +483,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
               <div className="flex items-center gap-1 bg-white/20 backdrop-blur-md px-3 py-1 rounded-xl">
                 <Zap size={13} className="text-amber-300 fill-amber-300" />
                 <span className="text-xs font-black tracking-wide">
-                  {data.currentUser.scoreBn} দুরূদ
+                  {data.currentUser.scoreBn} XP
                 </span>
               </div>
             </div>
