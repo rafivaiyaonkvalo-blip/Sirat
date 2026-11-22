@@ -3,9 +3,10 @@ import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap 
 import { campaign } from './brand';
 import { bn } from './questions';
 import { auth } from '../services/firebase';
+import { isSuperUser } from '../utils/superUser';
 import { t } from '../i18n';
 import { POINTS, addDurood, creditReferrer, ensureRefDoc, getMyCode, getPoints, refreshOwn, referralLink } from './points';
-import { addToGlobal, cloudEnabled, countryFlag, countryName, detectCountry, subscribeGlobal } from './duroodCloud';
+import { addToGlobal, cloudEnabled, countryFlag, countryName, detectCountry, subscribeGlobal, resetGlobalDurood } from './duroodCloud';
 
 const DUROODS = [
   { id: 'short', name: 'সংক্ষিপ্ত দুরূদ', ar: 'صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ', bn: 'আল্লাহ তাঁর ওপর রহমত ও শান্তি বর্ষণ করুন।' },
@@ -15,11 +16,30 @@ const DUROODS = [
 
 const KEY = 'sirat_durood_v1';
 const JOINED_KEY = 'sirat_durood_joined';
+const RESET_VER_KEY = 'sirat_durood_reset_v3';
 const BEAD = 33;
 const day = (d) => d.toISOString().slice(0, 10);
 const today = () => day(new Date());
+
 const load = () => {
-  try { return JSON.parse(localStorage.getItem(KEY)) || { total: 0, days: {} }; } catch { return { total: 0, days: {} }; }
+  try {
+    // ইউজারের অনুরোধে নতুন ভার্সন লোডে একবার স্বয়ংক্রিয়ভাবে কাউন্টার রিসেট করা
+    if (!localStorage.getItem(RESET_VER_KEY)) {
+      localStorage.setItem(RESET_VER_KEY, '1');
+      localStorage.setItem(KEY, JSON.stringify({ total: 0, days: {} }));
+      const ptsRaw = localStorage.getItem('sirat_points_v1');
+      if (ptsRaw) {
+        const p = JSON.parse(ptsRaw);
+        p.durood = 0;
+        p.pend = { ...(p.pend || {}), durood: 0 };
+        localStorage.setItem('sirat_points_v1', JSON.stringify(p));
+      }
+      return { total: 0, days: {} };
+    }
+    return JSON.parse(localStorage.getItem(KEY)) || { total: 0, days: {} };
+  } catch {
+    return { total: 0, days: {} };
+  }
 };
 const wasJoined = () => { try { return localStorage.getItem(JOINED_KEY) === '1'; } catch { return false; } };
 
@@ -148,6 +168,40 @@ export default function DuroodPage() {
   const daysLeft = campaign.endDate ? Math.max(0, Math.ceil((new Date(campaign.endDate) - new Date()) / 86400000)) : null;
   const topCountries = hasGlobal ? Object.entries(remote.countries).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
 
+  const resetToday = () => {
+    if (window.confirm('আজকের দুরূদ কাউন্টার শূন্য (০) করতে চান?')) {
+      setState((s) => ({
+        total: Math.max(0, s.total - todayCount),
+        days: { ...s.days, [today()]: 0 }
+      }));
+    }
+  };
+
+  const resetAll = () => {
+    if (window.confirm('আপনার মোট ও আজকের দুরূদ কাউন্টার সম্পূর্ণ শূন্য (০) করতে চান?')) {
+      setState({ total: 0, days: {} });
+      try {
+        localStorage.setItem(KEY, JSON.stringify({ total: 0, days: {} }));
+        const ptsRaw = localStorage.getItem('sirat_points_v1');
+        if (ptsRaw) {
+          const p = JSON.parse(ptsRaw);
+          p.durood = 0;
+          p.pend = { ...(p.pend || {}), durood: 0 };
+          localStorage.setItem('sirat_points_v1', JSON.stringify(p));
+          window.dispatchEvent(new CustomEvent('sirat_points_changed'));
+        }
+      } catch {}
+    }
+  };
+
+  const handleResetGlobal = async () => {
+    if (window.confirm('⚠️ আপনি কি নিশ্চিত যে পুরো ওয়েবসাইটের সম্মিলিত গ্লোবাল দুরূদ ক্যাম্পেইন কাউন্টার ০ করতে চান?')) {
+      const ok = await resetGlobalDurood();
+      if (ok) alert('গ্লোবাল ক্যাম্পেইন কাউন্টার সফলভাবে রিসেট করা হয়েছে।');
+      else alert('রিসেট করতে ব্যর্থ হয়েছে। অনুমতি চেক করুন।');
+    }
+  };
+
   const [shareMsg, setShareMsg] = useState('');
   const share = async () => {
     const url = myLink;
@@ -206,6 +260,39 @@ export default function DuroodPage() {
         </div>
       </div>
       <p className="mt-1 text-sm text-slate-500">{bn(filled)} / {bn(BEAD)} • {bn(cycles)} চক্র সম্পন্ন</p>
+
+      {/* কাউন্টার রিসেট বোতামসমূহ */}
+      <div className="mt-3 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={resetToday}
+          className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 px-4 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 transition cursor-pointer shadow-xs active:scale-95"
+          title="আজকের গণনা রিসেট করুন"
+        >
+          <RotateCcw size={13} className="text-amber-500" />
+          <span>কাউন্টার রিসেট (০)</span>
+        </button>
+        <button
+          type="button"
+          onClick={resetAll}
+          className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/60 border border-rose-200 dark:border-rose-900/40 px-4 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-300 transition cursor-pointer shadow-xs active:scale-95"
+          title="সব গণনা সম্পূর্ণ রিসেট করুন"
+        >
+          <RotateCcw size={13} className="text-rose-500" />
+          <span>সব রিসেট</span>
+        </button>
+      </div>
+      {isSuperUser(me) && (
+        <div className="mt-2 text-center">
+          <button
+            type="button"
+            onClick={handleResetGlobal}
+            className="text-[11px] font-bold text-rose-500 hover:text-rose-700 underline cursor-pointer"
+          >
+            🛡️ অ্যাডমিন: গ্লোবাল ক্যাম্পেইন কাউন্টার রিসেট
+          </button>
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         <span className="text-xs text-slate-500">আগে পড়েছেন? যোগ করুন:</span>

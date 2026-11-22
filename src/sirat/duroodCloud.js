@@ -36,6 +36,18 @@ export async function addToGlobal(n, { country, newParticipant } = {}) {
   return amount;
 }
 
+// অ্যাডমিনের জন্য গ্লোবাল ক্যাম্পেইন কাউন্টার রিসেট
+export async function resetGlobalDurood() {
+  if (!cloudEnabled()) return false;
+  try {
+    await setDoc(ref(), { count: 0, target: 1000000, participants: 0, countries: {} });
+    return true;
+  } catch (err) {
+    console.warn('Could not reset global durood:', err);
+    return false;
+  }
+}
+
 // ব্যবহারকারীর দেশ (আনুমানিক): ডিভাইসের টাইমজোন থেকে, না পেলে ভাষার অঞ্চল থেকে
 const TZ_COUNTRY = {
   'Asia/Dhaka': 'BD', 'Asia/Karachi': 'PK', 'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN', 'Asia/Kathmandu': 'NP', 'Asia/Colombo': 'LK',
