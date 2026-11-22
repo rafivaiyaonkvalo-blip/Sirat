@@ -5,31 +5,39 @@ let lastKnownSnapshot = {
   title: 'একসাথে ১ লক্ষ দরূদ',
   target: 100000,
   isActive: true,
-  total: 148636,
+  total: 148638,
   updatedAt: new Date().toISOString()
 };
 
-async function getParticipantId() {
-  if (cachedParticipantId) return cachedParticipantId;
+async function ensureParticipantId(preferredId) {
+  const pid = (preferredId && /^[0-9a-f-]{36}$/i.test(preferredId))
+    ? preferredId
+    : (cachedParticipantId || crypto.randomUUID());
+
   try {
     const res = await fetch('https://sirat.markazuliman.com/api/durud/session', {
-      headers: { 'User-Agent': 'Sirat-Bridge/1.0' },
+      headers: {
+        'Cookie': `sirat_durud_participant=${pid}`,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
       cache: 'no-store'
     });
-    const setCookie = res.headers.get('set-cookie');
-    const match = setCookie ? setCookie.match(/sirat_durud_participant=([a-f0-9-]+)/i) : null;
-    if (match) {
-      cachedParticipantId = match[1];
+    if (res.ok) {
+      cachedParticipantId = pid;
+      return pid;
     }
   } catch (err) {
-    console.warn('Failed to fetch session cookie from sirat.markazuliman.com:', err);
+    console.warn('Session init warning:', err);
   }
-  return cachedParticipantId || crypto.randomUUID();
+  cachedParticipantId = pid;
+  return pid;
 }
 
 async function fetchStats() {
   const res = await fetch('https://sirat.markazuliman.com/api/durud/stats', {
-    headers: { 'User-Agent': 'Sirat-Bridge/1.0' },
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    },
     cache: 'no-store'
   });
   if (!res.ok) throw new Error(`Stats HTTP ${res.status}`);
@@ -44,8 +52,8 @@ async function fetchStats() {
   return lastKnownSnapshot;
 }
 
-async function contribute(amount) {
-  let pid = await getParticipantId();
+async function contribute(amount, clientParticipantId) {
+  let pid = await ensureParticipantId(clientParticipantId);
   const subId = crypto.randomUUID();
 
   const send = async (p) => {
@@ -55,16 +63,16 @@ async function contribute(amount) {
         'Content-Type': 'application/json',
         'Cookie': `sirat_durud_participant=${p}`,
         'Origin': 'https://sirat.markazuliman.com',
-        'User-Agent': 'Sirat-Bridge/1.0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
       },
       body: JSON.stringify({ amount, submissionId: subId })
     });
   };
 
   let res = await send(pid);
-  if (res.status === 401) {
-    cachedParticipantId = null;
-    pid = await getParticipantId();
+  if (res.status === 401 || res.status === 403) {
+    cachedParticipantId = crypto.randomUUID();
+    pid = await ensureParticipantId(cachedParticipantId);
     res = await send(pid);
   }
 
@@ -103,7 +111,7 @@ export default async function handler(req, res) {
         updatedAt: snap.updatedAt
       });
     } catch (err) {
-      console.warn('Serving fallback stats:', err.message);
+      console.warn('Serving cached stats:', err.message);
       return res.status(200).json({
         count: lastKnownSnapshot.total,
         total: lastKnownSnapshot.total,
@@ -123,8 +131,9 @@ export default async function handler(req, res) {
       }
       const rawAmount = Number(body?.amount);
       const amount = Math.min(Math.max(Math.floor(rawAmount || 0), 1), 1000);
+      const clientPid = body?.participantId;
 
-      const result = await contribute(amount);
+      const result = await contribute(amount, clientPid);
       return res.status(200).json({
         success: true,
         count: result.total || lastKnownSnapshot.total,

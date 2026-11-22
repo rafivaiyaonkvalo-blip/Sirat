@@ -101,6 +101,19 @@ export function subscribeGlobal(cb) {
 // একবারে সর্বোচ্চ MAX_BATCH যোগ হয়; বাকিটা পরের ফ্লাশে
 export const MAX_BATCH = 200;
 
+function getLocalParticipantId() {
+  try {
+    let pid = localStorage.getItem('sirat_durud_participant_id');
+    if (!pid || !/^[0-9a-f-]{36}$/i.test(pid)) {
+      pid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : null;
+      if (pid) localStorage.setItem('sirat_durud_participant_id', pid);
+    }
+    return pid;
+  } catch {
+    return null;
+  }
+}
+
 // country: দুই অক্ষরের কোড (যেমন BD); newParticipant: এই ডিভাইসের প্রথমবার
 // উভয় ওয়েবসাইটে (Two-way sync) একসাথে কাউন্ট আপডেট পাঠানো হয়
 export async function addToGlobal(n, { country, newParticipant } = {}) {
@@ -113,7 +126,7 @@ export async function addToGlobal(n, { country, newParticipant } = {}) {
     const res = await fetch(`${baseUrl}/sirat/api/durood`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, country, newParticipant })
+      body: JSON.stringify({ amount, country, newParticipant, participantId: getLocalParticipantId() })
     });
     if (res.ok) {
       // ব্যাকগ্রাউন্ডে ফায়ারবেসেও রেকর্ড রাখা
