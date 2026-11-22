@@ -16,7 +16,7 @@ const DUROODS = [
 
 const KEY = 'sirat_durood_v1';
 const JOINED_KEY = 'sirat_durood_joined';
-const RESET_VER_KEY = 'sirat_durood_reset_v3';
+const RESET_VER_KEY = 'sirat_durood_reset_v4';
 const BEAD = 33;
 const day = (d) => d.toISOString().slice(0, 10);
 const today = () => day(new Date());
@@ -312,7 +312,7 @@ export default function DuroodPage() {
           <h2 className="inline-flex items-center gap-1.5 text-sm font-bold"><Zap size={16} className="text-amber-500" /> আপনার XP: {bn(pts.xp)}</h2>
           <button onClick={() => window.dispatchEvent(new CustomEvent('uls_open_leaderboard'))} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 px-3 py-1 text-xs font-bold dark:border-white/20"><Trophy size={13} /> লিডারবোর্ড</button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">দুরূদ পাঠে অফুরন্ত সওয়াব ও বরকত। লিডারবোর্ডে কুইজ ও অনুশীলনের স্কোরে (XP) এগিয়ে থাকা যায়।</p>
+        <p className="mt-1 text-xs text-slate-500">প্রতিটি দুরূদ পাঠে +১০ XP এবং কুইজ ও অনুশীলনে অতিরিক্ত XP অর্জন করা যায়।</p>
         <div className="mt-3">
           <p className="text-sm font-semibold">আপনার রেফারেল লিংক {!me && <span className="text-[11px] font-normal text-slate-500">(লগইন ছাড়াই)</span>}</p>
           <div className="mt-1 flex items-center gap-2">

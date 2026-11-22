@@ -13,34 +13,38 @@ import darsIndex from '../data/darsIndex.json';
 import { getTotalXp, getLevelInfo, toBengaliNumber } from './gamification';
 import { isSuperUser } from './superUser';
 
-const TOTAL_LESSONS = darsIndex.reduce((a, d) => a + d.porbos.length, 0);
+export const TOTAL_DARS = 32;
 
-// সনদের কোর্স: সীরাতের সব দারস (আইডি 'vol1' রাখা হয়েছে, পুরনো কোডের সঙ্গে সামঞ্জস্যের জন্য)
+// সনদের কোর্স: সীরাতের ৩২টি দারস (আইডি 'vol1' রাখা হয়েছে, পুরনো কোডের সঙ্গে সামঞ্জস্যের জন্য)
 export const VOLUME_CONFIGS = [
   {
     id: 'vol1',
     volumeNumber: 1,
-    title: 'সীরাত (পূর্ণাঙ্গ কোর্স)',
-    bookTitle: 'সীরাত: নবীজী ﷺ-এর জীবনী (৩২ দারস)',
-    arabicBookTitle: 'السِّيرَةُ النَّبَوِيَّةُ',
-    description: 'নবীজী ﷺ-এর জীবনী নিয়ে ৩২টি দারসের সব পাঠ',
-    totalLessons: TOTAL_LESSONS,
+    title: 'সীরাত (পূর্ণাঙ্গ কোর্স — ৩২ দারস)',
+    bookTitle: 'সীরাত: নবীজী ﷺ-এর পবিত্র জীবনচরিত (৩২টি দারস)',
+    arabicBookTitle: 'السِّيرَةُ النَّبَوِيَّةُ الشَّرِيفَةُ (٣٢ دَرْسًا)',
+    description: 'নবীজী ﷺ-এর পবিত্র জীবনী নিয়ে ৩২টি দারসের পূর্ণাঙ্গ পাঠ্যক্রম',
+    totalLessons: TOTAL_DARS,
     minXp: 0
   }
 ];
 
 /**
- * শিক্ষার্থীর পাঠ সম্পন্ন হওয়ার সংখ্যা ও শতকরা হার বের করা (সীরাতের অগ্রগতি থেকে)
+ * শিক্ষার্থীর পাঠ সম্পন্ন হওয়ার সংখ্যা ও শতকরা হার বের করা (৩২টি দারসের ভিত্তিতে)
  */
 export function getVolumeProgress() {
   let completedCount = 0;
   try {
     const progress = JSON.parse(localStorage.getItem('sirat_progress_v2') || '{}') || {};
-    completedCount = Object.keys(progress.done || {}).length;
+    const done = progress.done || {};
+    // দারসের প্রতিটি পর্ব সম্পন্ন হলে সেই দারস সম্পন্ন হিসেবে গণ্য
+    completedCount = darsIndex.filter(d => 
+      d.porbos.length > 0 && d.porbos.every(p => Boolean(done[`${d.id}-${p.no}`]))
+    ).length;
   } catch (err) {
     console.warn('Error calculating progress:', err);
   }
-  const totalCount = TOTAL_LESSONS;
+  const totalCount = TOTAL_DARS;
   const percent = Math.min(100, Math.round((completedCount / totalCount) * 100));
   return {
     completedCount,
@@ -135,9 +139,9 @@ export function getCertificateData(user, profile, volumeId = 'vol1', overrideNam
     directorTitle: 'শিক্ষা ও পাঠ্যক্রম পরিচালক',
     directorName: 'মাওলানা মুহাম্মাদ আব্দুল হাকিম',
     quranAyah: {
-      arabic: 'إِنَّا أَنْزَلْنَاهُ قُرْآنًا عَرَبِيًّا لَعَلَّكُمْ تَعْقِلُونَ',
-      bengali: 'নিশ্চয় আমি একে অবতীর্ণ করেছি আরবী ভাষায় কুরআনরূপে, যাতে তোমরা বুঝতে পারো।',
-      surah: 'সূরা ইউসুফ, আয়াত: ২'
+      arabic: 'لَقَدْ كَانَ لَكُمْ فِي رَسُولِ اللَّهِ أُسْوَةٌ حَسَنَةٌ',
+      bengali: 'নিশ্চয় রাসূলুল্লাহর মাঝে তোমাদের জন্য রয়েছে সর্বোত্তম আদর্শ।',
+      surah: 'সূরা আল-আহযাব, আয়াত: ২১'
     }
   };
 }

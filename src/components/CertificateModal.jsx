@@ -146,7 +146,7 @@ export default function CertificateModal({ isOpen, onClose, user }) {
                   {currentVolume.title} সনদপত্র
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                  মারকাযুল ঈমান মাদরাসার এই অফিশিয়াল সনদপত্রটি উন্মুক্ত করতে আপনাকে এই খণ্ডের সকল দারস সফলতার সাথে সম্পন্ন করতে হবে।
+                  মারকাযুল ঈমান মাদরাসার এই অফিশিয়াল সনদপত্রটি উন্মুক্ত করতে আপনাকে সীরাত পাঠ্যক্রমের ৩২টি দারস সফলতার সাথে সম্পন্ন করতে হবে।
                 </p>
               </div>
 

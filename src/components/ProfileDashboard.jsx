@@ -1127,10 +1127,10 @@ export default function ProfileDashboard({ user, loading, onLogout, onSaved, onE
                   <span>সনদপত্রটি এখনও তালাবদ্ধ (Locked)</span>
                 </span>
                 <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-2">
-                  ১ম খণ্ড সনদপত্র
+                  সীরাত পাঠ্যক্রম সনদপত্র (৩২ দারস)
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                  মারকাযুল ঈমান মাদরাসার এই অফিশিয়াল ডিজিটাল সনদপত্রটি অর্জন করতে আপনাকে ১ম খণ্ডের সকল দারস সফলতার সাথে সম্পন্ন করতে হবে।
+                  মারকাযুল ঈমান মাদরাসার এই অফিশিয়াল ডিজিটাল সনদপত্রটি অর্জন করতে আপনাকে সীরাত পাঠ্যক্রমের ৩২টি দারস সফলতার সাথে সম্পন্ন করতে হবে।
                 </p>
               </div>
 
@@ -1174,7 +1174,7 @@ export default function ProfileDashboard({ user, loading, onLogout, onSaved, onE
                     মারকাযুল ঈমান ডিজিটাল সনদপত্র
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    ✓ ১ম খণ্ড সফলভাবে সম্পন্ন হয়েছে
+                    ✓ ৩২টি দারস সফলভাবে সম্পন্ন হয়েছে
                   </p>
                 </div>
                 <button

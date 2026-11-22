@@ -3,7 +3,7 @@
 import { collection, doc, documentId, getDoc, getDocs, increment, limit, orderBy, query, runTransaction, setDoc, updateDoc, where } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../services/firebase';
 
-export const POINTS = { perDurood: 0, quizCorrect: 10, quizWrong: 5, quizComplete: 20, perfectBonus: 30 };
+export const POINTS = { perDurood: 10, quizCorrect: 10, quizWrong: 5, quizComplete: 20, perfectBonus: 30 };
 
 const KEY = 'sirat_points_v1';
 const REF_KEY = 'sirat_ref';
@@ -214,7 +214,9 @@ export function addDurood(n) {
   const s = read();
   s.durood += amount;
   s.pend.durood += amount;
-  // লিডারবোর্ড আপাতত দরূদের ওপর না করে কুইজ/অনুশীলন XP-র ওপর করা হয়েছে
+  if (POINTS.perDurood > 0) {
+    addXp(amount * POINTS.perDurood);
+  }
   save();
   scheduleFlush();
 }
