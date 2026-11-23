@@ -355,15 +355,27 @@ export default function App() {
       }
     };
     const handleHash = () => {
-      if (window.location.hash && window.location.hash.startsWith('#/dars')) {
+      const h = (window.location.hash || '').replace(/^#\/?/, '').split('?')[0];
+      if (h.startsWith('dars')) {
         setCurrentTab('lessons');
+      } else if (['book', 'durood', 'quiz'].includes(h)) {
+        setCurrentTab(h);
+      }
+    };
+    const handleNavigateTab = (e) => {
+      const tab = e.detail;
+      const validTabs = ['lessons', 'durood', 'quiz', 'exam', 'book'];
+      if (validTabs.includes(tab)) {
+        setCurrentTab(tab === 'exam' ? 'quiz' : tab);
       }
     };
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('hashchange', handleHash);
+    window.addEventListener('uls_navigate_tab', handleNavigateTab);
     return () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('uls_navigate_tab', handleNavigateTab);
     };
   }, []);
 

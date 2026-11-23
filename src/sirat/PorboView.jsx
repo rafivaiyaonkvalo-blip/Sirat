@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, ExternalLink, FileDown, FileText, Film, Headphones, Lightbulb, Lock, PenLine, PictureInPicture2 } from 'lucide-react';
+import { BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Circle, ExternalLink, FileDown, FileText, Film, Headphones, Lightbulb, Lock, PenLine, PictureInPicture2 } from 'lucide-react';
 import { isUnlocked, isDarsLocked, isTextLocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
@@ -231,20 +231,30 @@ export default function PorboPage({ id, no, step, progress }) {
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">দারস {meta.number}-এর লিখিত পাঠ ওয়েবসাইটে দেওয়া হবে না</h3>
             <p className="mt-2.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              দারস ২৫ থেকে ৩২-এর কোনো লিখিত পাঠ ওয়েবসাইটে দেওয়া হবে না। পাঠটি সম্পূর্ণ করতে সরাসরি মূল লেকচার ভিডিওটি মনোযোগ দিয়ে দেখুন অথবা অফলাইনে পড়ার জন্য গুগল ড্রাইভ ফোল্ডার থেকে সম্পূর্ণ মূল পিডিএফ ডাউনলোড করে নিন।
+              দারস ২৫ থেকে ৩২-এর কোনো লিখিত পাঠ ওয়েবসাইটে বা ড্রাইভে দেওয়া হবে না। পাঠটি সম্পূর্ণ করতে সরাসরি মূল লেকচার ভিডিওটি মনোযোগ দিয়ে দেখুন অথবা পড়ার জন্য মূল বই সংগ্রহ করুন।
             </p>
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <a href={go(`/dars/${id}/${no}/video`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors">
                 <Film size={16} /> লেকচার ভিডিও দেখুন
               </a>
               <a
-                href={DRIVE_PDF_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-900/40 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-800/40 transition-colors shadow-xs"
+                href="#/book"
+                onClick={() => {
+                  window.location.hash = '#/book';
+                  window.dispatchEvent(new CustomEvent('uls_navigate_tab', { detail: 'book' }));
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors shadow-xs cursor-pointer"
               >
-                <FileDown size={16} /> মূল পিডিএফ ডাউনলোড <ExternalLink size={13} className="opacity-70" />
+                <BookOpen size={16} /> মূল বই সংগ্রহ করুন / বই কিনুন
               </a>
+              {porbo.quiz?.length > 0 && (
+                <a
+                  href={go(`/dars/${id}/${no}/quiz`)}
+                  className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-amber-700 transition-colors"
+                >
+                  <PenLine size={16} /> কুইজ খেলুন
+                </a>
+              )}
             </div>
           </div>
         ) : (
@@ -330,7 +340,7 @@ export default function PorboPage({ id, no, step, progress }) {
         )
       )}
 
-      {step === 'quiz' && <QuizModal id={id} no={no} progress={progress} onClose={() => { window.location.hash = `/dars/${id}/${no}/text`; }} />}
+      {step === 'quiz' && <QuizModal id={id} no={no} progress={progress} onClose={() => { window.location.hash = isTextLocked(id) ? `/dars/${id}/${no}/video` : `/dars/${id}/${no}/text`; }} />}
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         {prevHref ? <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a> : <span />}
@@ -339,9 +349,11 @@ export default function PorboPage({ id, no, step, progress }) {
             {!isTextLocked(id) && (
               <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">লেখা পড়ুন <ChevronRight size={18} /></a>
             )}
-            {porbo.quiz.length > 0 && !isTextLocked(id) && <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><PenLine size={18} /> কুইজ খেলুন</a>}
-            {isTextLocked(id) && !done && (
-              <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><Circle size={18} /> সম্পন্ন করুন</button>
+            {porbo.quiz.length > 0 && (
+              <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"><PenLine size={18} /> কুইজ খেলুন</a>
+            )}
+            {!done && (
+              <button onClick={() => progress.markDone(id, no)} className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-bold transition-colors ${porbo.quiz.length > 0 ? 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/5' : 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700'}`}><Circle size={18} /> {porbo.quiz.length > 0 ? 'কুইজ ছাড়াই সম্পন্ন করুন' : 'সম্পন্ন করুন'}</button>
             )}
             {done && (
               <div className="flex items-center gap-3">
@@ -351,17 +363,16 @@ export default function PorboPage({ id, no, step, progress }) {
             )}
           </div>
         )}
-        {view === 'text' && !isTextLocked(id) && porbo.quiz.length > 0 && (
-          <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
+        {view === 'text' && porbo.quiz.length > 0 && (
+          <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
         )}
-        {view === 'text' && !isTextLocked(id) && porbo.quiz.length > 0 && !done && (
-          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200"><Circle size={18} /> কুইজ ছাড়াই সম্পন্ন করুন</button>
+        {view === 'text' && porbo.quiz.length > 0 && !done && (
+          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/5 transition-colors"><Circle size={18} /> কুইজ ছাড়াই সম্পন্ন করুন</button>
         )}
-        {view === 'text' && (!porbo.quiz.length || isTextLocked(id)) && !done && (
-          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><Circle size={18} /> সম্পন্ন করুন</button>
+        {view === 'text' && !porbo.quiz.length && !done && (
+          <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"><Circle size={18} /> সম্পন্ন করুন</button>
         )}
         {done && view !== 'video' && (
-
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1 text-sm font-bold text-emerald-700 dark:text-emerald-300"><CheckCircle2 size={18} /> সম্পন্ন</span>
             {nextLessonHref && <a href={go(nextLessonHref)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পরের ধাপ <ChevronRight size={18} /></a>}
