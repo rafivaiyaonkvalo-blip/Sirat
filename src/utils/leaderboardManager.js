@@ -115,8 +115,8 @@ export async function getLeaderboard(timeframe = 'week', forceRefresh = false) {
     }
   }
   const currentUid = auth?.currentUser?.uid || null;
-  // লিডারবোর্ড এখন অনুশীলন ও কুইজ XP-র ওপর ভিত্তি করে সাজানো হয়
-  const scoreOf = (u) => Number(u.xp) || 0;
+  // লিডারবোর্ড: অনুশীলন, কুইজ, দুরূদ (+১০ XP) ও রেফারেল চেইনের অর্জিত মোট XP
+  const scoreOf = (u) => Number(u.total ?? u.xp) || 0;
   const sorted = (cachedUsers || [])
     .filter((u) => scoreOf(u) > 0)
     .sort((a, b) => scoreOf(b) - scoreOf(a))

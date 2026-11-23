@@ -4,7 +4,7 @@ import { campaign } from './brand';
 import { bn } from './questions';
 import { auth } from '../services/firebase';
 import { isSuperUser } from '../utils/superUser';
-import { t } from '../i18n';
+import { t, useLang } from '../i18n';
 import { POINTS, addDurood, creditReferrer, ensureRefDoc, getMyCode, getPoints, refreshOwn, referralLink } from './points';
 import { addToGlobal, cloudEnabled, countryFlag, countryName, detectCountry, subscribeGlobal, resetGlobalDurood } from './duroodCloud';
 
@@ -20,6 +20,16 @@ const RESET_VER_KEY = 'sirat_durood_reset_v4';
 const BEAD = 33;
 const day = (d) => d.toISOString().slice(0, 10);
 const today = () => day(new Date());
+
+const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+const toAr = (s) => String(s).replace(/[0-9]/g, (d) => AR_DIGITS[d]);
+
+function formatNum(n, l) {
+  if (n === null || n === undefined) return '';
+  if (l === 'en') return Number(n).toLocaleString('en-US');
+  if (l === 'ar') return toAr(Number(n).toLocaleString('en-US'));
+  return bn(n);
+}
 
 const load = () => {
   try {
@@ -73,6 +83,7 @@ function BeadRing({ filled }) {
 }
 
 export default function DuroodPage() {
+  const lang = useLang();
   const [state, setState] = useState(load);
   const [sel, setSel] = useState(DUROODS[0].id);
   const d = DUROODS.find((x) => x.id === sel);
@@ -218,22 +229,30 @@ export default function DuroodPage() {
 
   return (
     <div className="mx-auto max-w-2xl text-center">
-      <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">দুরূদ</h1>
-      <p className="mt-1 text-slate-500 dark:text-slate-400">{campaign.title}: নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।</p>
+      <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{t('দুরূদ')}</h1>
+      <p className="mt-1 text-slate-500 dark:text-slate-400">{t(campaign.title)}: {t('নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।')}</p>
       <p className="font-arabic mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-200 sm:text-xl" dir="rtl">بَيْنَكَ أَنْتَ وَبَيْنَ اللَّهِ</p>
 
       <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
         <div className="flex items-center justify-between text-sm font-semibold">
-          <span className="inline-flex items-center gap-1.5">{hasGlobal && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>}{hasGlobal ? (remote.title || 'লাইভ সম্মিলিত দুরূদ') : 'ক্যাম্পেইন লক্ষ্য'}</span>
-          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">লক্ষ্য: {bn(target)}</span>
+          <span className="inline-flex items-center gap-1.5">{hasGlobal && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>}{t(hasGlobal ? (remote.title || campaign.title) : 'ক্যাম্পেইন লক্ষ্য')}</span>
+          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">{t('লক্ষ্য:')} {formatNum(target, lang)}</span>
         </div>
-        {hasGlobal && <p className="mt-1 text-3xl font-extrabold tabular-nums text-emerald-700 dark:text-emerald-200">{bn(globalCount)}</p>}
+        {hasGlobal && <p className="mt-1 text-3xl font-extrabold tabular-nums text-emerald-700 dark:text-emerald-200">{formatNum(globalCount, lang)}</p>}
         <div className="mt-2 h-3 rounded-full bg-emerald-100 dark:bg-white/10"><div className="h-full rounded-full bg-emerald-500 progress-fill" style={{ width: `${progressWidth}%` }} /></div>
-        <p className="mt-2 text-xs text-slate-500">{hasGlobal ? (remaining > 0 ? `লক্ষ্যের ${bn(pct.toFixed(1))}% পূর্ণ • বাকি ${bn(remaining)}` : `লক্ষ্যের ${bn(pct.toFixed(1))}% অর্জিত • আলহামদুলিল্লাহ লক্ষ্যমাত্রা পূর্ণ হয়েছে!`) : 'সম্মিলিত গণনা লোড হচ্ছে...'}</p>
+        <p className="mt-2 text-xs text-slate-500">
+          {hasGlobal ? (
+            remaining > 0 ? (
+              lang === 'en' ? `${pct.toFixed(1)}% of target complete • Remaining ${formatNum(remaining, lang)}` :
+              lang === 'ar' ? `اكتمل ${formatNum(pct.toFixed(1), lang)}% من الهدف • المتبقي ${formatNum(remaining, lang)}` :
+              `লক্ষ্যের ${bn(pct.toFixed(1))}% পূর্ণ • বাকি ${bn(remaining)}`
+            ) : t('আলহামদুলিল্লাহ লক্ষ্যমাত্রা পূর্ণ হয়েছে!')
+          ) : t('সম্মিলিত গণনা লোড হচ্ছে...')}
+        </p>
         {hasGlobal && (
           <div className="mt-3 grid grid-cols-2 gap-2 text-center">
-            <div className="rounded-xl bg-emerald-50 dark:bg-white/5 px-3 py-2"><Users size={16} className="mx-auto text-emerald-600" /><p className="mt-0.5 text-lg font-bold">{bn(remote.participants)}</p><p className="text-[11px] text-slate-500">অংশগ্রহণকারী</p></div>
-            <div className="rounded-xl bg-emerald-50 dark:bg-white/5 px-3 py-2"><Globe size={16} className="mx-auto text-emerald-600" /><p className="mt-0.5 text-lg font-bold">{daysLeft !== null ? bn(daysLeft) : bn(Object.keys(remote.countries).length)}</p><p className="text-[11px] text-slate-500">{daysLeft !== null ? 'দিন বাকি' : 'দেশ থেকে'}</p></div>
+            <div className="rounded-xl bg-emerald-50 dark:bg-white/5 px-3 py-2"><Users size={16} className="mx-auto text-emerald-600" /><p className="mt-0.5 text-lg font-bold">{formatNum(remote.participants, lang)}</p><p className="text-[11px] text-slate-500">{t('অংশগ্রহণকারী')}</p></div>
+            <div className="rounded-xl bg-emerald-50 dark:bg-white/5 px-3 py-2"><Globe size={16} className="mx-auto text-emerald-600" /><p className="mt-0.5 text-lg font-bold">{daysLeft !== null ? formatNum(daysLeft, lang) : formatNum(Object.keys(remote.countries).length, lang)}</p><p className="text-[11px] text-slate-500">{daysLeft !== null ? t('দিন বাকি') : t('দেশ থেকে')}</p></div>
           </div>
         )}
       </div>
@@ -309,42 +328,67 @@ export default function DuroodPage() {
         <div className="rounded-xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 px-2 py-2"><p className="inline-flex items-center gap-1 text-xl font-bold"><Flame size={16} className="text-orange-500" />{bn(streak)}</p><p className="text-[11px] text-slate-500">টানা দিন</p></div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
-        <div className="flex items-center justify-between">
-          <h2 className="inline-flex items-center gap-1.5 text-sm font-bold"><Zap size={16} className="text-amber-500" /> আপনার XP: {bn(pts.xp)}</h2>
-          <button onClick={() => window.dispatchEvent(new CustomEvent('uls_open_leaderboard'))} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 px-3 py-1 text-xs font-bold dark:border-white/20"><Trophy size={13} /> লিডারবোর্ড</button>
-        </div>
-        <p className="mt-1 text-xs text-slate-500">প্রতিটি দুরূদ পাঠে +১০ XP এবং কুইজ ও অনুশীলনে অতিরিক্ত XP অর্জন করা যায়।</p>
-        <div className="mt-3">
-          <p className="text-sm font-semibold">আপনার রেফারেল লিংক {!me && <span className="text-[11px] font-normal text-slate-500">(লগইন ছাড়াই)</span>}</p>
-          <div className="mt-1 flex items-center gap-2">
-            <input readOnly value={myLink} onFocus={(e) => e.target.select()} className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs dark:border-white/10 dark:bg-slate-900" />
-            <button onClick={copyLink} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white"><Copy size={13} /> {copied ? 'কপি হয়েছে' : 'কপি / শেয়ার'}</button>
-          </div>
-          <p className="mt-1.5 text-[11px] text-slate-500">এই লিংকে যাঁরা ওয়েবসাইটে এসে দুরূদ পড়বেন, তাঁদের দুরূদ আপনার হিসাবে জমা হবে।</p>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-center">
-            <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{bn(pts.referredPeople)}</p><p className="text-[11px] text-slate-500">আপনার লিংকে এসেছেন</p></div>
-            <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{bn(pts.referred)}</p><p className="text-[11px] text-slate-500">তাঁদের পড়া দুরূদ (আপনার হিসাবে জমা)</p></div>
-          </div>
-          {!me && (
-            <div className="mt-3 rounded-xl bg-emerald-50 p-3 dark:bg-white/5">
-              <p className="text-sm">লিডারবোর্ডে আপনার নাম আসতে লগইন করুন। লগইনের পর আপনার এই লিংক ও আজ পর্যন্ত জমা সব সংখ্যা অ্যাকাউন্টে যোগ হবে।</p>
-              <button onClick={() => window.dispatchEvent(new CustomEvent('sirat_open_auth'))} className="mt-2 rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-bold text-white">লগইন করুন</button>
+      {/* XP ও রেফারেল সেকশন */}
+      {(() => {
+        const referralXp = (pts.referred || 0) * (POINTS.perDurood || 10);
+        return (
+          <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="inline-flex items-center gap-2 text-sm font-bold flex-wrap">
+                <Zap size={16} className="text-amber-500 fill-amber-500" />
+                <span>{t('আপনার XP:')} {formatNum(pts.xp, lang)}</span>
+                {referralXp > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-xs">
+                    +{formatNum(referralXp, lang)} {t('রেফারেল')}
+                  </span>
+                )}
+              </h2>
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('uls_open_leaderboard'))} 
+                className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-3 py-1 text-xs font-bold hover:bg-emerald-50 dark:hover:bg-white/10 transition cursor-pointer"
+              >
+                <Trophy size={13} className="text-amber-500" />
+                <span>{t('লিডারবোর্ড')}</span>
+              </button>
             </div>
-          )}
-        </div>
-      </div>
+            <div className="mt-1 text-xs text-slate-500 leading-relaxed space-y-1">
+              <p>{t('প্রতিটি দুরূদ পাঠে +১০ XP এবং কুইজ ও অনুশীলনে অতিরিক্ত XP অর্জন করা যায়।')}</p>
+              <p className="text-emerald-700 dark:text-emerald-300 font-medium">
+                ✨ {t('আপনার লিংকের মাধ্যমে এসে যাঁরা দুরূদ পড়বেন, তাঁদের দুরূদ XP-এর সমপরিমাণ কপি স্বয়ংক্রিয়ভাবে আপনার অ্যাকাউন্টেও জমা হবে।')}
+              </p>
+            </div>
+            <div className="mt-3">
+              <p className="text-sm font-semibold">{t('আপনার রেফারেল লিংক')} {!me && <span className="text-[11px] font-normal text-slate-500">({t('লগইন ছাড়াই')})</span>}</p>
+              <div className="mt-1 flex items-center gap-2">
+                <input readOnly value={myLink} onFocus={(e) => e.target.select()} className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs dark:border-white/10 dark:bg-slate-900" />
+                <button onClick={copyLink} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white transition cursor-pointer"><Copy size={13} /> {copied ? t('কপি হয়েছে') : t('কপি / শেয়ার')}</button>
+              </div>
+              <p className="mt-1.5 text-[11px] text-slate-500">{t('এই লিংকে যাঁরা ওয়েবসাইটে এসে দুরূদ পড়বেন, তাঁদের দুরূদ আপনার হিসাবে জমা হবে এবং সম্পূর্ণ চেইনে যুক্ত থাকবে।')}</p>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-center">
+                <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{formatNum(pts.referredPeople, lang)}</p><p className="text-[11px] text-slate-500">{t('আপনার লিংকে এসেছেন')}</p></div>
+                <div className="rounded-xl bg-emerald-50 px-2 py-2 dark:bg-white/5"><p className="text-lg font-bold">{formatNum(pts.referred, lang)}</p><p className="text-[11px] text-slate-500">{t('তাঁদের পড়া দুরূদ (আপনার হিসাবে জমা)')}</p></div>
+              </div>
+              {!me && (
+                <div className="mt-3 rounded-xl bg-emerald-50 p-3 dark:bg-white/5">
+                  <p className="text-sm">{t('লিডারবোর্ডে আপনার নাম আসতে লগইন করুন। লগইনের পর আপনার এই লিংক ও আজ পর্যন্ত জমা সব সংখ্যা অ্যাকাউন্টে যোগ হবে।')}</p>
+                  <button onClick={() => window.dispatchEvent(new CustomEvent('sirat_open_auth'))} className="mt-2 rounded-full bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 text-sm font-bold text-white transition cursor-pointer">{t('লগইন করুন')}</button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {topCountries.length > 0 && (
         <div className="mt-6 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
-          <h2 className="mb-2 text-sm font-bold">দেশ অনুযায়ী দুরূদ</h2>
+          <h2 className="mb-2 text-sm font-bold">{t('দেশ অনুযায়ী দুরূদ')}</h2>
           <ol className="space-y-1.5">
             {topCountries.map(([cc, n], i) => (
               <li key={cc} className={`flex items-center gap-2 rounded-lg px-2 py-1 text-sm ${cc === country ? 'bg-emerald-50 dark:bg-white/10 font-bold' : ''}`}>
-                <span className="w-5 text-xs text-slate-400">{bn(i + 1)}</span>
+                <span className="w-5 text-xs text-slate-400">{formatNum(i + 1, lang)}</span>
                 <span>{countryFlag(cc)}</span>
-                <span className="flex-1">{countryName(cc)}{cc === country && <span className="ml-1 text-[11px] text-emerald-600">(আপনার দেশ)</span>}</span>
-                <span className="font-semibold tabular-nums">{bn(n)}</span>
+                <span className="flex-1">{countryName(cc)}{cc === country && <span className="ml-1 text-[11px] text-emerald-600">({t('আপনার দেশ')})</span>}</span>
+                <span className="font-semibold tabular-nums">{formatNum(n, lang)}</span>
               </li>
             ))}
           </ol>
@@ -352,22 +396,22 @@ export default function DuroodPage() {
       )}
 
       <div className="mt-6">
-        <button onClick={share} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-md active:scale-95"><Share2 size={16} /> বন্ধু-পরিজনকে আমন্ত্রণ জানান</button>
-        <p className="mt-2 text-xs text-slate-500">{shareMsg || 'আপনার আমন্ত্রণে আরেকজন দুরূদ পাঠের সুযোগ পেতে পারেন।'}</p>
+        <button onClick={share} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-md active:scale-95"><Share2 size={16} /> {t('বন্ধু-পরিজনকে আমন্ত্রণ জানান')}</button>
+        <p className="mt-2 text-xs text-slate-500">{shareMsg || t('আপনার আমন্ত্রণে আরেকজন দুরূদ পাঠের সুযোগ পেতে পারেন।')}</p>
       </div>
 
       <div className="mt-8 space-y-2 text-left">
-        <h2 className="text-sm font-bold">সচরাচর জিজ্ঞাসা</h2>
+        <h2 className="text-sm font-bold">{t('সচরাচর জিজ্ঞাসা')}</h2>
         {FAQ.map((f) => (
           <details key={f.q} className="group rounded-xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2.5">
-            <summary className="cursor-pointer list-none text-sm font-semibold">{f.q}</summary>
+            <summary className="cursor-pointer list-none text-sm font-semibold">{t(f.q)}</summary>
             {f.ar && <p className="font-arabic mt-2 text-center text-xl text-emerald-700 dark:text-emerald-200" dir="rtl">{f.ar}</p>}
-            <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">{f.a}</p>
+            <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">{t(f.a)}</p>
           </details>
         ))}
       </div>
 
-      <button onClick={() => { if (window.confirm(t('আজকের গণনা শূন্য করবেন?'))) setState((s) => ({ total: s.total - todayCount, days: { ...s.days, [today()]: 0 } })); }} className="mt-6 inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"><RotateCcw size={12} /> আজকের গণনা রিসেট</button>
+      <button onClick={() => { if (window.confirm(t('আজকের গণনা শূন্য করবেন?'))) setState((s) => ({ total: s.total - todayCount, days: { ...s.days, [today()]: 0 } })); }} className="mt-6 inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"><RotateCcw size={12} /> {t('আজকের গণনা রিসেট')}</button>
     </div>
   );
 }

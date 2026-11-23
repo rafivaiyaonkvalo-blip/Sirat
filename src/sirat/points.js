@@ -7,6 +7,7 @@ export const POINTS = { perDurood: 10, quizCorrect: 10, quizWrong: 5, quizComple
 
 const KEY = 'sirat_points_v1';
 const REF_KEY = 'sirat_ref';
+const REF_CHAIN_KEY = 'sirat_ref_chain';
 const REF_JOINED_KEY = 'sirat_ref_joined';
 const MY_CODE_KEY = 'sirat_refcode';
 const OWNED_KEY = 'sirat_refcode_owned';
@@ -71,8 +72,22 @@ export function getMyCode() {
   }
 }
 
-// ছোট লিংক: .../sirat/?r=abc1234
-export const referralLink = (code) => `${window.location.origin}${import.meta.env.BASE_URL}?r=${code}`;
+// ছোট লিংক: .../sirat/?r=abc1234 এবং চেইনের রেফারেল থাকলে &c=code1.code2
+export const referralLink = (code) => {
+  const base = `${window.location.origin}${import.meta.env.BASE_URL}?r=${code}`;
+  try {
+    let chain = [];
+    const raw = localStorage.getItem(REF_CHAIN_KEY);
+    if (raw) chain = JSON.parse(raw);
+    const direct = localStorage.getItem(REF_KEY);
+    if (direct && !chain.includes(direct)) chain.unshift(direct);
+    const validChain = chain.filter((c) => validCode(c) && c !== code).slice(0, 8);
+    if (validChain.length > 0) {
+      return `${base}&c=${validChain.join('.')}`;
+    }
+  } catch { /* ignore */ }
+  return base;
+};
 
 // কোডের গণনা-ডক না থাকলে বানায় (যেন অন্যদের দুরূদ জমা হতে পারে)
 export async function ensureRefDoc() {
@@ -239,43 +254,75 @@ export function addQuizBonus(bonusXp) {
   return bonusXp;
 }
 
-// ---- রেফারেল (আসা দর্শকের দিক) ----
+// ---- রেফারেল (আসা দর্শকের দিক) ও মাল্টি-টিয়ার চেইন ----
 export function captureReferral() {
   try {
     const q = new URLSearchParams(window.location.search);
     const ref = q.get('r') || q.get('ref');
-    if (ref && /^[A-Za-z0-9]{7,64}$/.test(ref) && !localStorage.getItem(REF_KEY)) localStorage.setItem(REF_KEY, ref);
+    const chainParam = q.get('c') || q.get('via') || q.get('chain');
+    if (ref && validCode(ref)) {
+      if (!localStorage.getItem(REF_KEY)) localStorage.setItem(REF_KEY, ref);
+      let chain = [ref];
+      if (chainParam) {
+        const ancestors = chainParam.split(/[.,_]/).map((x) => x.trim()).filter((x) => validCode(x));
+        chain = [...new Set([ref, ...ancestors])];
+      }
+      try {
+        const existing = JSON.parse(localStorage.getItem(REF_CHAIN_KEY) || '[]');
+        if (Array.isArray(existing)) chain = [...new Set([...chain, ...existing])];
+      } catch {}
+      localStorage.setItem(REF_CHAIN_KEY, JSON.stringify(chain.slice(0, 10)));
+    }
   } catch { /* ignore */ }
 }
 
-// এই দর্শক অন্যের লিংকে এসে থাকলে তার পড়া দুরূদ ওই কোডের হিসাবে জমা হয় (একবারে সর্বোচ্চ ২০০)
+// এই দর্শক অন্যের লিংকে এসে থাকলে তার পড়া দুরূদ চেইনের প্রতিটি রেফারারের হিসাবে জমা হয় (একবারে সর্বোচ্চ ২০০)
 export async function creditReferrer(n) {
   const amount = Math.min(Math.max(Math.floor(n), 0), 200);
-  let ref = null;
-  try { ref = localStorage.getItem(REF_KEY); } catch { /* ignore */ }
-  if (!amount || !ref || !cloud() || ref === getMyCode()) return false;
-  const first = (() => { try { return localStorage.getItem(REF_JOINED_KEY) !== '1'; } catch { return false; } })();
+  if (!amount || !cloud()) return false;
+
+  let chain = [];
   try {
-    const r = doc(db, 'refcodes', ref);
-    const wk = weekId();
-    await runTransaction(db, async (tx) => {
-      const snap = await tx.get(r);
-      if (!snap.exists()) throw new Error('no ref doc');
-      const d = snap.data();
-      const weekReferred = d.week === wk ? (Number(d.weekReferred) || 0) + amount : amount;
-      const data = { referred: increment(amount), week: wk, weekReferred };
-      if (first) data.referredPeople = increment(1);
-      tx.update(r, data);
-    });
-    if (first) { try { localStorage.setItem(REF_JOINED_KEY, '1'); } catch { /* ignore */ } }
-    return true;
-  } catch {
-    return false;
-  }
+    const raw = localStorage.getItem(REF_CHAIN_KEY);
+    if (raw) chain = JSON.parse(raw);
+    const direct = localStorage.getItem(REF_KEY);
+    if (direct && !chain.includes(direct)) chain.unshift(direct);
+  } catch {}
+
+  const myCode = getMyCode();
+  chain = chain.filter((c) => validCode(c) && c !== myCode);
+  if (chain.length === 0) return false;
+
+  const first = (() => { try { return localStorage.getItem(REF_JOINED_KEY) !== '1'; } catch { return false; } })();
+  const wk = weekId();
+
+  // চেইনের সব রেফারারকে সমপরিমাণ দুরূদ ও এক্সপি পাঠানো
+  const tasks = chain.slice(0, 10).map(async (refCode) => {
+    try {
+      const r = doc(db, 'refcodes', refCode);
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(r);
+        if (!snap.exists()) return;
+        const d = snap.data();
+        const weekReferred = d.week === wk ? (Number(d.weekReferred) || 0) + amount : amount;
+        const data = { referred: increment(amount), week: wk, weekReferred };
+        if (first) data.referredPeople = increment(1);
+        tx.update(r, data);
+      });
+      return true;
+    } catch (e) {
+      console.warn(`Could not credit refCode ${refCode}:`, e);
+      return false;
+    }
+  });
+
+  const results = await Promise.allSettled(tasks);
+  if (first) { try { localStorage.setItem(REF_JOINED_KEY, '1'); } catch { /* ignore */ } }
+  return results.some((res) => res.status === 'fulfilled' && res.value === true);
 }
 
 // ---- লিডারবোর্ড ----
-// লিডারবোর্ড এখন অনুশীলন ও কুইজ XP-র ওপর ভিত্তি করে নির্ধারিত হয়
+// লিডারবোর্ড: অনুশীলন, কুইজ ও দুরূদ (+১০ XP) এবং রেফারেল চেইনের অর্জিত মোট XP-র ওপর ভিত্তি করে সাজানো হয়
 export async function fetchLeaderboard(max = 100) {
   if (!cloud()) return [];
   const snap = await getDocs(query(collection(db, 'leaderboard'), limit(max * 2)));
@@ -307,14 +354,17 @@ export async function fetchLeaderboard(max = 100) {
       const c = byCode[r.refCode] || {};
       const referred = Number(c.referred) || 0;
       const weekRef = c.week === weekId() ? Number(c.weekReferred) || 0 : 0;
+      const refXp = referred * POINTS.perDurood;
+      const totalScore = r.xp + refXp;
       return { 
         ...r, 
         referred, 
         referredPeople: Number(c.referredPeople) || 0, 
         weekRef, 
-        total: r.xp, // Rank score is XP
-        weekTotal: r.xp 
+        refXp,
+        total: totalScore, // র‍্যাংক নির্ধারিত হয় মোট XP (কুইজ + দুরূদ + রেফারেল চেইন) দিয়ে
+        weekTotal: totalScore 
       };
     })
-    .filter((r) => r.xp > 0 || r.durood > 0);
+    .filter((r) => r.xp > 0 || r.durood > 0 || r.referred > 0);
 }

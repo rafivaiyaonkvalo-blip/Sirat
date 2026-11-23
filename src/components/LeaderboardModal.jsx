@@ -10,6 +10,7 @@ import {
 import { toBengaliNumber } from '../utils/gamification';
 import { triggerHaptic } from '../utils/haptics';
 import { getAssetUrl } from '../utils/assetHelper';
+import { useLang, t } from '../i18n';
 
 // ইসলামের পবিত্র মসজিদ ও ঐতিহাসিক নিদর্শনের ছবি (অটো স্লাইডশো)
 const MOSQUE_BACKGROUNDS = [
@@ -61,6 +62,7 @@ const MOSQUE_BACKGROUNDS = [
 ];
 
 export default function LeaderboardModal({ isOpen, onClose, user }) {
+  const lang = useLang();
   const [timeframe, setTimeframe] = useState('week'); // 'week' | 'all'
   const [data, setData] = useState({ items: [], currentUser: null, totalParticipants: 0, activeParticipants: 0 });
   const [loading, setLoading] = useState(true);
@@ -277,7 +279,7 @@ export default function LeaderboardModal({ isOpen, onClose, user }) {
             ))}
           </div>
           <p className="mt-1.5 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-            র‍্যাংক নির্ধারিত হয় অনুশীলন ও কুইজের স্কোরের (XP) ওপর ভিত্তি করে
+            {t('র‍্যাংক নির্ধারিত হয় কুইজ, অনুশীলন, দুরূদ (+১০ XP) ও রেফারেল চেইনের মোট XP-এর ওপর')}
           </p>
         </div>
 
