@@ -98,15 +98,18 @@ export function VideoProvider({ children, onNavigateToTab }) {
     setIsDismissed(false);
 
     if (current?.darsId && current?.porboNo) {
-      if (typeof onNavigateToTab === 'function') {
-        onNavigateToTab('lessons');
-      }
       try {
+        localStorage.setItem('uls_active_tab', 'lessons');
         const url = new URL(window.location.href);
         url.searchParams.delete('tab');
+        url.searchParams.delete('r');
+        url.searchParams.delete('ref');
         window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
       } catch (e) {
         /* ignore */
+      }
+      if (typeof onNavigateToTab === 'function') {
+        onNavigateToTab('lessons');
       }
       const targetHash = `#/dars/${current.darsId}/${current.porboNo}/video`;
       if (window.location.hash !== targetHash) {

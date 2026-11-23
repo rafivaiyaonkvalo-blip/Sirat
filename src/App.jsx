@@ -47,6 +47,11 @@ const getInitialTab = () => {
         return 'admin';
       }
 
+      // ০. যদি হ্যাশে #/dars থাকে, তবে সরাসরি দারস পাঠ্যক্রম বা পাঠ
+      if (window.location.hash && window.location.hash.startsWith('#/dars')) {
+        return 'lessons';
+      }
+
       // ১. কোয়েরি প্যারামিটার সংগ্রহ (search এবং hash উভয়ের থেকে)
       const params = new URLSearchParams(window.location.search);
       if (window.location.hash && window.location.hash.includes('?')) {
@@ -330,12 +335,16 @@ export default function App() {
     }
   }, [currentTab]);
 
-  // Handle browser back/forward navigation
+  // Handle browser back/forward navigation and hash change
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.replace(/\/+$/, '');
       if (path === '/rafi' || path.endsWith('/rafi')) {
         setCurrentTab('admin');
+        return;
+      }
+      if (window.location.hash && window.location.hash.startsWith('#/dars')) {
+        setCurrentTab('lessons');
         return;
       }
       const params = new URLSearchParams(window.location.search);
@@ -345,8 +354,17 @@ export default function App() {
         setCurrentTab(tab === 'exam' ? 'quiz' : tab);
       }
     };
+    const handleHash = () => {
+      if (window.location.hash && window.location.hash.startsWith('#/dars')) {
+        setCurrentTab('lessons');
+      }
+    };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handleHash);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handleHash);
+    };
   }, []);
 
   // Check URL pathname strictly for /rafi
