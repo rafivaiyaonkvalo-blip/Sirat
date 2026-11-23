@@ -1,5 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Clapperboard, Headphones, Maximize, Maximize2, Minimize, Pause, PictureInPicture2, Play, RotateCcw, Video, Volume2, VolumeX, X } from 'lucide-react';
+import {
+  ChevronUp,
+  Clapperboard,
+  Headphones,
+  Maximize,
+  Maximize2,
+  Minimize,
+  Minus,
+  Pause,
+  PictureInPicture2,
+  Play,
+  Plus,
+  RotateCcw,
+  Video,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
 import { bn } from './questions';
 import { getAssetUrl } from '../utils/assetHelper';
 import { useVideo } from '../context/VideoContext';
@@ -22,7 +39,7 @@ const fmt = (s) => {
   const t = h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
   return t.replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]);
 };
-const RATES = [1, 1.25, 1.5, 2];
+const RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 let ytApi;
 const loadYT = () => {
@@ -66,6 +83,7 @@ function CustomPlayer({
   onExpand,
   onClose,
   onPlaybackChange,
+  onFullscreenChange,
 }) {
   const box = useRef(null);
   const mount = useRef(null);
@@ -82,6 +100,8 @@ function CustomPlayer({
   const [audioMode, setAudioMode] = useState(false); // শুধু শব্দ: ভিডিও ঢাকা, ছোট বার
   const audio = !!audioOnly || audioMode;
   const [pseudo, setPseudo] = useState(false); // ব্রাউজার ফুলস্ক্রিন না দিলে (যেমন আইফোন) পুরো স্ক্রিন জুড়ে ফিক্সড
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const speedMenuRef = useRef(null);
 
   const from = startProp ?? (frac && dur ? Math.floor(frac[0] * dur) : 0);
   const end = endProp ?? (frac && dur ? Math.ceil(frac[1] * dur) : undefined);
@@ -97,6 +117,30 @@ function CustomPlayer({
       onPlaybackChange(playing, started);
     }
   }, [playing, started, onPlaybackChange]);
+
+  // ফুলস্ক্রিন স্টেট পরিবর্তন নোটিফাই করা
+  useEffect(() => {
+    if (typeof onFullscreenChange === 'function') {
+      onFullscreenChange(full);
+    }
+    return () => {
+      if (typeof onFullscreenChange === 'function') {
+        onFullscreenChange(false);
+      }
+    };
+  }, [full, onFullscreenChange]);
+
+  // স্পিড মেনু বাইরে ক্লিকে বন্ধ হওয়া
+  useEffect(() => {
+    if (!showSpeedMenu) return;
+    const handleClickOutside = (e) => {
+      if (speedMenuRef.current && !speedMenuRef.current.contains(e.target)) {
+        setShowSpeedMenu(false);
+      }
+    };
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
+  }, [showSpeedMenu]);
 
   // YouTube / mp4 অ্যাডাপ্টার
   useEffect(() => {
@@ -218,20 +262,54 @@ function CustomPlayer({
     const r = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
     setRate(r); media.current?.rate(r);
   };
+  const decreaseRate = (e) => {
+    if (e?.stopPropagation) e.stopPropagation();
+    const idx = RATES.indexOf(rate);
+    const nextIdx = Math.max(0, (idx === -1 ? 2 : idx) - 1);
+    const r = RATES[nextIdx];
+    setRate(r);
+    media.current?.rate(r);
+  };
+  const increaseRate = (e) => {
+    if (e?.stopPropagation) e.stopPropagation();
+    const idx = RATES.indexOf(rate);
+    const nextIdx = Math.min(RATES.length - 1, (idx === -1 ? 2 : idx) + 1);
+    const r = RATES[nextIdx];
+    setRate(r);
+    media.current?.rate(r);
+  };
+  const selectRate = (r, e) => {
+    if (e?.stopPropagation) e.stopPropagation();
+    setRate(r);
+    media.current?.rate(r);
+    setShowSpeedMenu(false);
+  };
   const toggleMute = () => { setMuted(!muted); media.current?.mute(!muted); };
-  const toggleFull = () => {
+  const toggleFull = (e) => {
+    if (e?.stopPropagation) e.stopPropagation();
     const el = box.current;
     if (full) {
-      if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-      setPseudo(false); setFull(false);
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) exit.call(document);
+      }
+      setPseudo(false);
+      setFull(false);
       return;
     }
-    const rq = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (!rq) { setPseudo(true); setFull(true); return; }
+    const rq = el?.requestFullscreen || el?.webkitRequestFullscreen;
+    if (!rq) {
+      setPseudo(true);
+      setFull(true);
+      return;
+    }
     Promise.resolve(rq.call(el)).then(() => {
       setFull(true);
       try { window.screen.orientation?.lock?.('landscape').catch(() => {}); } catch { /* সমর্থিত না */ }
-    }).catch(() => { setPseudo(true); setFull(true); });
+    }).catch(() => {
+      setPseudo(true);
+      setFull(true);
+    });
   };
 
   const { float, expand, close } = useVideo();
@@ -370,85 +448,179 @@ function CustomPlayer({
 
         {ready && (
           <div
-            className={`absolute inset-x-0 bottom-0 z-20 flex items-center gap-1.5 sm:gap-2 bg-gradient-to-t from-black/85 to-transparent text-white ${
-              isFloating ? 'px-2 pb-1.5 pt-4' : 'px-3 pb-2 pt-6'
+            className={`absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 sm:gap-1.5 bg-gradient-to-t from-black/95 via-black/75 to-transparent text-white transition-opacity ${
+              isFloating ? 'px-2 pb-1.5 pt-3' : 'px-2.5 sm:px-4 pb-2 sm:pb-3 pt-6'
             }`}
           >
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label="চালান/বিরতি"
-              className="!animate-none rounded-full p-1.5 hover:bg-white/15 cursor-pointer"
-            >
-              {playing ? <Pause size={isFloating ? 14 : 18} /> : <Play size={isFloating ? 14 : 18} />}
-            </button>
-            <span className="w-10 sm:w-12 shrink-0 text-[10px] sm:text-[11px] tabular-nums">
-              {fmt(rel)}
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={Math.max(len, 1)}
-              step={0.5}
-              value={rel}
-              onChange={seek}
-              aria-label="অগ্রগতি"
-              className="h-1 flex-1 cursor-pointer accent-sky-400"
-            />
-            <span className="w-10 sm:w-12 shrink-0 text-right text-[10px] sm:text-[11px] tabular-nums">
-              {fmt(len)}
-            </span>
-            {!isFloating && (
-              <>
+            {/* Row 1: ফুল-উইডথ প্রগ্রেস / সিকবার (Full-width Seek Bar) */}
+            <div className="flex items-center w-full px-0.5 group">
+              <input
+                type="range"
+                min={0}
+                max={Math.max(len, 1)}
+                step={0.5}
+                value={rel}
+                onChange={seek}
+                aria-label="অগ্রগতি"
+                className="w-full h-1.5 sm:h-2 rounded-lg cursor-pointer accent-sky-400 bg-white/25 hover:bg-white/40 transition-all touch-none"
+              />
+            </div>
+
+            {/* Row 2: কন্ট্রোল বাটন ও অপশনসমূহ */}
+            <div className="flex items-center justify-between gap-1 sm:gap-2">
+              {/* Left Side: Play/Pause and Time */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={cycleRate}
-                  className="!animate-none rounded-md px-1.5 py-0.5 text-[11px] font-bold hover:bg-white/15 cursor-pointer"
+                  onClick={toggle}
+                  aria-label={playing ? 'বিরতি' : 'চালান'}
+                  className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/25 active:bg-white/35 transition-colors cursor-pointer text-white"
                 >
-                  {bn(rate)}x
+                  {playing ? <Pause size={isFloating ? 14 : 18} /> : <Play size={isFloating ? 14 : 18} className="ml-0.5" />}
                 </button>
-                <button
-                  type="button"
-                  onClick={toggleMute}
-                  aria-label="শব্দ"
-                  className="!animate-none rounded-full p-1.5 hover:bg-white/15 cursor-pointer"
-                >
-                  {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                </button>
-                {!audioOnly && (
+                <span className="text-[11px] sm:text-xs tabular-nums text-slate-200 font-medium whitespace-nowrap">
+                  {fmt(rel)} <span className="text-white/40">/</span> {fmt(len)}
+                </span>
+              </div>
+
+              {/* Right Side: Speed controls (+ / - / Menu), Volume, Audio Mode, PiP, Fullscreen */}
+              {!isFloating ? (
+                <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                  {/* Speed Stepper & Dropdown */}
+                  <div className="relative flex items-center bg-white/10 hover:bg-white/15 rounded-lg border border-white/15 p-0.5 text-white">
+                    <button
+                      type="button"
+                      onClick={decreaseRate}
+                      disabled={rate <= RATES[0]}
+                      title="গতি কমান (-)"
+                      aria-label="গতি কমান"
+                      className="h-7 w-6 sm:h-7 sm:w-7 flex items-center justify-center rounded hover:bg-white/20 active:bg-white/30 disabled:opacity-25 disabled:hover:bg-transparent text-sm font-black transition-colors cursor-pointer"
+                    >
+                      <Minus size={13} strokeWidth={2.5} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowSpeedMenu((prev) => !prev);
+                      }}
+                      title="প্লেব্যাক স্পিড মেনু"
+                      className="px-1.5 py-0.5 text-[11px] sm:text-xs font-bold hover:bg-white/20 rounded transition-colors tabular-nums flex items-center gap-0.5 cursor-pointer"
+                    >
+                      <span>{bn(rate)}x</span>
+                      <ChevronUp size={11} className={`transition-transform duration-200 ${showSpeedMenu ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={increaseRate}
+                      disabled={rate >= RATES[RATES.length - 1]}
+                      title="গতি বাড়ান (+)"
+                      aria-label="গতি বাড়ান"
+                      className="h-7 w-6 sm:h-7 sm:w-7 flex items-center justify-center rounded hover:bg-white/20 active:bg-white/30 disabled:opacity-25 disabled:hover:bg-transparent text-sm font-black transition-colors cursor-pointer"
+                    >
+                      <Plus size={13} strokeWidth={2.5} />
+                    </button>
+
+                    {/* Popover Speed Menu */}
+                    {showSpeedMenu && (
+                      <div
+                        ref={speedMenuRef}
+                        className="absolute bottom-full mb-2 right-0 sm:left-1/2 sm:-translate-x-1/2 bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-xl shadow-2xl p-1 z-50 flex flex-col gap-0.5 min-w-[76px]"
+                      >
+                        <div className="text-[10px] text-slate-400 font-semibold px-2 py-0.5 border-b border-white/10 mb-0.5 text-center">
+                          গতি নির্বাচন
+                        </div>
+                        {RATES.map((r) => (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={(e) => selectRate(r, e)}
+                            className={`px-2 py-1 text-xs rounded-lg text-center font-medium transition-colors cursor-pointer ${
+                              rate === r
+                                ? 'bg-sky-500 text-white font-bold'
+                                : 'text-slate-200 hover:bg-white/15'
+                            }`}
+                          >
+                            {bn(r)}x
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Volume / Mute */}
                   <button
                     type="button"
-                    onClick={() => setAudioMode((a) => !a)}
-                    aria-label={audio ? 'ভিডিও মোড' : 'অডিও মোড'}
-                    title={audio ? 'ভিডিও মোডে ফিরুন' : 'শুধু শব্দ (অডিও মোড)'}
-                    className="!animate-none rounded-full p-1.5 hover:bg-white/15 cursor-pointer"
+                    onClick={toggleMute}
+                    aria-label="শব্দ বন্ধ/চালু"
+                    title={muted ? 'আনমিউট' : 'মিউট'}
+                    className="h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded-lg hover:bg-white/15 active:bg-white/25 transition-colors cursor-pointer text-white"
                   >
-                    {audio ? <Video size={16} /> : <Headphones size={16} />}
+                    {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
                   </button>
-                )}
-                {!audio && (
+
+                  {/* Audio Mode Toggle */}
+                  {!audioOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setAudioMode((a) => !a)}
+                      aria-label={audio ? 'ভিডিও মোড' : 'অডিও মোড'}
+                      title={audio ? 'ভিডিও মোডে ফিরুন' : 'শুধু শব্দ (অডিও মোড)'}
+                      className="h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded-lg hover:bg-white/15 active:bg-white/25 transition-colors cursor-pointer text-white"
+                    >
+                      {audio ? <Video size={17} /> : <Headphones size={17} />}
+                    </button>
+                  )}
+
+                  {/* PiP Floating Mode (Desktop / Tablet) */}
+                  {!audio && (
+                    <button
+                      type="button"
+                      onClick={toggleFloating}
+                      aria-label="ফ্লোটিং মিনিপ্লেয়ার"
+                      title="ফ্লোটিং মিনিপ্লেয়ার (PiP Mode)"
+                      className="hidden sm:flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg hover:bg-white/15 active:bg-white/25 transition-colors cursor-pointer text-white"
+                    >
+                      <PictureInPicture2 size={17} />
+                    </button>
+                  )}
+
+                  {/* Fullscreen Button - Prominent, accessible, and guaranteed visible on mobile & desktop */}
+                  {!audio && (
+                    <button
+                      type="button"
+                      onClick={toggleFull}
+                      aria-label={full ? 'ফুলস্ক্রিন বন্ধ' : 'ফুলস্ক্রিন'}
+                      title={full ? 'ফুলস্ক্রিন বন্ধ করুন' : 'ফুলস্ক্রিনে দেখুন'}
+                      className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-lg bg-sky-500/25 hover:bg-sky-500/40 active:bg-sky-500/60 border border-sky-400/40 text-white transition-colors cursor-pointer shrink-0 ml-0.5"
+                    >
+                      {full ? <Minimize size={18} /> : <Maximize size={18} />}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                /* Floating Miniplayer Right Controls */
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    onClick={toggleFloating}
-                    aria-label="ফ্লোটিং মিনিপ্লেয়ার"
-                    title="ফ্লোটিং মিনিপ্লেয়ার (PiP Mode)"
-                    className="!animate-none rounded-full p-1.5 hover:bg-white/15 cursor-pointer"
+                    onClick={cycleRate}
+                    className="rounded-md px-1.5 py-0.5 text-[10px] font-bold bg-white/10 hover:bg-white/20 transition-colors cursor-pointer text-white"
                   >
-                    <PictureInPicture2 size={16} />
+                    {bn(rate)}x
                   </button>
-                )}
-                {!audio && (
                   <button
                     type="button"
-                    onClick={toggleFull}
-                    aria-label="ফুলস্ক্রিন"
-                    className="!animate-none rounded-full p-1.5 hover:bg-white/15 cursor-pointer"
+                    onClick={toggleMute}
+                    aria-label="শব্দ"
+                    className="p-1 rounded-full hover:bg-white/20 cursor-pointer text-white"
                   >
-                    {full ? <Minimize size={16} /> : <Maximize size={16} />}
+                    {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
                   </button>
-                )}
-              </>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -456,7 +628,7 @@ function CustomPlayer({
 }
 
 // একটি পাঠ দুই ভিডিওতে ছড়ানো থাকলে অংশগুলো পরপর চলে
-function Sequence({ entries, title, audioOnly, isFloating, onExpand, onClose, onPlaybackChange }) {
+function Sequence({ entries, title, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange }) {
   const [i, setI] = useState(0);
   const next = useCallback(() => setI((x) => (x < entries.length - 1 ? x + 1 : x)), [entries.length]);
   return (
@@ -471,11 +643,12 @@ function Sequence({ entries, title, audioOnly, isFloating, onExpand, onClose, on
       onExpand={onExpand}
       onClose={onClose}
       onPlaybackChange={onPlaybackChange}
+      onFullscreenChange={onFullscreenChange}
     />
   );
 }
 
-export default function VideoPlayer({ entry, entries, title, frac, audioOnly, isFloating, onExpand, onClose, onPlaybackChange }) {
+export default function VideoPlayer({ entry, entries, title, frac, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange }) {
   if (entries?.length > 1) {
     return (
       <Sequence
@@ -486,6 +659,7 @@ export default function VideoPlayer({ entry, entries, title, frac, audioOnly, is
         onExpand={onExpand}
         onClose={onClose}
         onPlaybackChange={onPlaybackChange}
+        onFullscreenChange={onFullscreenChange}
       />
     );
   }
@@ -499,11 +673,12 @@ export default function VideoPlayer({ entry, entries, title, frac, audioOnly, is
       onExpand={onExpand}
       onClose={onClose}
       onPlaybackChange={onPlaybackChange}
+      onFullscreenChange={onFullscreenChange}
     />
   );
 }
 
-function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloating, onExpand, onClose, onPlaybackChange }) {
+function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange }) {
   const cfg = typeof entry === 'string' ? { url: entry } : entry;
   if (!cfg?.url) return <Placeholder />;
   const start = toSec(cfg.start);
@@ -526,6 +701,7 @@ function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloatin
         onExpand={onExpand}
         onClose={onClose}
         onPlaybackChange={onPlaybackChange}
+        onFullscreenChange={onFullscreenChange}
       />
     );
   }
@@ -556,6 +732,7 @@ function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloatin
       onExpand={onExpand}
       onClose={onClose}
       onPlaybackChange={onPlaybackChange}
+      onFullscreenChange={onFullscreenChange}
     />
   );
 }

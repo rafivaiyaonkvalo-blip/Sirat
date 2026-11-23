@@ -5,6 +5,7 @@ import VideoPlayer from './VideoPlayer';
 export default function GlobalVideoHost() {
   const { activeVideo, isFloating, isDismissed, anchorRect, expand, close, setIsPlaying, setIsStarted } = useVideo();
   const [mounted, setMounted] = useState(false);
+  const [isFull, setIsFull] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -56,21 +57,33 @@ export default function GlobalVideoHost() {
     <div
       id="global-video-host"
       className={`select-none transition-all duration-300 ${
-        isFloatingMode
-          ? 'fixed bottom-20 right-3 sm:bottom-6 sm:right-6 z-50 w-72 sm:w-80 md:w-96 aspect-video rounded-2xl shadow-2xl ring-2 ring-emerald-500/80 bg-black backdrop-blur overflow-hidden'
-          : 'overflow-hidden rounded-2xl shadow-lg'
+        isFull
+          ? 'fixed inset-0 z-[99999] w-screen h-screen !max-w-none !rounded-none !top-0 !left-0 !m-0 !p-0 bg-black overflow-hidden'
+          : isFloatingMode
+            ? 'fixed bottom-20 right-3 sm:bottom-6 sm:right-6 z-50 w-72 sm:w-80 md:w-96 aspect-video rounded-2xl shadow-2xl ring-2 ring-emerald-500/80 bg-black backdrop-blur overflow-hidden'
+            : 'overflow-hidden rounded-2xl shadow-lg'
       }`}
       style={
-        isFloatingMode
-          ? {}
-          : {
-              position: 'absolute',
-              top: `${effectiveRect.top}px`,
-              left: `${effectiveRect.left}px`,
-              width: `${effectiveRect.width}px`,
-              height: `${effectiveRect.height}px`,
-              zIndex: 30,
+        isFull
+          ? {
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 99999,
+              borderRadius: 0,
             }
+          : isFloatingMode
+            ? {}
+            : {
+                position: 'absolute',
+                top: `${effectiveRect.top}px`,
+                left: `${effectiveRect.left}px`,
+                width: `${effectiveRect.width}px`,
+                height: `${effectiveRect.height}px`,
+                zIndex: 30,
+              }
       }
     >
       <VideoPlayer
@@ -82,6 +95,7 @@ export default function GlobalVideoHost() {
         isFloating={isFloatingMode}
         onExpand={expand}
         onClose={close}
+        onFullscreenChange={setIsFull}
         onPlaybackChange={(playing, started) => {
           setIsPlaying(playing);
           if (started) setIsStarted(true);
