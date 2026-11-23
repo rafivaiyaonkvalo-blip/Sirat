@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ChevronUp,
   Clapperboard,
+  GripHorizontal,
   Headphones,
   Maximize,
   Maximize2,
@@ -84,6 +85,7 @@ function CustomPlayer({
   onClose,
   onPlaybackChange,
   onFullscreenChange,
+  onDragStart,
 }) {
   const box = useRef(null);
   const mount = useRef(null);
@@ -156,10 +158,22 @@ function CustomPlayer({
           videoId: id,
           width: '100%',
           height: '100%',
-          playerVars: { controls: 0, disablekb: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1, fs: 0, origin: window.location.origin },
+          playerVars: { controls: 0, disablekb: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1, fs: 0, cc_load_policy: 0, origin: window.location.origin },
           events: {
             onReady: () => {
               if (dead) return;
+              try {
+                if (typeof player.unloadModule === 'function') {
+                  player.unloadModule('captions');
+                  player.unloadModule('cc');
+                }
+                if (typeof player.setOption === 'function') {
+                  player.setOption('captions', 'track', {});
+                  player.setOption('cc', 'track', {});
+                }
+              } catch {
+                /* ক্যাপশন আনলোড না হলে উপেক্ষা */
+              }
               media.current = {
                 play: () => player.playVideo(),
                 pause: () => player.pauseVideo(),
@@ -368,18 +382,30 @@ function CustomPlayer({
         } ${audio ? 'pointer-events-none opacity-0' : ''}`}
       />
 
-        {/* ফ্লোটিং মিনিপ্লেয়ারের উপরের অ্যাকশন বার */}
+        {/* ফ্লোটিং মিনিপ্লেয়ারের উপরের অ্যাকশন বার (ড্র্যাগ হ্যান্ডেল) */}
         {isFloating && (
-          <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/40 to-transparent p-2 text-white">
-            <span className="truncate text-[11px] font-bold drop-shadow px-1 max-w-[180px] sm:max-w-[220px]">
-              {title}
-            </span>
-            <div className="flex items-center gap-1">
+          <div
+            onPointerDown={onDragStart}
+            className="absolute inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/50 to-transparent px-2.5 py-1.5 text-white cursor-grab active:cursor-grabbing select-none touch-none group"
+            title="চেপে ধরে স্ক্রিনে যেকোনো জায়গায় সরান (Drag to move)"
+          >
+            <div className="flex items-center gap-1.5 min-w-0 pr-1 pointer-events-none">
+              <span className="flex items-center justify-center text-white/70 group-hover:text-emerald-400 transition-colors">
+                <GripHorizontal size={15} />
+              </span>
+              <span className="truncate text-[11px] font-bold drop-shadow max-w-[140px] sm:max-w-[200px]">
+                {title}
+              </span>
+            </div>
+            <div
+              className="flex items-center gap-1 shrink-0"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 onClick={expandFromFloating}
                 title="বড় করুন"
-                className="rounded-lg p-1 hover:bg-white/20 transition-colors cursor-pointer"
+                className="rounded-lg p-1 hover:bg-white/20 active:bg-white/30 transition-colors cursor-pointer text-white"
               >
                 <Maximize2 size={14} />
               </button>
@@ -387,7 +413,7 @@ function CustomPlayer({
                 type="button"
                 onClick={closeFloating}
                 title="মিনিপ্লেয়ার বন্ধ করুন"
-                className="rounded-lg p-1 hover:bg-white/20 transition-colors cursor-pointer"
+                className="rounded-lg p-1 hover:bg-red-500/80 active:bg-red-600 transition-colors cursor-pointer text-white"
               >
                 <X size={14} />
               </button>
@@ -628,7 +654,7 @@ function CustomPlayer({
 }
 
 // একটি পাঠ দুই ভিডিওতে ছড়ানো থাকলে অংশগুলো পরপর চলে
-function Sequence({ entries, title, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange }) {
+function Sequence({ entries, title, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange, onDragStart }) {
   const [i, setI] = useState(0);
   const next = useCallback(() => setI((x) => (x < entries.length - 1 ? x + 1 : x)), [entries.length]);
   return (
@@ -644,11 +670,12 @@ function Sequence({ entries, title, audioOnly, isFloating, onExpand, onClose, on
       onClose={onClose}
       onPlaybackChange={onPlaybackChange}
       onFullscreenChange={onFullscreenChange}
+      onDragStart={onDragStart}
     />
   );
 }
 
-export default function VideoPlayer({ entry, entries, title, frac, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange }) {
+export default function VideoPlayer({ entry, entries, title, frac, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange, onDragStart }) {
   if (entries?.length > 1) {
     return (
       <Sequence
@@ -660,6 +687,7 @@ export default function VideoPlayer({ entry, entries, title, frac, audioOnly, is
         onClose={onClose}
         onPlaybackChange={onPlaybackChange}
         onFullscreenChange={onFullscreenChange}
+        onDragStart={onDragStart}
       />
     );
   }
@@ -674,11 +702,12 @@ export default function VideoPlayer({ entry, entries, title, frac, audioOnly, is
       onClose={onClose}
       onPlaybackChange={onPlaybackChange}
       onFullscreenChange={onFullscreenChange}
+      onDragStart={onDragStart}
     />
   );
 }
 
-function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange }) {
+function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloating, onExpand, onClose, onPlaybackChange, onFullscreenChange, onDragStart }) {
   const cfg = typeof entry === 'string' ? { url: entry } : entry;
   if (!cfg?.url) return <Placeholder />;
   const start = toSec(cfg.start);
@@ -702,6 +731,7 @@ function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloatin
         onClose={onClose}
         onPlaybackChange={onPlaybackChange}
         onFullscreenChange={onFullscreenChange}
+        onDragStart={onDragStart}
       />
     );
   }
@@ -733,6 +763,7 @@ function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, isFloatin
       onClose={onClose}
       onPlaybackChange={onPlaybackChange}
       onFullscreenChange={onFullscreenChange}
+      onDragStart={onDragStart}
     />
   );
 }
