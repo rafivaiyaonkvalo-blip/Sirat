@@ -45,17 +45,35 @@ const getInitialTab = () => {
         return 'admin';
       }
 
-      const validTabs = ['lessons', 'durood', 'quiz', 'exam', 'book'];
+      // ১. কোয়েরি প্যারামিটার সংগ্রহ (search এবং hash উভয়ের থেকে)
       const params = new URLSearchParams(window.location.search);
-      const hash = window.location.hash.replace('#', '');
+      if (window.location.hash && window.location.hash.includes('?')) {
+        const hashQuery = window.location.hash.slice(window.location.hash.indexOf('?'));
+        const hashParams = new URLSearchParams(hashQuery);
+        for (const [k, v] of hashParams.entries()) {
+          if (!params.has(k)) params.set(k, v);
+        }
+      }
+
+      // ২. রেফারেল লিংক (?r= বা ?ref=) নিয়ে এসে থাকলে সরাসরি দুরূদ ট্যাবে পাঠাও
+      if (params.get('r') || params.get('ref')) {
+        return 'durood';
+      }
+
+      // ৩. সুনির্দিষ্ট tab প্যারামিটার
+      const validTabs = ['lessons', 'durood', 'quiz', 'exam', 'book'];
       const paramTab = params.get('tab');
       if (paramTab && validTabs.includes(paramTab)) {
         return paramTab === 'exam' ? 'quiz' : paramTab;
       }
-      if (hash && validTabs.includes(hash)) {
-        return hash;
+
+      // ৪. হ্যাশ রুট (যেমন #/durood বা #durood)
+      const cleanHash = window.location.hash.replace(/^#\/?/, '').split('?')[0];
+      if (cleanHash && validTabs.includes(cleanHash)) {
+        return cleanHash === 'exam' ? 'quiz' : cleanHash;
       }
 
+      // ৫. সেভ করা পূর্বের সক্রিয় ট্যাব
       const savedTab = localStorage.getItem('uls_active_tab');
       if (savedTab && validTabs.includes(savedTab)) {
         return savedTab === 'exam' ? 'quiz' : savedTab;
@@ -109,8 +127,33 @@ export default function App() {
     return () => window.removeEventListener('uls_open_mistakes_modal', handleOpenMistakes);
   }, []);
 
-  // অন্যের রেফারেল-লিংকে (?ref=) এসে থাকলে মনে রাখা
-  useEffect(() => { captureReferral(); }, []);
+  // অন্যের রেফারেল-লিংকে (?r= বা ?ref=) এসে থাকলে সরাসরি দুরূদ ট্যাবে সুইচ করা ও তথ্য সংরক্ষণ
+  useEffect(() => {
+    const handleCheckRef = () => {
+      const q = new URLSearchParams(window.location.search);
+      let hashRef = false;
+      let hashTab = null;
+      if (window.location.hash && window.location.hash.includes('?')) {
+        const hq = new URLSearchParams(window.location.hash.slice(window.location.hash.indexOf('?')));
+        if (hq.get('r') || hq.get('ref')) hashRef = true;
+        if (hq.get('tab')) hashTab = hq.get('tab');
+      }
+      const hasRef = q.get('r') || q.get('ref') || hashRef;
+      const tabParam = q.get('tab') || hashTab;
+      if (hasRef || tabParam === 'durood') {
+        setCurrentTab('durood');
+      }
+      captureReferral();
+    };
+
+    handleCheckRef();
+    window.addEventListener('popstate', handleCheckRef);
+    window.addEventListener('hashchange', handleCheckRef);
+    return () => {
+      window.removeEventListener('popstate', handleCheckRef);
+      window.removeEventListener('hashchange', handleCheckRef);
+    };
+  }, []);
 
   // কুইজ/পরীক্ষার প্রশ্ন থেকে নির্দিষ্ট দারসে যাওয়া
   useEffect(() => {

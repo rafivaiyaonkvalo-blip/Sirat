@@ -72,9 +72,15 @@ export function getMyCode() {
   }
 }
 
-// ছোট লিংক: .../sirat/?r=abc1234 এবং চেইনের রেফারেল থাকলে &c=code1.code2
+// ছোট লিংক: .../sirat/?tab=durood&r=abc1234 এবং চেইনের রেফারেল থাকলে &c=code1.code2
 export const referralLink = (code) => {
-  const base = `${window.location.origin}${import.meta.env.BASE_URL}?r=${code}`;
+  let origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.markazuliman.com';
+  if (typeof window !== 'undefined' && window.location.hostname.includes('markazuliman.com')) {
+    origin = 'https://www.markazuliman.com';
+  }
+  const baseUrl = import.meta.env.BASE_URL || '/sirat/';
+  const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const base = `${origin}${cleanBase}?tab=durood&r=${code}`;
   try {
     let chain = [];
     const raw = localStorage.getItem(REF_CHAIN_KEY);
@@ -258,8 +264,16 @@ export function addQuizBonus(bonusXp) {
 export function captureReferral() {
   try {
     const q = new URLSearchParams(window.location.search);
-    const ref = q.get('r') || q.get('ref');
-    const chainParam = q.get('c') || q.get('via') || q.get('chain');
+    let ref = q.get('r') || q.get('ref');
+    let chainParam = q.get('c') || q.get('via') || q.get('chain');
+
+    if (!ref && typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('?')) {
+      const hashQuery = window.location.hash.slice(window.location.hash.indexOf('?'));
+      const hashParams = new URLSearchParams(hashQuery);
+      ref = hashParams.get('r') || hashParams.get('ref');
+      chainParam = chainParam || hashParams.get('c') || hashParams.get('via') || hashParams.get('chain');
+    }
+
     if (ref && validCode(ref)) {
       if (!localStorage.getItem(REF_KEY)) localStorage.setItem(REF_KEY, ref);
       let chain = [ref];

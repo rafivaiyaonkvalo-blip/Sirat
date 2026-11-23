@@ -233,6 +233,26 @@ export default function DuroodPage() {
       <p className="mt-1 text-slate-500 dark:text-slate-400">{t(campaign.title)}: {t('নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।')}</p>
       <p className="font-arabic mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-200 sm:text-xl" dir="rtl">بَيْنَكَ أَنْتَ وَبَيْنَ اللَّهِ</p>
 
+      {/* বন্ধুর রেফারেল লিংকে এসে থাকলে দৃশ্যমান নোটিশ */}
+      {(() => {
+        let refCode = null;
+        try {
+          refCode = localStorage.getItem('sirat_ref');
+        } catch {}
+        if (!refCode) return null;
+        return (
+          <div className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/30 text-emerald-950 dark:text-emerald-200 text-xs font-semibold flex items-center justify-between gap-2 shadow-xs animate-fade-in text-left">
+            <span className="flex items-center gap-2">
+              <span className="text-base shrink-0">🤝</span>
+              <span>{t('স্বাগতম! আপনি বন্ধুর আমন্ত্রণে এই দুরূদ মাহফিলে যুক্ত হয়েছেন। আপনার পঠিত প্রতিটি দুরূদ আপনার ও আপনার বন্ধুর উভয়ের হিসাবে জমা হবে।')}</span>
+            </span>
+            <span className="shrink-0 text-[10px] font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-full shadow-xs">
+              {t('যুক্ত')}
+            </span>
+          </div>
+        );
+      })()}
+
       <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
         <div className="flex items-center justify-between text-sm font-semibold">
           <span className="inline-flex items-center gap-1.5">{hasGlobal && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>}{t(hasGlobal ? (remote.title || campaign.title) : 'ক্যাম্পেইন লক্ষ্য')}</span>
