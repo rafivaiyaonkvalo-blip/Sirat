@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, ExternalLink, FileDown, FileText, Film, Headphones, Lightbulb, Lock, PenLine } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, ExternalLink, FileDown, FileText, Film, Headphones, Lightbulb, Lock, PenLine, PictureInPicture2 } from 'lucide-react';
 import { isUnlocked, isDarsLocked, isTextLocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
@@ -7,10 +7,10 @@ import { loadDarsLocalized } from '../data/loadTranslation';
 import { useLang } from '../i18n';
 import { href } from './router';
 import Runs from './Runs';
-import VideoPlayer from './VideoPlayer';
 import QuizModal from './QuizModal';
 import NotFound from './NotFound';
 import NoteWrap from './NoteWrap';
+import { useVideo } from '../context/VideoContext';
 
 function Block({ b }) {
   switch (b.type) {
@@ -59,6 +59,16 @@ export default function PorboPage({ id, no, step, progress }) {
   const [listen, setListen] = useState(false);
   const lang = useLang();
   const { markVisited } = progress;
+  const {
+    registerLesson,
+    activeVideo,
+    isFloating,
+    expand,
+    float,
+    isPlaying,
+    setAnchorEl,
+  } = useVideo();
+  const anchorNodeRef = useRef(null);
 
   useEffect(() => {
     let live = true;
@@ -67,6 +77,60 @@ export default function PorboPage({ id, no, step, progress }) {
     return () => { live = false; };
   }, [id, lang]);
   useEffect(() => { markVisited(id, no); }, [id, no, markVisited]);
+
+  // পাঠের ভিডিও গ্লোবাল ভিডিও কন্টেক্সটে রেজিস্টার করা
+  useEffect(() => {
+    if (meta?.porbos?.[no - 1]) {
+      const p = meta.porbos[no - 1];
+      registerLesson({
+        darsId: id,
+        porboNo: no,
+        title: p.title,
+        ...videoFor(meta, id, no),
+      });
+    }
+  }, [id, no, meta, registerLesson]);
+
+  // ভিউ পরিবর্তন হলে (ভিডিও থেকে লেখা/কুইজ সেকশনে এলে স্বয়ংক্রিয়ভাবে ফ্লোটিং হবে)
+  useEffect(() => {
+    if (step && step !== 'video') {
+      if (isPlaying) {
+        float();
+      }
+    }
+  }, [step, isPlaying, float]);
+
+  // ভিডিও পেজে স্ক্রল করলে ফ্লোটিং হওয়া (IntersectionObserver)
+  useEffect(() => {
+    if (step !== 'video') {
+      setAnchorEl(null);
+      return undefined;
+    }
+    const el = anchorNodeRef.current;
+    if (!el) return undefined;
+    setAnchorEl(el);
+
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          if (isPlaying) {
+            float();
+          }
+        }
+        // NOTE: একবার ফ্লোটিং হলে স্বয়ংক্রিয়ভাবে আনফ্লোট হবে না।
+        // ব্যবহারকারী [ ↗ ] বাটনে বা কার্ডে চাপলেই কেবল আনফ্লোট হবে।
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      setAnchorEl(null);
+    };
+  }, [step, isPlaying, float, setAnchorEl]);
 
   // নোট/বুকমার্ক থেকে এলে ওই অনুচ্ছেদে স্ক্রল ও কিছুক্ষণ জ্বলে ওঠা
   useEffect(() => {
@@ -142,15 +206,31 @@ export default function PorboPage({ id, no, step, progress }) {
         })}
       </div>
 
-      {/* ভিডিও প্লেয়ার: ভিডিও ভিউতে মূল আকারে থাকে; ভিডিও চালু অবস্থায় শিক্ষার্থী "লেখা" বা অন্য সেকশনে এলে ভিডিও বন্ধ না হয়ে নিচে ফ্লোটিং মিনিপ্লেয়ার হিসেবে সচল থাকবে */}
-      <VideoPlayer
-        {...videoFor(meta, id, no)}
-        title={porbo.title}
-        currentView={view}
-        onExpandToVideo={() => {
-          window.location.hash = `/dars/${id}/${no}/video`;
-        }}
-      />
+      {/* ভিডিও প্লেয়ারের অ্যাংকর স্থান: ভিডিও মোডে এখানে ভিডিও রেন্ডার হবে অথবা ফ্লোটিং কার্ড দেখাবে */}
+      {step === 'video' && (
+        <div
+          ref={anchorNodeRef}
+          id="sirat-video-anchor"
+          className="relative w-full aspect-video rounded-2xl mb-6 bg-slate-900/10 dark:bg-black/30 overflow-hidden"
+        >
+          {isFloating && (
+            <div
+              onClick={expand}
+              className="h-full w-full rounded-2xl border-2 border-dashed border-emerald-400/50 dark:border-emerald-600/50 bg-emerald-500/5 dark:bg-emerald-950/20 flex flex-col items-center justify-center gap-2 cursor-pointer p-4 text-center group hover:bg-emerald-500/10 transition-colors select-none"
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md group-hover:scale-105 transition-transform">
+                <PictureInPicture2 size={20} />
+              </span>
+              <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                ভিডিও নিচে ভাসমান (Floating Mini-Player) অবস্থায় চলছে
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                এখানে চাপ দিয়ে স্বাভাবিক আকারে বড় করুন ↗
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {view === 'text' && (
         isTextLocked(id) ? (

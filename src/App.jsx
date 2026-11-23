@@ -19,6 +19,8 @@ import NotesModal from './sirat/NotesModal';
 import QuizView from './sirat/QuizView';
 import BookView from './sirat/BookView';
 import { isSuperUser, applySuperUserUnlock, setVerifiedSuperUser } from './utils/superUser';
+import { VideoProvider } from './context/VideoContext';
+import GlobalVideoHost from './sirat/GlobalVideoHost';
 
 // অ্যাডমিন পোর্টাল ও কম-ব্যবহৃত মোডাল প্রথম পেজ-লোডে লাগে না — দরকারের সময় আলাদা ফাইল থেকে আসে
 const AdminPortal = lazy(() => import('./components/admin/AdminPortal'));
@@ -486,37 +488,35 @@ export default function App() {
     };
   }, [authModalOpen, reportModalOpen, selectedBook, currentTab]);
 
-  if (currentTab === 'admin') {
-    return (
-      <div className="min-h-screen bg-slate-900 text-slate-100">
-        <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
-          <AdminPortal
-            lessonsData={EMPTY_LESSONS}
-            vocabularyData={EMPTY_LIST}
-            chaptersData={EMPTY_LIST}
-            onExitAdmin={() => {
-              if (typeof window !== 'undefined') {
-                const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
-                window.history.pushState(null, '', baseRoot);
-              }
-              setCurrentTab('lessons');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onNavigateToLesson={(lessonId) => {
-              if (typeof window !== 'undefined') {
-                const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
-                window.history.pushState(null, '', baseRoot);
-              }
-              setCurrentTab('lessons');
-            }}
-          />
-        </Suspense>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-[#0A0D12] dark:text-slate-100">
+    <VideoProvider onNavigateToTab={setCurrentTab}>
+      {currentTab === 'admin' ? (
+        <div className="min-h-screen bg-slate-900 text-slate-100 relative">
+          <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+            <AdminPortal
+              lessonsData={EMPTY_LESSONS}
+              vocabularyData={EMPTY_LIST}
+              chaptersData={EMPTY_LIST}
+              onExitAdmin={() => {
+                if (typeof window !== 'undefined') {
+                  const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
+                  window.history.pushState(null, '', baseRoot);
+                }
+                setCurrentTab('lessons');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onNavigateToLesson={(lessonId) => {
+                if (typeof window !== 'undefined') {
+                  const baseRoot = window.location.pathname.replace(/\/rafi\/?$/, '') || import.meta.env.BASE_URL || '/';
+                  window.history.pushState(null, '', baseRoot);
+                }
+                setCurrentTab('lessons');
+              }}
+            />
+          </Suspense>
+        </div>
+      ) : (
+        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-[#0A0D12] dark:text-slate-100 relative">
       {/* Underlying Website Shell - hidden with 0 opacity while splash is active to prevent any pre-animation flash */}
       <div
         style={{
@@ -649,5 +649,8 @@ export default function App() {
         />
       )}
     </div>
+    )}
+    <GlobalVideoHost />
+  </VideoProvider>
   );
 }
