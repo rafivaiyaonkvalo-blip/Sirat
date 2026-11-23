@@ -191,7 +191,7 @@ export default function PorboPage({ id, no, step, progress }) {
             >
               {textLocked ? <Lock size={15} className="text-amber-500" /> : <Icon size={16} />}
               {label}
-              {textLocked ? <span className="text-[10px] text-amber-500 font-semibold">(শীঘ্রই)</span> : null}
+              {textLocked ? <span className="text-[10px] text-amber-500 font-semibold">(দেওয়া হবে না)</span> : null}
             </a>
           );
         })}
@@ -225,13 +225,13 @@ export default function PorboPage({ id, no, step, progress }) {
 
       {view === 'text' && (
         isTextLocked(id) ? (
-          <div className="mx-auto max-w-md py-14 px-4 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20">
-              <Lock size={32} />
+          <div className="mx-auto max-w-lg py-12 px-6 text-center rounded-3xl border border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/20 my-4">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30">
+              <FileText size={28} />
             </div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">দারস {meta.number}-এর লেখা প্রস্তুত হচ্ছে</h3>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              দারস ২৫ থেকে ৩২-এর বিস্তারিত লিখিত পাঠ ও নোট তৈরির কাজ চলছে, ইনশাআল্লাহ শীঘ্রই উন্মুক্ত করা হবে। অফলাইনে পড়ার জন্য গুগল ড্রাইভ ফোল্ডার থেকে সম্পূর্ণ পিডিএফ সংগ্রহ করতে পারেন।
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">দারস {meta.number}-এর লিখিত পাঠ ওয়েবসাইটে দেওয়া হবে না</h3>
+            <p className="mt-2.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              দারস ২৫ থেকে ৩২-এর কোনো লিখিত পাঠ ওয়েবসাইটে দেওয়া হবে না। পাঠটি সম্পূর্ণ করতে সরাসরি মূল লেকচার ভিডিওটি মনোযোগ দিয়ে দেখুন অথবা অফলাইনে পড়ার জন্য গুগল ড্রাইভ ফোল্ডার থেকে সম্পূর্ণ মূল পিডিএফ ডাউনলোড করে নিন।
             </p>
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <a href={go(`/dars/${id}/${no}/video`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors">
@@ -241,7 +241,7 @@ export default function PorboPage({ id, no, step, progress }) {
                 href={DRIVE_PDF_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors shadow-xs"
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-900/40 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-800/40 transition-colors shadow-xs"
               >
                 <FileDown size={16} /> মূল পিডিএফ ডাউনলোড <ExternalLink size={13} className="opacity-70" />
               </a>

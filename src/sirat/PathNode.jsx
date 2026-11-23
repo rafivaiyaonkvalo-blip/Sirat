@@ -52,7 +52,7 @@ export function PathNode({ darsId, darsNumber, title, seq, no, offsetClass, side
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white"><Icon size={14} /></span>
                   <span>{label}</span>
                   {key === 'video' && !hasVideo && <span className="ml-auto text-[9px] font-semibold text-slate-400">শিগগির</span>}
-                  {textLocked && <span className="ml-auto text-[9px] font-semibold text-amber-500">শিগগির</span>}
+                  {textLocked && <span className="ml-auto text-[9px] font-semibold text-amber-500">অনুপলব্ধ</span>}
                 </Tag>
                 );
               })}
