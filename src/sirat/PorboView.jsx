@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Headphones, Lightbulb, Lock, PenLine } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, ExternalLink, FileDown, FileText, Film, Headphones, Lightbulb, Lock, PenLine } from 'lucide-react';
 import { isUnlocked, isDarsLocked, isTextLocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
@@ -39,6 +39,8 @@ const STEP_META = {
   text: { label: 'লেখা', icon: FileText },
   quiz: { label: 'কুইজ', icon: PenLine },
 };
+
+const DRIVE_PDF_LINK = 'https://drive.google.com/drive/folders/1jYIve35J-bdRkydqeE14PqfNsX6w7Mii?usp=drive_link';
 
 // দারসের মূল ইউটিউব ভিডিও: পার্ট থাকলে সেটি, অন্যথায় মূল ভিডিওটি সম্পূর্ণভাবে কোনো কাটাকাটি ছাড়া চলবে
 function videoFor(meta, id, no) {
@@ -150,31 +152,78 @@ export default function PorboPage({ id, no, step, progress }) {
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">দারস {meta.number}-এর লেখা প্রস্তুত হচ্ছে</h3>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              দারস ২৫ থেকে ৩২-এর বিস্তারিত লিখিত পাঠ ও নোট তৈরির কাজ চলছে, ইনশাআল্লাহ শীঘ্রই উন্মুক্ত করা হবে।
+              দারস ২৫ থেকে ৩২-এর বিস্তারিত লিখিত পাঠ ও নোট তৈরির কাজ চলছে, ইনশাআল্লাহ শীঘ্রই উন্মুক্ত করা হবে। অফলাইনে পড়ার জন্য গুগল ড্রাইভ ফোল্ডার থেকে সম্পূর্ণ পিডিএফ সংগ্রহ করতে পারেন।
             </p>
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a href={go(`/dars/${id}/${no}/video`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-emerald-700">
+              <a href={go(`/dars/${id}/${no}/video`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors">
                 <Film size={16} /> লেকচার ভিডিও দেখুন
+              </a>
+              <a
+                href={DRIVE_PDF_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors shadow-xs"
+              >
+                <FileDown size={16} /> মূল পিডিএফ ডাউনলোড <ExternalLink size={13} className="opacity-70" />
               </a>
             </div>
           </div>
         ) : (
           <>
-            {videos[String(id)] && (
-              <div className="mb-4">
-                {!listen ? (
-                  <button type="button" onClick={() => setListen(true)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200"><Headphones size={16} /> পড়ার সাথে শুনুন</button>
-                ) : (
-                  <div className="sticky top-16 z-30 md:top-20">
-                    <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
-                    <button type="button" onClick={() => setListen(false)} className="mt-1 text-xs font-semibold text-slate-500 underline">অডিও বার বন্ধ করুন</button>
-                  </div>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 dark:border-white/10 pb-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {videos[String(id)] && (
+                  !listen ? (
+                    <button type="button" onClick={() => setListen(true)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/5 transition-colors">
+                      <Headphones size={16} /> পড়ার সাথে শুনুন
+                    </button>
+                  ) : (
+                    <div className="sticky top-16 z-30 md:top-20">
+                      <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
+                      <button type="button" onClick={() => setListen(false)} className="mt-1 text-xs font-semibold text-slate-500 underline">অডিও বার বন্ধ করুন</button>
+                    </div>
+                  )
                 )}
               </div>
-            )}
+              <a
+                href={DRIVE_PDF_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500/40 bg-emerald-50/80 dark:bg-emerald-950/30 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors shadow-xs"
+                title="গুগল ড্রাইভ ফোল্ডার থেকে সম্পূর্ণ দারসের মূল পিডিএফ ডাউনলোড করুন"
+              >
+                <FileDown size={16} />
+                <span>পিডিএফ ডাউনলোড</span>
+                <ExternalLink size={13} className="opacity-70" />
+              </a>
+            </div>
+
             <div translate="no" className="reader space-y-4">
               {porbo.blocks.map((b, i) => (b.type === 'sub' ? <Block key={i} b={b} /> : <NoteWrap key={i} b={b} idx={i} dars={id} porbo={no}><Block b={b} /></NoteWrap>))}
             </div>
+
+            <div className="my-8 rounded-2xl border border-emerald-200/80 dark:border-emerald-800/60 bg-gradient-to-r from-emerald-50 via-teal-50/40 to-emerald-50 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-emerald-950/30 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <FileDown size={20} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">দারসের মূল মুদ্রিত পিডিএফ সংগ্রহ করুন</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">অফলাইনে পড়া ও রিভিশনের জন্য গুগল ড্রাইভ ফোল্ডার থেকে সব পিডিএফ সংগ্রহ করতে পারেন।</p>
+                </div>
+              </div>
+              <a
+                href={DRIVE_PDF_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-700 shrink-0 transition-colors"
+              >
+                <FileDown size={15} />
+                <span>ড্রাইভ থেকে ডাউনলোড</span>
+                <ExternalLink size={12} className="opacity-80" />
+              </a>
+            </div>
+
             {porbo.footnotes.length > 0 && (
               <aside className="mt-8 border-t border-slate-200 dark:border-white/10 pt-4 text-sm text-slate-600 dark:text-slate-300">
                 <h2 className="mb-2 font-bold">পাদটীকা</h2>
