@@ -69,11 +69,13 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
   const [pseudo, setPseudo] = useState(false); // ব্রাউজার ফুলস্ক্রিন না দিলে (যেমন আইফোন) পুরো স্ক্রিন জুড়ে ফিক্সড
   const [isFloating, setIsFloating] = useState(false);
   const [dismissedFloat, setDismissedFloat] = useState(false);
+  const wasOutOfViewRef = useRef(false);
+  const manualFloatRef = useRef(false);
 
   // ২. অটো-স্ক্রল ফ্লোটিং (Auto-Float on scroll)
   useEffect(() => {
     if (audio || full) {
-      if (isFloating) setIsFloating(false);
+      setIsFloating(false);
       return undefined;
     }
     const el = containerRef.current;
@@ -81,15 +83,19 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // ভিডিও চলছে এমন অবস্থায় স্ক্রিনের বাইরে চলে গেলে ভাসমান (Floating Mini-Player) মোডে যাবে
         if (!entry.isIntersecting) {
+          wasOutOfViewRef.current = true;
+          // ভিডিও চলছে এবং ব্যবহারকারী নিচে স্ক্রল করলে স্বয়ংক্রিয়ভাবে ভেসে উঠবে
           if (playing && !dismissedFloat) {
             setIsFloating(true);
           }
         } else {
-          // মূল স্থানে ফিরে এলে স্বয়ংক্রিয়ভাবে স্বাভাবিক আকারে ফিরে আসবে
-          setIsFloating(false);
-          setDismissedFloat(false);
+          // যখন ভিডিওর মূল জায়গায় ফিরে আসা হয়, তখন অটো-ফ্লোট রিস্টোর হবে
+          if (wasOutOfViewRef.current && !manualFloatRef.current) {
+            setIsFloating(false);
+            setDismissedFloat(false);
+          }
+          wasOutOfViewRef.current = false;
         }
       },
       { threshold: 0.15 }
@@ -97,7 +103,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [playing, dismissedFloat, audio, full, isFloating]);
+  }, [playing, dismissedFloat, audio, full]);
 
   const from = startProp ?? (frac && dur ? Math.floor(frac[0] * dur) : 0);
   const end = endProp ?? (frac && dur ? Math.ceil(frac[1] * dur) : undefined);
@@ -245,16 +251,21 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
   const toggleFloating = (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
-    setIsFloating((f) => {
-      const next = !f;
-      if (!next) setDismissedFloat(true);
-      else setDismissedFloat(false);
+    setIsFloating((prev) => {
+      const next = !prev;
+      manualFloatRef.current = next;
+      if (!next) {
+        setDismissedFloat(true);
+      } else {
+        setDismissedFloat(false);
+      }
       return next;
     });
   };
 
   const expandFromFloating = (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
+    manualFloatRef.current = false;
     setIsFloating(false);
     setDismissedFloat(false);
     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -262,6 +273,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
   const closeFloating = (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
+    manualFloatRef.current = false;
     setIsFloating(false);
     setDismissedFloat(true);
   };
