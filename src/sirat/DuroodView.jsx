@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap } from 'lucide-react';
+import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap, Sparkles } from 'lucide-react';
 import { campaign } from './brand';
 import { bn } from './questions';
 import { auth } from '../services/firebase';
@@ -233,7 +233,7 @@ export default function DuroodPage() {
       <p className="mt-1 text-slate-500 dark:text-slate-400">{t(campaign.title)}: {t('নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।')}</p>
       <p className="font-arabic mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-200 sm:text-xl" dir="rtl">بَيْنَكَ أَنْتَ وَبَيْنَ اللَّهِ</p>
 
-      {/* বন্ধুর রেফারেল লিংকে এসে থাকলে দৃশ্যমান নোটিশ */}
+      {/* বন্ধুর রেফারেল লিংকে এসে থাকলে মার্জিত ও নূরানী ওয়েলকাম কার্ড */}
       {(() => {
         let refCode = null;
         try {
@@ -241,14 +241,25 @@ export default function DuroodPage() {
         } catch {}
         if (!refCode) return null;
         return (
-          <div className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/30 text-emerald-950 dark:text-emerald-200 text-xs font-semibold flex items-center justify-between gap-2 shadow-xs animate-fade-in text-left">
-            <span className="flex items-center gap-2">
-              <span className="text-base shrink-0">🤝</span>
-              <span>{t('স্বাগতম! আপনি বন্ধুর আমন্ত্রণে এই দুরূদ মাহফিলে যুক্ত হয়েছেন। আপনার পঠিত প্রতিটি দুরূদ আপনার ও আপনার বন্ধুর উভয়ের হিসাবে জমা হবে।')}</span>
-            </span>
-            <span className="shrink-0 text-[10px] font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-full shadow-xs">
-              {t('যুক্ত')}
-            </span>
+          <div className="mt-3.5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-amber-500/15 border border-emerald-500/30 dark:border-emerald-500/40 text-slate-800 dark:text-slate-100 shadow-sm animate-fade-in text-left">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                  <Sparkles size={16} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-emerald-900 dark:text-emerald-200">
+                    {t('মারহাবা! প্রিয়জনের দাওয়াতে যুক্ত হয়েছেন')}
+                  </h4>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    {t('নবীপ্রেমের এই বরকতময় কাফেলায় আপনাকে আন্তরিক স্বাগতম। আপনার পঠিত প্রতিটি দুরূদের সাওয়াব ও XP উভয়ের আমলনামায় সদকায়ে জারিয়া হিসেবে যুক্ত হবে ইনশাআল্লাহ।')}
+                  </p>
+                </div>
+              </div>
+              <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
+                {t('কাফেলায় সংযুক্ত')}
+              </span>
+            </div>
           </div>
         );
       })()}
