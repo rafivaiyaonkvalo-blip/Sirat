@@ -11,10 +11,10 @@ export const isDarsLocked = (darsId) => darsId > 32 && !isSuperUser(null);
 // দারস ২৫ থেকে ৩২-এর লিখিত পাঠ ওয়েবসাইটে দেওয়া হবে না (সবার জন্য বন্ধ)
 export const isTextLocked = (darsId) => (darsId >= 25 && darsId <= 32);
 
-// পাঠ N খোলা: প্রথম পাঠ সবসময় (যদি পুরো দারস লক না থাকে); অন্যগুলো আগের পাঠের কুইজ/সম্পন্ন হলে (সুপার ইউজারের জন্য সব খোলা)
+// পাঠ N খোলা: সব দারসের সকল পর্ব এখন সবার জন্য উন্মুক্ত (আগের ধাপ সম্পন্ন করার লক তুলে দেওয়া হয়েছে)
 export const isUnlocked = (done, darsId, no) => {
   if (isDarsLocked(darsId)) return false;
-  return no <= 1 || !!done[`${darsId}-${no - 1}`] || isSuperUser(null);
+  return true;
 };
 
 // আগের (ছোট ছোট ভাগের) অগ্রগতি নতুন ৩-ভাগে রূপান্তর: নতুন পাঠের সব পুরনো পাঠ সম্পন্ন হলেই সেটি সম্পন্ন
