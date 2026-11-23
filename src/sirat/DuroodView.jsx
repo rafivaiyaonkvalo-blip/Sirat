@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap, Sparkles } from 'lucide-react';
+import { Copy, Flame, Globe, Heart, Plus, RotateCcw, Share2, Trophy, Users, Zap } from 'lucide-react';
 import { campaign } from './brand';
 import { bn } from './questions';
 import { auth } from '../services/firebase';
@@ -232,37 +232,6 @@ export default function DuroodPage() {
       <h1 className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{t('দুরূদ')}</h1>
       <p className="mt-1 text-slate-500 dark:text-slate-400">{t(campaign.title)}: {t('নবীজী ﷺ-এর ওপর দুরূদ পাঠ করি, সবাই মিলে।')}</p>
       <p className="font-arabic mt-2 text-lg font-bold text-emerald-700 dark:text-emerald-200 sm:text-xl" dir="rtl">بَيْنَكَ أَنْتَ وَبَيْنَ اللَّهِ</p>
-
-      {/* বন্ধুর রেফারেল লিংকে এসে থাকলে মার্জিত ও নূরানী ওয়েলকাম কার্ড */}
-      {(() => {
-        let refCode = null;
-        try {
-          refCode = localStorage.getItem('sirat_ref');
-        } catch {}
-        if (!refCode) return null;
-        return (
-          <div className="mt-3.5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-amber-500/15 border border-emerald-500/30 dark:border-emerald-500/40 text-slate-800 dark:text-slate-100 shadow-sm animate-fade-in text-left">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
-                  <Sparkles size={16} className="text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-emerald-900 dark:text-emerald-200">
-                    {t('মারহাবা! প্রিয়জনের দাওয়াতে যুক্ত হয়েছেন')}
-                  </h4>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                    {t('নবীপ্রেমের এই বরকতময় কাফেলায় আপনাকে আন্তরিক স্বাগতম। আপনার পঠিত প্রতিটি দুরূদের সাওয়াব ও XP উভয়ের আমলনামায় সদকায়ে জারিয়া হিসেবে যুক্ত হবে ইনশাআল্লাহ।')}
-                  </p>
-                </div>
-              </div>
-              <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
-                {t('কাফেলায় সংযুক্ত')}
-              </span>
-            </div>
-          </div>
-        );
-      })()}
 
       <div className="mt-5 rounded-2xl border border-emerald-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left">
         <div className="flex items-center justify-between text-sm font-semibold">
