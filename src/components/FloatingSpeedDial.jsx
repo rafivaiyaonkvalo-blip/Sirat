@@ -699,8 +699,9 @@ export default function FloatingSpeedDial({
                       if (onOpenReport) {
                         onOpenReport({
                           source: 'help_modal',
-                          category: 'other',
-                          title: 'ডেভেলপার সহায়তা ও মেসেজ'
+                          category: 'suggestion',
+                          isMessage: true,
+                          title: 'পরামর্শ বা মেসেজ পাঠান'
                         });
                       }
                     }}

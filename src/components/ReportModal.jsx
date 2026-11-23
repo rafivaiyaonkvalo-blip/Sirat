@@ -12,19 +12,19 @@ import { getDeviceInfo } from '../services/analyticsTracker';
 const WHATSAPP_NUMBER = '8801540715958';
 
 const ISSUE_CATEGORIES = [
-  { id: 'harakat', label: '🔤 হরকত / তাশকীল ভুল', desc: 'যবর, যের, পেশ বা তাশদীদ সংক্রান্ত ত্রুটি' },
-  { id: 'meaning', label: '📖 বাংলা অর্থ ভুল', desc: 'শব্দার্থ বা বাক্য তরজমায় অসংগতি' },
-  { id: 'audio', label: '🔊 অডিও সমস্যা', desc: 'ভুল উচ্চারণ বা অডিও শুনতে না পাওয়া' },
-  { id: 'tarkib', label: '⚖️ তারকীব / ব্যাকরণ প্রশ্ন', desc: "মুবতাদা, খবর, ফে'ল বা এরাব সংক্রান্ত" },
-  { id: 'typo', label: '✏️ টাইপো বা বানান ভুল', desc: 'মুদ্রণজনিত যেকোনো ভুল' },
-  { id: 'other', label: '💬 অন্যান্য ত্রুটি', desc: 'অন্যান্য যেকোনো অসঙ্গতি' }
+  { id: 'meaning', label: '📖 তথ্য বা বর্ণনায় ভুল', desc: 'সীরাত, ঘটনা বা ঐতিহাসিক তথ্যে অসঙ্গতি' },
+  { id: 'typo', label: '✏️ টাইপো বা বানান ভুল', desc: 'বাংলা বা আরবি বানানে মুদ্রণজনিত ভুল' },
+  { id: 'audio', label: '🎥 ভিডিও বা অডিও সমস্যা', desc: 'ভিডিও না চলা বা প্লেয়ার সংক্রান্ত ত্রুটি' },
+  { id: 'harakat', label: '🔤 হরকত / তাশকীল ভুল', desc: 'কুরআন বা হাদীসের পাঠে হরকত সংক্রান্ত ত্রুটি' },
+  { id: 'inquiry', label: '❓ কুইজ বা প্রশ্ন সমস্যা', desc: 'কুইজের প্রশ্ন বা উত্তরে কোনো অসঙ্গতি' },
+  { id: 'other', label: '💬 অন্যান্য সমস্যা', desc: 'অ্যাপ বা পাঠ সংক্রান্ত যেকোনো অসঙ্গতি' }
 ];
 
 const MESSAGE_CATEGORIES = [
-  { id: 'suggestion', label: '💡 পরামর্শ ও মতামত', desc: 'অ্যাপটি আরও উন্নত করার মূল্যবান পরামর্শ' },
-  { id: 'inquiry', label: '❓ কিতাব বা কোর্স জিজ্ঞাসা', desc: 'আরবি শিক্ষা ও কোর্স সংক্রান্ত যেকোনো প্রশ্ন' },
-  { id: 'dua', label: '❤️ উৎসাহ ও দুআ', desc: 'টিমের প্রতি শুভেচ্ছা ও নেক দুআ' },
-  { id: 'feature', label: '🚀 নতুন ফিচারের প্রস্তাব', desc: 'নতুন কোনো ফিচার বা সুবিধা যোগ করার অনুরোধ' }
+  { id: 'suggestion', label: '💡 পরামর্শ ও মতামত', desc: 'সীরাত প্ল্যাটফর্ম আরও উন্নত করার পরামর্শ' },
+  { id: 'dua', label: '❤️ উৎসাহ ও দুআ', desc: 'মারকাযুল ঈমান টিমের প্রতি শুভেচ্ছা ও নেক দুআ' },
+  { id: 'feature', label: '🚀 নতুন ফিচারের প্রস্তাব', desc: 'নতুন কোনো ফিচার বা সুবিধা যোগ করার অনুরোধ' },
+  { id: 'inquiry', label: '❓ কোর্স বা সাধারণ জিজ্ঞাসা', desc: 'সীরাত পাঠ্যক্রম বা অন্যান্য তথ্য জানতে' }
 ];
 
 export default function ReportModal({ 
@@ -32,10 +32,23 @@ export default function ReportModal({
   onClose, 
   context = {} 
 }) {
-  const isMessageMode = Boolean(context?.isMessage || context?.category === 'other' && context?.source === 'floating_speed_dial');
+  const initialIsMessage = Boolean(
+    context?.isMessage || 
+    context?.category === 'suggestion' || 
+    context?.category === 'dua' || 
+    context?.category === 'feature' || 
+    (context?.category === 'other' && context?.source !== 'error_report')
+  );
+
+  const [activeTab, setActiveTab] = useState(initialIsMessage ? 'message' : 'issue');
+  const isMessageMode = activeTab === 'message';
   const activeCategories = isMessageMode ? MESSAGE_CATEGORIES : ISSUE_CATEGORIES;
 
-  const [selectedCategory, setSelectedCategory] = useState(isMessageMode ? (MESSAGE_CATEGORIES.some(c => c.id === context.category) ? context.category : 'suggestion') : (context.category || 'harakat'));
+  const [selectedCategory, setSelectedCategory] = useState(
+    isMessageMode 
+      ? (MESSAGE_CATEGORIES.some(c => c.id === context.category) ? context.category : 'suggestion') 
+      : (ISSUE_CATEGORIES.some(c => c.id === context.category) ? context.category : 'meaning')
+  );
   const [details, setDetails] = useState('');
   const [contactInfo, setContactInfo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +56,19 @@ export default function ReportModal({
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedCategory(isMessageMode ? (MESSAGE_CATEGORIES.some(c => c.id === context.category) ? context.category : 'suggestion') : (context.category || 'harakat'));
+      const isMsg = Boolean(
+        context?.isMessage || 
+        context?.category === 'suggestion' || 
+        context?.category === 'dua' || 
+        context?.category === 'feature' || 
+        (context?.category === 'other' && context?.source !== 'error_report')
+      );
+      setActiveTab(isMsg ? 'message' : 'issue');
+      setSelectedCategory(
+        isMsg
+          ? (MESSAGE_CATEGORIES.some(c => c.id === context.category) ? context.category : 'suggestion')
+          : (ISSUE_CATEGORIES.some(c => c.id === context.category) ? context.category : 'meaning')
+      );
       setIsSuccess(false);
       setDetails('');
 
@@ -161,7 +186,7 @@ export default function ReportModal({
       `📅 *তারিখ:* ${date}`,
       '━━━━━━━━━━━━━━',
       'জাযাকাল্লাহু খাইরান 🌿',
-      'arabic.markazuliman.com'
+      'https://www.markazuliman.com/sirat'
     ];
 
     const text = encodeURIComponent(lines.join('\n'));
@@ -172,7 +197,7 @@ export default function ReportModal({
     setIsSuccess(false);
     setDetails('');
     setContactInfo('');
-    setSelectedCategory('harakat');
+    setSelectedCategory('meaning');
     onClose();
   };
 
@@ -183,7 +208,7 @@ export default function ReportModal({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            {context?.isMessage || context?.category === 'other' ? (
+            {isMessageMode ? (
               <div className="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-950/70 text-violet-600 dark:text-violet-400 flex items-center justify-center">
                 <MessageSquare size={18} />
               </div>
@@ -194,10 +219,10 @@ export default function ReportModal({
             )}
             <div>
               <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                {context?.isMessage || context?.category === 'other' ? 'পরামর্শ বা মেসেজ পাঠান' : 'ভুলত্রুটি বা অসঙ্গতি রিপোর্ট'}
+                {isMessageMode ? 'পরামর্শ বা মেসেজ পাঠান' : 'ভুলত্রুটি বা অসঙ্গতি রিপোর্ট'}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {context?.isMessage || context?.category === 'other' ? 'মারকাযুল ঈমান টিম' : 'মারকাযুল ঈমান ইলমী যাচাই টিম'}
+                {isMessageMode ? 'মারকাযুল ঈমান টিম' : 'মারকাযুল ঈমান ইলমী যাচাই টিম'}
               </p>
             </div>
           </div>
@@ -215,6 +240,40 @@ export default function ReportModal({
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {!isSuccess ? (
             <form onSubmit={handleSubmit} className="space-y-4">
+
+              {/* Mode Toggle Switch (Message vs Bug Report) */}
+              <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 border border-slate-200/60 dark:border-slate-700/60">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('message');
+                    setSelectedCategory('suggestion');
+                  }}
+                  className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    activeTab === 'message'
+                      ? 'bg-white dark:bg-slate-700 text-violet-700 dark:text-violet-300 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <MessageSquare size={13} />
+                  <span>পরামর্শ বা বার্তা</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('issue');
+                    setSelectedCategory('meaning');
+                  }}
+                  className={`flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    activeTab === 'issue'
+                      ? 'bg-white dark:bg-slate-700 text-rose-700 dark:text-rose-300 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <Flag size={13} />
+                  <span>ভুলত্রুটি রিপোর্ট</span>
+                </button>
+              </div>
               
               {/* Context Preview Card (Auto-captured) */}
               {(context.arabic || context.bangla || context.lessonTitle) && (
@@ -290,8 +349,8 @@ export default function ReportModal({
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder={
                     isMessageMode
-                      ? 'এখানে আপনার প্রশ্ন, সুচিন্তিত পরামর্শ বা যেকোনো মতামত বিস্তারিত লিখুন...'
-                      : 'যেমন: অমুক শব্দের শেষ অক্ষরে পেশের পরিবর্তে যের হবে / বাংলা অর্থের সঠিক রূপ...'
+                      ? 'সীরাত প্ল্যাটফর্ম, কোর্স বা অ্যাপ সংক্রান্ত যেকোনো প্রশ্ন, পরামর্শ বা বার্তা লিখুন...'
+                      : 'যেমন: ভিডিও চলতে সমস্যা হচ্ছে / দারসের অমুক তথ্যে সংশোধন প্রয়োজন...'
                   }
                   className={`w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none transition-colors resize-none font-sans ${
                     isMessageMode ? 'focus:border-violet-500' : 'focus:border-rose-500'
