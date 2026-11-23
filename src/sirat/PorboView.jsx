@@ -209,7 +209,10 @@ export default function PorboPage({ id, no, step, progress }) {
       {/* ভিডিও প্লেয়ারের অ্যাংকর স্থান: ভিডিও মোডে এখানে ভিডিও রেন্ডার হবে অথবা ফ্লোটিং কার্ড দেখাবে */}
       {step === 'video' && (
         <div
-          ref={anchorNodeRef}
+          ref={(node) => {
+            anchorNodeRef.current = node;
+            setAnchorEl(node);
+          }}
           id="sirat-video-anchor"
           className="relative w-full aspect-video rounded-2xl mb-6 bg-slate-900/10 dark:bg-black/30 overflow-hidden"
         >

@@ -12,16 +12,24 @@ export default function GlobalVideoHost() {
 
   if (!mounted || !activeVideo) return null;
 
-  // ফ্লোটিং উইন্ডো বন্ধ করে দেওয়া হলে এবং ব্যবহারকারী যদি কোনো ভিডিও অ্যাংকরে না থাকেন, তবে লুকানো থাকবে
-  if (isDismissed && !anchorRect) {
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
+  const isVideoPage = hash.includes('/video');
+
+  // ফ্লোটিং উইন্ডো বন্ধ করে দেওয়া হলে এবং ব্যবহারকারী যদি ভিডিও পেজে না থাকেন, তবে লুকানো থাকবে
+  if (isDismissed && (!isVideoPage || !anchorRect)) {
     return null;
   }
 
-  // ফ্লোটিং মোড: যদি স্পষ্টভাবে ফ্লোটিং চালু থাকে অথবা পেজে কোনো অ্যাংকর না থাকে (যেমন অন্য ট্যাবে থাকলে)
-  const isFloatingMode = isFloating || !anchorRect;
+  // ফ্লোটিং মোড: যদি স্পষ্টভাবে ফ্লোটিং চালু থাকে অথবা ভিডিও পেজে না থাকি
+  const isFloatingMode = isFloating || (!isVideoPage && !anchorRect);
 
-  // যদি ফ্লোটিং বন্ধ করে দেওয়া থাকে কিন্তু ভিডিও পেজে আছেন, তখন স্বাভাবিক আকারে দেখাবে
+  // যদি ফ্লোটিং বন্ধ করে দেওয়া থাকে এবং ফ্লোটিং মোডে থাকে, তবে লুকানো থাকবে
   if (isDismissed && isFloatingMode) {
+    return null;
+  }
+
+  // যদি স্বাভাবিক মোডে আছি কিন্তু অ্যাংকর পরিমাপ প্রস্তুত না, এক ফ্রেম অপেক্ষা
+  if (!isFloatingMode && !anchorRect) {
     return null;
   }
 

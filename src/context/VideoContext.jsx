@@ -24,6 +24,9 @@ export function VideoProvider({ children, onNavigateToTab }) {
       return;
     }
     const rootEl = document.getElementById('root') || document.body;
+    if (rootEl && window.getComputedStyle(rootEl).position === 'static') {
+      rootEl.style.position = 'relative';
+    }
     const elRect = el.getBoundingClientRect();
     const rootRect = rootEl.getBoundingClientRect();
 
