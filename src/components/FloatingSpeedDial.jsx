@@ -3,7 +3,7 @@ import {
   Sun, Moon, User, Share2, MessageSquare, Flag, 
   HelpCircle, ArrowDown, ArrowUp, X, Check, ExternalLink, 
   BookOpen, Award, ShieldCheck, Sparkles,
-  Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send, StickyNote
+  Languages, BookX, Trophy, Lock, SlidersHorizontal, PlaySquare, Send, StickyNote, ClipboardList
 } from 'lucide-react';
 import { langLabel, nextLang, toggleLang, useLang } from '../i18n';
 import { getVoiceProfile, setVoiceProfile, playArabicAudio } from '../utils/audio';
@@ -21,6 +21,7 @@ export default function FloatingSpeedDial({
   onOpenMistakes,
   onOpenLeaderboard,
   onOpenCertificate,
+  onOpenQuizResults,
   onNavigateTab,
   customItems = []
 }) {
@@ -153,6 +154,17 @@ export default function FloatingSpeedDial({
       onOpenCertificate();
     } else {
       window.dispatchEvent(new CustomEvent('uls_open_certificate'));
+    }
+    setIsOpen(false);
+  };
+
+  // Quiz Results / Exam history handler
+  const handleQuizResultsClick = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (typeof onOpenQuizResults === 'function') {
+      onOpenQuizResults();
+    } else {
+      window.dispatchEvent(new CustomEvent('sirat_open_quiz_results'));
     }
     setIsOpen(false);
   };
@@ -319,6 +331,13 @@ export default function FloatingSpeedDial({
         ? 'from-amber-600 via-amber-500 to-yellow-500 shadow-amber-500/35 ring-amber-400/30'
         : 'from-slate-700 via-slate-800 to-slate-900 shadow-slate-700/35 ring-slate-600/30',
       onClick: handleCertificateClick
+    },
+    {
+      id: 'quiz_results',
+      label: 'অনুশীলন ফল',
+      icon: ClipboardList,
+      gradient: 'from-blue-600 via-indigo-600 to-sky-600 shadow-blue-600/35 ring-blue-400/30',
+      onClick: handleQuizResultsClick
     },
     {
       id: 'mistakes',

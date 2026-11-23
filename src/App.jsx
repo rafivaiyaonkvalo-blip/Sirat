@@ -25,6 +25,7 @@ const AdminPortal = lazy(() => import('./components/admin/AdminPortal'));
 const MistakesNotebookModal = lazy(() => import('./components/MistakesNotebookModal'));
 const LeaderboardModal = lazy(() => import('./components/LeaderboardModal'));
 const CertificateModal = lazy(() => import('./components/CertificateModal'));
+const QuizResultsModal = lazy(() => import('./components/QuizResultsModal'));
 
 // প্রথমবার খোলার আগে পর্যন্ত মোডালের কোডই লোড হয় না; একবার খুললে মাউন্ট থাকে (বন্ধ হলে নিজেই null দেয়)
 function LazyOnceOpen({ open, children }) {
@@ -74,6 +75,7 @@ export default function App() {
   const [mistakesModalOpen, setMistakesModalOpen] = useState(false);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [certificateModalOpen, setCertificateModalOpen] = useState(false);
+  const [quizResultsModalOpen, setQuizResultsModalOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState('original');
   const [user, setUser] = useState(null);
@@ -157,6 +159,13 @@ export default function App() {
     const handleOpenCertificate = () => setCertificateModalOpen(true);
     window.addEventListener('uls_open_certificate', handleOpenCertificate);
     return () => window.removeEventListener('uls_open_certificate', handleOpenCertificate);
+  }, []);
+
+  // Listen for Open Quiz Results triggers
+  useEffect(() => {
+    const handleOpenQuizResults = () => setQuizResultsModalOpen(true);
+    window.addEventListener('sirat_open_quiz_results', handleOpenQuizResults);
+    return () => window.removeEventListener('sirat_open_quiz_results', handleOpenQuizResults);
   }, []);
 
   // Initialize Website Usage Tracer & Activity Heartbeat
@@ -553,6 +562,13 @@ export default function App() {
           user={user}
         />
       </LazyOnceOpen>
+      {/* "অনুশীলন ফল" (Quiz Results) Modal */}
+      <LazyOnceOpen open={quizResultsModalOpen}>
+        <QuizResultsModal
+          isOpen={quizResultsModalOpen}
+          onClose={() => setQuizResultsModalOpen(false)}
+        />
+      </LazyOnceOpen>
       {/* Expandable Floating Action Menu (Right Corner Speed Dial) */}
       <FloatingSpeedDial
         darkMode={darkMode}
@@ -562,6 +578,7 @@ export default function App() {
         onOpenMistakes={() => setMistakesModalOpen(true)}
         onOpenLeaderboard={() => setLeaderboardModalOpen(true)}
         onOpenCertificate={() => setCertificateModalOpen(true)}
+        onOpenQuizResults={() => setQuizResultsModalOpen(true)}
         onOpenReport={(ctx) => {
           setReportContext(ctx || {});
           setReportModalOpen(true);

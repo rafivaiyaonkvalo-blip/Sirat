@@ -1,59 +1,29 @@
 import React, { useRef, useState } from 'react';
-import { Download, Printer, Share2, Check, Sparkles, ShieldCheck, Award, ExternalLink, Lock, Palette } from 'lucide-react';
+import { Download, Printer, Share2, Check, Sparkles, Award, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { triggerHaptic } from '../utils/haptics';
+import { getAssetUrl } from '../utils/assetHelper';
 
-export const CERTIFICATE_THEMES = [
-  {
-    id: 'emerald',
-    name: 'রাজকীয় পান্না ও স্বর্ণালী',
-    nameEn: 'Royal Emerald & Gold',
-    primary: '#064e3b',
-    secondary: '#d97706',
-    accent: '#fbbf24',
-    badgeBg: 'bg-emerald-800 text-amber-200',
-    borderGradient: 'from-amber-500 via-yellow-400 to-emerald-700',
-    cardBg: 'from-[#fdfbf7] via-[#faf7ef] to-[#f4eee1]',
-    cardBorder: 'border-emerald-950/20',
-    textColor: 'text-emerald-950',
-    ribbonBg: 'bg-emerald-900 text-amber-200'
-  },
-  {
-    id: 'parchment',
-    name: 'ক্ল্যাসিক্যাল পার্চমেন্ট ও ক্যালিগ্রাফি',
-    nameEn: 'Antique Parchment Calligraphy',
-    primary: '#78350f',
-    secondary: '#b45309',
-    accent: '#f59e0b',
-    badgeBg: 'bg-amber-900 text-amber-100',
-    borderGradient: 'from-amber-700 via-amber-500 to-amber-900',
-    cardBg: 'from-[#fffdfa] via-[#fcf6e8] to-[#f5ebdc]',
-    cardBorder: 'border-amber-950/20',
-    textColor: 'text-amber-950',
-    ribbonBg: 'bg-amber-900 text-amber-100'
-  },
-  {
-    id: 'navy',
-    name: 'ইম্পেরিয়াল নেভি ও প্লাটিনাম গোল্ড',
-    nameEn: 'Imperial Navy & Gold',
-    primary: '#0f172a',
-    secondary: '#ca8a04',
-    accent: '#facc15',
-    badgeBg: 'bg-slate-900 text-amber-300',
-    borderGradient: 'from-amber-400 via-slate-600 to-slate-950',
-    cardBg: 'from-[#ffffff] via-[#f8fafc] to-[#f1f5f9]',
-    cardBorder: 'border-slate-950/25',
-    textColor: 'text-slate-950',
-    ribbonBg: 'bg-slate-900 text-amber-300'
-  }
-];
+// ইউজারের পছন্দ অনুযায়ী অফিসিয়াল সনদ: ইম্পেরিয়াল নেভি ও প্লাটিনাম গোল্ড (A4 Landscape)
+export const CERTIFICATE_THEME = {
+  id: 'navy',
+  name: 'ইম্পেরিয়াল নেভি ও প্লাটিনাম গোল্ড',
+  primary: '#0f172a',
+  secondary: '#ca8a04',
+  accent: '#facc15',
+  badgeBg: 'bg-slate-900 text-amber-300',
+  borderGradient: 'from-amber-400 via-slate-600 to-slate-950',
+  cardBg: 'from-[#ffffff] via-[#f8fafc] to-[#f1f5f9]',
+  cardBorder: 'border-slate-950/25',
+  textColor: 'text-slate-950',
+  ribbonBg: 'bg-slate-900 text-amber-300'
+};
 
 export default function StudentCertificate({ certificateData, isPreview = false }) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [activeThemeId, setActiveThemeId] = useState('emerald');
 
-  const activeTheme = CERTIFICATE_THEMES.find(t => t.id === activeThemeId) || CERTIFICATE_THEMES[0];
+  const activeTheme = CERTIFICATE_THEME;
 
   const {
     volumeConfig,
@@ -64,13 +34,11 @@ export default function StudentCertificate({ certificateData, isPreview = false 
     issueDateBn,
     organization,
     organizationAr,
-    madrasaLocation,
     directorTitle,
     directorName,
     quranAyah
   } = certificateData;
 
-  // কনফেটি অ্যানিমেশন ও তাকবীর ধ্বনি
   const fireCelebration = () => {
     try {
       confetti({
@@ -82,60 +50,48 @@ export default function StudentCertificate({ certificateData, isPreview = false 
     } catch {}
   };
 
-  // উচ্চ রেজোলিউশনের (2400 x 1700 px) আল্ট্রা-শার্প PNG সনদ তৈরি
+  // উচ্চ রেজোলিউশনের (২৮২৮ x ২০০০ px - A4 Landscape ৩০০০ ডিপিআই) আল্ট্রা-শার্প PNG সনদ তৈরি
   const handleDownloadPng = async () => {
     try {
       triggerHaptic();
       setDownloading(true);
       fireCelebration();
 
+      // লোগো লোড
+      const loadImg = (src) => new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+
+      const dawahLogo = await loadImg(getAssetUrl('/logos/dawah_logo.png'));
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const width = 1200;
-      const height = 850;
-      const scale = 2; // Ultra High-DPI 2x Retina scale (2400x1700)
+      // A4 Landscape Dimensions: 1414 x 1000 (Scale 2x = 2828 x 2000 px)
+      const width = 1414;
+      const height = 1000;
+      const scale = 2;
       
       canvas.width = width * scale;
       canvas.height = height * scale;
       ctx.scale(scale, scale);
 
-      // থিম কালারসমূহ
-      let bgGradStart = '#fbfaf5';
-      let bgGradMid = '#f7f4ea';
-      let bgGradEnd = '#f3ede0';
-      let outerBorder = '#d97706';
-      let midBorder = '#fbbf24';
-      let innerBorder = '#064e3b';
-      let headerText = '#064e3b';
-      let ribbonBg = '#064e3b';
-      let ribbonText = '#fef3c7';
-      let titleArColor = '#b45309';
+      // থিম কালারসমূহ (ইম্পেরিয়াল নেভি ও গোল্ড)
+      const bgGradStart = '#ffffff';
+      const bgGradMid = '#f8fafc';
+      const bgGradEnd = '#f1f5f9';
+      const outerBorder = '#0f172a';
+      const midBorder = '#ca8a04';
+      const innerBorder = '#1e293b';
+      const headerText = '#0f172a';
+      const ribbonBg = '#0f172a';
+      const ribbonText = '#fde047';
+      const titleArColor = '#b45309';
 
-      if (activeThemeId === 'parchment') {
-        bgGradStart = '#fffdfa';
-        bgGradMid = '#fcf6e8';
-        bgGradEnd = '#f5ebdc';
-        outerBorder = '#854d0e';
-        midBorder = '#f59e0b';
-        innerBorder = '#78350f';
-        headerText = '#78350f';
-        ribbonBg = '#78350f';
-        ribbonText = '#fef3c7';
-        titleArColor = '#9a3412';
-      } else if (activeThemeId === 'navy') {
-        bgGradStart = '#ffffff';
-        bgGradMid = '#f8fafc';
-        bgGradEnd = '#f1f5f9';
-        outerBorder = '#0f172a';
-        midBorder = '#ca8a04';
-        innerBorder = '#1e293b';
-        headerText = '#0f172a';
-        ribbonBg = '#0f172a';
-        ribbonText = '#fde047';
-        titleArColor = '#b45309';
-      }
-
-      // ১. ক্লাসিক ব্যাকগ্রাউন্ড
+      // ১. ব্যাকগ্রাউন্ড
       const bgGrad = ctx.createLinearGradient(0, 0, width, height);
       bgGrad.addColorStop(0, bgGradStart);
       bgGrad.addColorStop(0.5, bgGradMid);
@@ -144,179 +100,156 @@ export default function StudentCertificate({ certificateData, isPreview = false 
       ctx.fillRect(0, 0, width, height);
 
       // ২. গাঢ় ও স্বর্ণালী রাজকীয় ফ্রেম (Double Islamic Border)
-      // বাইরের বর্ডার
       ctx.strokeStyle = outerBorder;
-      ctx.lineWidth = 14;
-      ctx.strokeRect(20, 20, width - 40, height - 40);
+      ctx.lineWidth = 16;
+      ctx.strokeRect(24, 24, width - 48, height - 48);
 
-      // মধ্যবর্তী পাতলা সোনালী লাইন
       ctx.strokeStyle = midBorder;
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(32, 32, width - 64, height - 64);
+      ctx.lineWidth = 3;
+      ctx.strokeRect(38, 38, width - 76, height - 76);
 
-      // ভেতরের বর্ডার
       ctx.strokeStyle = innerBorder;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(40, 40, width - 80, height - 80);
+      ctx.lineWidth = 5;
+      ctx.strokeRect(48, 48, width - 96, height - 96);
 
-      // কোণার ইসলামিক অলংকরণ ও নকশা
+      // কোণার ইসলামিক অলংকরণ
       const drawCornerStar = (cx, cy) => {
         ctx.save();
         ctx.fillStyle = outerBorder;
         ctx.beginPath();
-        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 12, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = midBorder;
         ctx.beginPath();
-        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       };
-      drawCornerStar(40, 40);
-      drawCornerStar(width - 40, 40);
-      drawCornerStar(40, height - 40);
-      drawCornerStar(width - 40, height - 40);
+      drawCornerStar(48, 48);
+      drawCornerStar(width - 48, 48);
+      drawCornerStar(48, height - 48);
+      drawCornerStar(width - 48, height - 48);
 
-      // ৩. বিসমিল্লাহির রাহমানির রাহিম (ক্যালিগ্রাফি স্টাইল)
+      // ৩. বিসমিল্লাহির রাহমানির রাহিম
       ctx.textAlign = 'center';
       ctx.fillStyle = headerText;
-      ctx.font = 'bold 22px "Amiri", "Scheherazade New", serif';
-      ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', width / 2, 85);
+      ctx.font = 'bold 24px "Amiri", "Scheherazade New", serif';
+      ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', width / 2, 95);
 
-      // ৪. মারকাযুল ঈমান হেডার ও পরিচয়
+      // ৪. মারকাযুল ঈমান মাদরাসা হেডার (সঠিক আরবি ও বাংলা)
       ctx.fillStyle = titleArColor;
-      ctx.font = 'bold 16px "Amiri", serif';
-      ctx.fillText(organizationAr, width / 2, 114);
+      ctx.font = 'bold 20px "Amiri", serif';
+      ctx.fillText(organizationAr, width / 2, 128);
 
       ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 26px "Hind Siliguri", "Segoe UI", sans-serif';
-      ctx.fillText(organization, width / 2, 146);
-
-      ctx.fillStyle = '#1e293b';
-      ctx.font = '600 14px "Hind Siliguri", sans-serif';
-      ctx.fillText('অনলাইন সীরাত শিক্ষা বিভাগ • ' + madrasaLocation, width / 2, 170);
+      ctx.font = 'bold 30px "Hind Siliguri", "Segoe UI", sans-serif';
+      ctx.fillText(organization, width / 2, 165);
 
       // ৫. সার্টিফিকেটের মূল শিরোনাম
       ctx.fillStyle = titleArColor;
-      ctx.font = 'bold 20px "Amiri", serif';
+      ctx.font = 'bold 22px "Amiri", serif';
       ctx.fillText('شَهَادَةُ إِتْمَامِ دِرَاسَةِ السِّيرَةِ النَّبَوِيَّةِ الشَّرِيفَةِ', width / 2, 215);
 
       // আলংকারিক রিবন ব্যাকগ্রাউন্ড
       ctx.fillStyle = ribbonBg;
       ctx.beginPath();
-      ctx.roundRect(width / 2 - 210, 230, 420, 44, 8);
+      ctx.roundRect(width / 2 - 240, 235, 480, 48, 10);
       ctx.fill();
 
       ctx.fillStyle = ribbonText;
-      ctx.font = 'bold 21px "Hind Siliguri", sans-serif';
-      ctx.fillText('প্রশংসাপত্র ও সমাপনী সনদপত্র', width / 2, 260);
+      ctx.font = 'bold 23px "Hind Siliguri", sans-serif';
+      ctx.fillText('প্রশংসাপত্র ও সমাপনী সনদপত্র', width / 2, 268);
 
       // ৬. শিক্ষার্থীর বিবরণ ও পাঠ্যক্রম স্বীকৃতি
       ctx.fillStyle = '#475569';
-      ctx.font = '16px "Hind Siliguri", sans-serif';
-      ctx.fillText('এই মর্মে প্রশংসাপত্র ও স্বীকৃতি প্রদান করা যাচ্ছে যে,', width / 2, 310);
+      ctx.font = '17px "Hind Siliguri", sans-serif';
+      ctx.fillText('এই মর্মে প্রশংসাপত্র ও স্বীকৃতি প্রদান করা যাচ্ছে যে,', width / 2, 325);
 
-      // শিক্ষার্থীর নাম (বড়, মার্জিত ও স্পষ্ট)
+      // শিক্ষার্থীর নাম (বড়, স্পষ্ট)
       ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 36px "Hind Siliguri", "Segoe UI", sans-serif';
-      ctx.fillText(studentName, width / 2, 360);
+      ctx.font = 'bold 40px "Hind Siliguri", "Segoe UI", sans-serif';
+      ctx.fillText(studentName, width / 2, 380);
 
-      // আইডি ও রোল
+      // আইডি
       ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 13px "Hind Siliguri", sans-serif';
-      ctx.fillText(`স্টুডেন্ট আইডি: ${studentId}`, width / 2, 386);
+      ctx.font = 'bold 14px "Hind Siliguri", sans-serif';
+      ctx.fillText(`স্টুডেন্ট আইডি: ${studentId}`, width / 2, 410);
 
       // পাঠ্যক্রমের বিবরণ
       ctx.fillStyle = '#1e293b';
-      ctx.font = '17px "Hind Siliguri", sans-serif';
-      ctx.fillText('মারকাযুল ঈমান মাদরাসা পরিচালিত নবীজী ﷺ-এর জীবনচরিত পাঠ্যক্রম', width / 2, 425);
+      ctx.font = '19px "Hind Siliguri", sans-serif';
+      ctx.fillText('মারকাযুল ঈমান মাদরাসা পরিচালিত নবীজী ﷺ-এর জীবনচরিত পাঠ্যক্রম', width / 2, 455);
 
       ctx.fillStyle = innerBorder;
-      ctx.font = 'bold 22px "Hind Siliguri", sans-serif';
-      ctx.fillText(`“${volumeConfig.bookTitle}”`, width / 2, 458);
+      ctx.font = 'bold 24px "Hind Siliguri", sans-serif';
+      ctx.fillText(`“${volumeConfig.bookTitle}”`, width / 2, 492);
 
       ctx.fillStyle = '#334155';
-      ctx.font = '16px "Hind Siliguri", sans-serif';
-      ctx.fillText('এর ৩২টি দারসের সকল পাঠ, পর্যালোচনা, তামরীন ও কুইজ সফলতার সাথে সম্পন্ন করেছেন।', width / 2, 492);
+      ctx.font = '17px "Hind Siliguri", sans-serif';
+      ctx.fillText('এর ৩২টি দারসের সকল পাঠ, পর্যালোচনা, তামরীন ও কুইজ সফলতার সাথে সম্পন্ন করেছেন।', width / 2, 530);
 
       // ফলাফল ও গ্রেড ব্যাজ
       ctx.fillStyle = innerBorder;
       ctx.beginPath();
-      ctx.roundRect(width / 2 - 180, 520, 360, 38, 19);
+      ctx.roundRect(width / 2 - 200, 560, 400, 42, 21);
       ctx.fill();
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 15px "Hind Siliguri", sans-serif';
-      ctx.fillText(`অর্জিত মূল্যায়ন: ${grade.gradeBn}`, width / 2, 545);
+      ctx.font = 'bold 17px "Hind Siliguri", sans-serif';
+      ctx.fillText(`অর্জিত মূল্যায়ন: ${grade.gradeBn}`, width / 2, 587);
 
       // ৭. কুরআনের নূরানী আয়াত
       ctx.fillStyle = innerBorder;
-      ctx.font = 'bold 18px "Amiri", serif';
-      ctx.fillText(quranAyah.arabic, width / 2, 600);
+      ctx.font = 'bold 20px "Amiri", serif';
+      ctx.fillText(quranAyah.arabic, width / 2, 655);
 
       ctx.fillStyle = '#475569';
-      ctx.font = 'italic 12px "Hind Siliguri", sans-serif';
-      ctx.fillText(`“${quranAyah.bengali}” — ${quranAyah.surah}`, width / 2, 622);
+      ctx.font = 'italic 13px "Hind Siliguri", sans-serif';
+      ctx.fillText(`“${quranAyah.bengali}” — ${quranAyah.surah}`, width / 2, 680);
 
-      // ৮. ফুটার: মারকাযুল ঈমান সিলমোহর (বাম পাশে)
-      const sealX = 180;
-      const sealY = 720;
-      
-      // সিলমোহর সার্কেল
-      ctx.save();
-      ctx.fillStyle = outerBorder;
-      ctx.beginPath();
-      ctx.arc(sealX, sealY, 46, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = midBorder;
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(sealX, sealY, 42, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = '#fef3c7';
-      ctx.font = 'bold 10px "Hind Siliguri", sans-serif';
-      ctx.fillText('মারকাযুল ঈমান', sealX, sealY - 14);
-      ctx.font = 'bold 12px "Amiri", serif';
-      ctx.fillText('مَرْكَزُ الإِيمَان', sealX, sealY + 2);
-      ctx.font = 'bold 8px "Hind Siliguri", sans-serif';
-      ctx.fillText('অফিশিয়াল সিল', sealX, sealY + 16);
-      ctx.fillText('২০২৬', sealX, sealY + 28);
-      ctx.restore();
+      // ৮. ফুটার: মারকাযুল ঈমান দাওয়াহ লোগো (বাম পাশে)
+      const sealX = 220;
+      const sealY = 820;
+      if (dawahLogo) {
+        ctx.drawImage(dawahLogo, sealX - 50, sealY - 50, 100, 100);
+      } else {
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 14px "Hind Siliguri", sans-serif';
+        ctx.fillText('মারকাযুল ঈমান দাওয়াহ', sealX, sealY);
+      }
 
       // ফুটার: তারিখ ও ভেরিফিকেশন আইডি (মাঝখানে)
       ctx.textAlign = 'center';
       ctx.fillStyle = '#64748b';
-      ctx.font = '12px "Hind Siliguri", sans-serif';
-      ctx.fillText(`সনদ প্রদানের তারিখ: ${issueDateBn}`, width / 2, 715);
-      ctx.font = 'bold 11px monospace';
-      ctx.fillText(`সনদ সত্যতা যাচাই কোড: ${certificateId}`, width / 2, 735);
-      ctx.font = '10px "Hind Siliguri", sans-serif';
-      ctx.fillText('যাচাই করুন: markazuliman.com/sirat', width / 2, 752);
+      ctx.font = '13px "Hind Siliguri", sans-serif';
+      ctx.fillText(`সনদ প্রদানের তারিখ: ${issueDateBn}`, width / 2, 805);
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText(`সনদ সত্যতা যাচাই কোড: ${certificateId}`, width / 2, 828);
+      ctx.font = '11px "Hind Siliguri", sans-serif';
+      ctx.fillText('যাচাই করুন: markazuliman.com/sirat', width / 2, 848);
 
-      // ফুটার: শিক্ষকের স্বাক্ষর (ডান পাশে)
-      const sigX = width - 180;
-      const sigY = 715;
+      // ফুটার: পরিচালকের স্বাক্ষর ও পদবি (ডান পাশে)
+      const sigX = width - 220;
+      const sigY = 805;
 
       ctx.strokeStyle = innerBorder;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(sigX - 90, sigY);
-      ctx.lineTo(sigX + 90, sigY);
+      ctx.moveTo(sigX - 110, sigY);
+      ctx.lineTo(sigX + 110, sigY);
       ctx.stroke();
 
       ctx.fillStyle = innerBorder;
-      ctx.font = 'italic 16px "Segoe Script", cursive';
-      ctx.fillText('M. Abdul Hakim', sigX, sigY - 10);
+      ctx.font = 'bold italic 20px "Brush Script MT", "Segoe Script", cursive';
+      ctx.fillText('Mufti Anisur Rahman', sigX, sigY - 12);
 
       ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 13px "Hind Siliguri", sans-serif';
-      ctx.fillText(directorName, sigX, sigY + 18);
+      ctx.font = 'bold 15px "Hind Siliguri", sans-serif';
+      ctx.fillText(directorName, sigX, sigY + 22);
 
       ctx.fillStyle = '#64748b';
-      ctx.font = '11px "Hind Siliguri", sans-serif';
-      ctx.fillText(directorTitle, sigX, sigY + 34);
+      ctx.font = '12px "Hind Siliguri", sans-serif';
+      ctx.fillText(directorTitle, sigX, sigY + 42);
 
       // প্রিভিউ ওয়াটারমার্ক (যদি এখনো পূর্ণ আনলক না হয়)
       if (isPreview) {
@@ -324,7 +257,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
         ctx.translate(width / 2, height / 2);
         ctx.rotate(-Math.PI / 6);
         ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
-        ctx.font = 'bold 70px "Hind Siliguri", sans-serif';
+        ctx.font = 'bold 80px "Hind Siliguri", sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('শিক্ষার্থী প্রিভিউ কপি', 0, 0);
         ctx.restore();
@@ -344,17 +277,15 @@ export default function StudentCertificate({ certificateData, isPreview = false 
     }
   };
 
-  // প্রিন্ট হ্যান্ডলার
   const handlePrint = () => {
     triggerHaptic();
     window.print();
   };
 
-  // শেয়ার হ্যান্ডলার
   const handleShare = async () => {
     triggerHaptic();
     const shareUrl = 'https://www.markazuliman.com/sirat';
-    const text = `আলহামদুলিল্লাহ! মারকাযুল ঈমানের 'সীরাত' অনলাইন প্ল্যাটফর্মে নবীজী ﷺ-এর জীবনী নিয়ে ৩২টি দারস সফলতার সাথে সম্পন্ন করে আমি সনদপত্র অর্জন করেছি! আপনিও শুরু করুন: ${shareUrl}`;
+    const text = `আলহামদুলিল্লাহ! মারকাযুল ঈমানের 'সীরাত' অনলাইন প্ল্যাটফর্মে নবীজী ﷺ-এর পবিত্র জীবনচরিত নিয়ে ৩২টি দারস সফলতার সাথে সম্পন্ন করে আমি প্রশংসাপত্র ও সমাপনী সনদপত্র অর্জন করেছি! আপনিও শুরু করুন: ${shareUrl}`;
 
     if (navigator.share) {
       try {
@@ -375,37 +306,6 @@ export default function StudentCertificate({ certificateData, isPreview = false 
 
   return (
     <div className="space-y-4">
-      {/* থিম ও ডিজাইন সিলেক্টর বার */}
-      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-          <Palette size={15} className="text-amber-500" />
-          <span>সনদের ডিজাইন নির্বাচন করুন:</span>
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {CERTIFICATE_THEMES.map((th) => {
-            const isActive = th.id === activeThemeId;
-            return (
-              <button
-                key={th.id}
-                type="button"
-                onClick={() => {
-                  triggerHaptic();
-                  setActiveThemeId(th.id);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isActive
-                    ? 'bg-emerald-600 text-white shadow-xs scale-102 ring-2 ring-emerald-500/30'
-                    : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: th.primary }} />
-                <span>{th.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* অ্যাকশন বাটনসমূহ (ডাউনলোড, প্রিন্ট, শেয়ার) */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
@@ -415,10 +315,10 @@ export default function StudentCertificate({ certificateData, isPreview = false 
                 type="button"
                 onClick={handleDownloadPng}
                 disabled={downloading}
-                className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-98 cursor-pointer disabled:opacity-60"
+                className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 hover:from-slate-800 hover:to-slate-900 text-amber-300 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-98 cursor-pointer disabled:opacity-60 border border-amber-500/30"
               >
                 <Download size={16} />
-                <span>{downloading ? 'সনদ তৈরি হচ্ছে...' : 'সনদ ডাউনলোড করুন (HD PNG)'}</span>
+                <span>{downloading ? 'সনদ তৈরি হচ্ছে...' : 'সনদ ডাউনলোড করুন (A4 HD PNG)'}</span>
               </button>
 
               <button
@@ -428,7 +328,7 @@ export default function StudentCertificate({ certificateData, isPreview = false 
                 title="সরাসরি প্রিন্ট করুন (A4 ল্যান্ডস্কেপ)"
               >
                 <Printer size={16} />
-                <span className="hidden sm:inline">প্রিন্ট</span>
+                <span className="hidden sm:inline">প্রিন্ট (A4)</span>
               </button>
             </>
           ) : (
@@ -449,140 +349,141 @@ export default function StudentCertificate({ certificateData, isPreview = false 
         </button>
       </div>
 
-      {/* সার্টিফিকেট প্রিভিউ কার্ড (Responsive Islamic Frame) */}
-      <div className={`relative p-1 rounded-3xl bg-gradient-to-br ${activeTheme.borderGradient} shadow-xl overflow-hidden print:p-0 print:shadow-none transition-all duration-300`}>
-        <div className={`relative p-5 sm:p-8 rounded-[22px] bg-gradient-to-b ${activeTheme.cardBg} text-slate-900 border-4 ${activeTheme.cardBorder} shadow-inner select-none print:border-none print:rounded-none`}>
-          {/* ব্যাকগ্রাউন্ড ওয়াটারমার্ক (মারকাযুল ঈমান সিলমোহর) */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] overflow-hidden">
-            <div className="w-[450px] h-[450px] rounded-full border-[25px] border-emerald-950 flex items-center justify-center">
-              <span className="text-8xl font-black font-arabic">مَرْكَز</span>
-            </div>
-          </div>
-
-          {/* প্রিভিউ ওয়াটারমার্ক ব্যাজ (যদি আনলক বাকি থাকে) */}
-          {isPreview && (
-            <div className="absolute top-4 right-4 z-20">
-              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-800 border border-amber-500/40 shadow-xs">
-                প্রিভিউ কপি
-              </span>
-            </div>
-          )}
-
-          {/* বিসমিল্লাহ */}
-          <div className="text-center mb-1">
-            <p className="font-arabic font-bold text-base sm:text-lg tracking-wider" style={{ color: activeTheme.primary }}>
-              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-            </p>
-          </div>
-
-          {/* মারকাযুল ঈমান হেডার */}
-          <div className="text-center space-y-0.5 mb-4">
-            <p className="font-arabic font-bold text-xs sm:text-sm text-amber-700">
-              {organizationAr}
-            </p>
-            <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
-              {organization}
-            </h1>
-            <p className="text-[11px] sm:text-xs font-semibold" style={{ color: activeTheme.primary }}>
-              অনলাইন সীরাত শিক্ষা বিভাগ • {madrasaLocation}
-            </p>
-          </div>
-
-          {/* সনদপত্র ব্যানার */}
-          <div className="text-center mb-4">
-            <p className="font-arabic font-bold text-xs sm:text-sm text-amber-800">
-              شَهَادَةُ إِتْمَامِ دِرَاسَةِ السِّيرَةِ النَّبَوِيَّةِ الشَّرِيفَةِ
-            </p>
-            <div className={`inline-block mt-1 px-6 py-1.5 rounded-lg ${activeTheme.ribbonBg} shadow-sm`}>
-              <h2 className="text-sm sm:text-base font-black tracking-wide">
-                প্রশংসাপত্র ও সমাপনী সনদপত্র
-              </h2>
-            </div>
-          </div>
-
-          {/* প্রাপক ও স্বীকৃতির বিবরণ */}
-          <div className="text-center space-y-2 mb-4">
-            <p className="text-xs sm:text-sm text-slate-600">
-              এই মর্মে প্রশংসাপত্র ও স্বীকৃতি প্রদান করা যাচ্ছে যে,
-            </p>
-            <h3 className="text-xl sm:text-3xl font-black underline decoration-amber-500/40 decoration-2 underline-offset-8" style={{ color: activeTheme.primary }}>
-              {studentName}
-            </h3>
-            <p className="text-[11px] font-mono font-bold text-slate-500 pt-1">
-              স্টুডেন্ট আইডি: {studentId}
-            </p>
-          </div>
-
-          <div className="text-center space-y-1 max-w-xl mx-auto mb-4">
-            <p className="text-xs sm:text-sm text-slate-700">
-              মারকাযুল ঈমান মাদরাসা পরিচালিত নবীজী ﷺ-এর জীবনচরিত পাঠ্যক্রম
-            </p>
-            <p className="text-sm sm:text-base font-black text-slate-900">
-              “{volumeConfig.bookTitle}”
-            </p>
-            <p className="text-xs sm:text-sm text-slate-600">
-              এর ৩২টি দারসের সকল পাঠ, পর্যালোচনা, তামরীন ও কুইজ সফলতার সাথে সম্পন্ন করেছেন।
-            </p>
-          </div>
-
-          {/* ফলাফল গ্রেড পিল */}
-          <div className="text-center mb-5">
-            <span className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-white text-xs sm:text-sm font-bold shadow-xs" style={{ backgroundColor: activeTheme.primary }}>
-              <Award size={15} className="text-amber-300" />
-              <span>অর্জিত মূল্যায়ন: {grade.gradeBn}</span>
-            </span>
-          </div>
-
-          {/* কুরআনের আয়াত */}
-          <div className="text-center px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 max-w-md mx-auto mb-6">
-            <p className="font-arabic font-bold text-xs sm:text-sm" dir="rtl" style={{ color: activeTheme.primary }}>
-              {quranAyah.arabic}
-            </p>
-            <p className="text-[10px] sm:text-[11px] text-slate-600 italic mt-0.5">
-              “{quranAyah.bengali}” — {quranAyah.surah}
-            </p>
-          </div>
-
-          {/* ফুটার সিলমোহর ও স্বাক্ষর */}
-          <div className="pt-3 border-t border-amber-600/30 grid grid-cols-3 items-center text-center gap-2">
-            {/* সিলমোহর */}
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-500 p-0.5 shadow-md flex items-center justify-center">
-                <div className="w-full h-full rounded-full border-2 border-dashed border-amber-200 flex flex-col items-center justify-center text-amber-50">
-                  <span className="text-[8px] sm:text-[9px] font-bold">মারকাযুল ঈমান</span>
-                  <span className="font-arabic text-[9px] sm:text-[10px] font-bold">مَرْكَز الإِيمَان</span>
-                  <span className="text-[7px] sm:text-[8px]">অফিশিয়াল সিল</span>
-                </div>
-              </div>
+      {/* সার্টিফিকেট প্রিভিউ কার্ড: হুবহু A4 ল্যান্ডস্কেপ অনুপাত (Aspect Ratio: 297/210 = 1.414:1) এবং রেসপনসিভ */}
+      <div className="w-full overflow-x-auto pb-2 [scrollbar-width:thin]">
+        <div className="min-w-[700px] max-w-4xl mx-auto aspect-[297/210] p-1.5 sm:p-2.5 rounded-3xl bg-gradient-to-br from-amber-400 via-slate-700 to-slate-950 shadow-2xl relative select-none print:m-0 print:p-0 print:shadow-none print:w-full print:max-w-none print:aspect-[297/210]">
+          <div className="w-full h-full rounded-[22px] bg-gradient-to-b from-white via-slate-50 to-slate-100 border-4 border-slate-900/30 p-4 sm:p-7 md:p-9 flex flex-col justify-between shadow-inner relative overflow-hidden print:border-none print:rounded-none">
+            
+            {/* ব্যাকগ্রাউন্ড নূরানী ওয়াটারমার্ক */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] overflow-hidden">
+              <img 
+                src={getAssetUrl('/logos/dawah_logo.png')} 
+                alt="" 
+                className="w-[500px] h-[500px] object-contain grayscale"
+              />
             </div>
 
-            {/* তারিখ ও ভেরিফিকেশন আইডি */}
-            <div className="space-y-0.5 text-slate-500">
-              <p className="text-[10px] sm:text-xs font-semibold">
-                ইস্যুর তারিখ: {issueDateBn}
-              </p>
-              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-600">
-                আইডি: {certificateId}
-              </p>
-              <p className="text-[9px] font-medium" style={{ color: activeTheme.primary }}>
-                markazuliman.com/sirat
-              </p>
-            </div>
-
-            {/* শিক্ষকের স্বাক্ষর */}
-            <div className="flex flex-col items-center">
-              <div className="w-24 sm:w-32 border-b-2 pb-0.5 mb-1" style={{ borderColor: activeTheme.primary }}>
-                <span className="font-serif italic text-sm sm:text-base" style={{ color: activeTheme.primary }}>
-                  M. Abdul Hakim
+            {/* প্রিভিউ ব্যাজ (যদি আনলক বাকি থাকে) */}
+            {isPreview && (
+              <div className="absolute top-4 right-4 z-20">
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-800 border border-amber-500/40 shadow-xs">
+                  প্রিভিউ কপি
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs font-bold text-slate-800">
-                {directorName}
+            )}
+
+            {/* শীর্ষ অংশ: বিসমিল্লাহ ও মারকাযুল ঈমান মাদরাসা */}
+            <div className="text-center space-y-1">
+              <p className="font-arabic font-bold text-sm sm:text-base md:text-lg text-slate-900 tracking-wider">
+                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
               </p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500">
-                {directorTitle}
+              <p className="font-arabic font-bold text-xs sm:text-sm text-amber-800">
+                {organizationAr}
+              </p>
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-950 tracking-tight">
+                {organization}
+              </h1>
+            </div>
+
+            {/* সনদপত্র ব্যানার */}
+            <div className="text-center my-1 sm:my-2">
+              <p className="font-arabic font-bold text-[11px] sm:text-xs text-amber-800">
+                شَهَادَةُ إِتْمَامِ دِرَاسَةِ السِّيرَةِ النَّبَوِيَّةِ الشَّرِيفَةِ
+              </p>
+              <div className="inline-block mt-1 px-5 sm:px-8 py-1 rounded-lg bg-slate-900 text-amber-300 shadow-sm border border-amber-400/40">
+                <h2 className="text-xs sm:text-sm md:text-base font-black tracking-wide">
+                  প্রশংসাপত্র ও সমাপনী সনদপত্র
+                </h2>
+              </div>
+            </div>
+
+            {/* প্রাপক ও স্বীকৃতির বিবরণ */}
+            <div className="text-center space-y-1 sm:space-y-1.5">
+              <p className="text-[11px] sm:text-xs text-slate-600 font-medium">
+                এই মর্মে প্রশংসাপত্র ও স্বীকৃতি প্রদান করা যাচ্ছে যে,
+              </p>
+              <h3 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-950 underline decoration-amber-500/50 decoration-2 underline-offset-6">
+                {studentName}
+              </h3>
+              <p className="text-[10px] sm:text-[11px] font-mono font-bold text-slate-500">
+                স্টুডেন্ট আইডি: {studentId}
               </p>
             </div>
+
+            {/* পাঠ্যক্রম ও অর্জনের বিবরণ */}
+            <div className="text-center space-y-0.5 sm:space-y-1 max-w-2xl mx-auto my-1">
+              <p className="text-[11px] sm:text-xs text-slate-700">
+                মারকাযুল ঈমান মাদরাসা পরিচালিত নবীজী ﷺ-এর জীবনচরিত পাঠ্যক্রম
+              </p>
+              <p className="text-xs sm:text-sm md:text-base font-black text-slate-950">
+                “{volumeConfig.bookTitle}”
+              </p>
+              <p className="text-[11px] sm:text-xs text-slate-600">
+                এর ৩২টি দারসের সকল পাঠ, পর্যালোচনা, তামরীন ও কুইজ সফলতার সাথে সম্পন্ন করেছেন।
+              </p>
+            </div>
+
+            {/* অর্জিত মূল্যায়ন / গ্রেড */}
+            <div className="text-center my-1">
+              <span className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-slate-900 text-amber-300 text-[11px] sm:text-xs font-bold shadow-xs border border-amber-400/30">
+                <Award size={14} className="text-amber-400" />
+                <span>অর্জিত মূল্যায়ন: {grade.gradeBn}</span>
+              </span>
+            </div>
+
+            {/* কুরআনের নূরানী আয়াত */}
+            <div className="text-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 max-w-lg mx-auto my-1">
+              <p className="font-arabic font-bold text-xs sm:text-sm text-slate-900" dir="rtl">
+                {quranAyah.arabic}
+              </p>
+              <p className="text-[9px] sm:text-[10px] text-slate-600 italic mt-0.5">
+                “{quranAyah.bengali}” — {quranAyah.surah}
+              </p>
+            </div>
+
+            {/* ফুটার: দাওয়াহ লোগো, তারিখ ও পরিচালকের স্বাক্ষর */}
+            <div className="pt-2 sm:pt-3 border-t border-slate-300 grid grid-cols-3 items-center text-center gap-2">
+              {/* বাম পাশ: মারকাযুল ঈমান দাওয়াহ লোগো */}
+              <div className="flex flex-col items-center justify-center">
+                <img 
+                  src={getAssetUrl('/logos/dawah_logo.png')} 
+                  alt="মারকাযুল ঈমান দাওয়াহ" 
+                  className="w-12 h-12 sm:w-16 sm:h-16 md:w-18 md:h-18 object-contain drop-shadow-sm" 
+                />
+                <span className="text-[8px] sm:text-[9px] font-bold text-amber-900 dark:text-amber-400 mt-0.5">
+                  মারকাযুল ঈমান দাওয়াহ
+                </span>
+              </div>
+
+              {/* মাঝখান: তারিখ ও ভেরিফিকেশন আইডি */}
+              <div className="space-y-0.5 text-slate-500">
+                <p className="text-[9px] sm:text-[11px] font-semibold text-slate-600">
+                  সনদ প্রদানের তারিখ: {issueDateBn}
+                </p>
+                <p className="text-[8px] sm:text-[10px] font-mono font-bold text-slate-700">
+                  আইডি: {certificateId}
+                </p>
+                <p className="text-[8px] sm:text-[9px] font-medium text-slate-500">
+                  markazuliman.com/sirat
+                </p>
+              </div>
+
+              {/* ডান পাশ: প্রতিষ্ঠাতার স্বাক্ষর ও পদবি */}
+              <div className="flex flex-col items-center">
+                <div className="w-28 sm:w-36 md:w-44 border-b-2 pb-0.5 mb-1 border-slate-900">
+                  <span className="font-serif italic text-xs sm:text-sm md:text-base font-bold text-slate-950 tracking-wider">
+                    Mufti Anisur Rahman
+                  </span>
+                </div>
+                <p className="text-[10px] sm:text-xs font-bold text-slate-900">
+                  {directorName}
+                </p>
+                <p className="text-[8px] sm:text-[10px] text-slate-500 font-medium">
+                  {directorTitle}
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

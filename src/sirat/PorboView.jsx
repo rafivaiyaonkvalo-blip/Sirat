@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Film, Headphones, Lightbulb, Lock, PenLine } from 'lucide-react';
-import { isUnlocked, isDarsLocked } from './progress';
+import { isUnlocked, isDarsLocked, isTextLocked } from './progress';
 import index from '../data/darsIndex.json';
 import videos from '../data/videos.json';
 import { loadDarsLocalized } from '../data/loadTranslation';
@@ -40,7 +40,7 @@ const STEP_META = {
   quiz: { label: 'কুইজ', icon: PenLine },
 };
 
-// দারসের একটি ভিডিও থেকে এই পাঠের অংশ: স্পষ্ট সময় থাকলে সেটি, নাহলে লেখার দৈর্ঘ্যের অনুপাতে
+// দারসের মূল ইউটিউব ভিডিও: পার্ট থাকলে সেটি, অন্যথায় মূল ভিডিওটি সম্পূর্ণভাবে কোনো কাটাকাটি ছাড়া চলবে
 function videoFor(meta, id, no) {
   const v = videos[String(id)];
   if (!v) return {};
@@ -48,9 +48,7 @@ function videoFor(meta, id, no) {
   const part = cfg.parts?.[no - 1];
   if (part?.segments) return { entries: part.segments };
   if (part) return { entry: { url: cfg.url, ...part } };
-  const total = meta.porbos.reduce((a, p) => a + p.weight, 0);
-  const before = meta.porbos.slice(0, no - 1).reduce((a, p) => a + p.weight, 0);
-  return { entry: { url: cfg.url }, frac: [before / total, (before + meta.porbos[no - 1].weight) / total] };
+  return { entry: { url: cfg.url } };
 }
 
 export default function PorboPage({ id, no, step, progress }) {
@@ -101,7 +99,7 @@ export default function PorboPage({ id, no, step, progress }) {
       <div className="mx-auto max-w-md py-16 text-center">
         <Lock size={44} className="mx-auto text-slate-400" />
         <p className="mt-4 text-lg font-bold">{lockedDars ? 'এই দারসটি এখনও বন্ধ রয়েছে' : 'এই ধাপ এখনও বন্ধ'}</p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{lockedDars ? 'দারস ২৫ থেকে ৩২ শীঘ্রই আসছে, ইন শা আল্লাহ।' : 'আগের ধাপ সম্পন্ন করলে এটি খুলবে।'}</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{lockedDars ? 'এই দারসটি শীঘ্রই আসছে, ইন শা আল্লাহ।' : 'আগের ধাপ সম্পন্ন করলে এটি খুলবে।'}</p>
         <a href={href(lockedDars ? '/dars' : (no > 1 ? `/dars/${id}/${no - 1}/video` : `/dars/${id - 1}/1/video`))} className="mt-5 inline-flex rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">{lockedDars ? 'পাঠ্যক্রমে ফিরুন' : 'আগের ধাপে যান'}</a>
       </div>
     );
@@ -121,8 +119,23 @@ export default function PorboPage({ id, no, step, progress }) {
       <div className="mb-6 grid gap-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-1" style={{ gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}>
         {steps.map((k) => {
           const { label, icon: Icon } = STEP_META[k];
+          const textLocked = k === 'text' && isTextLocked(id);
           return (
-            <a key={k} href={go(`/dars/${id}/${no}/${k}`)} className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold ${k === step ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 dark:text-slate-300'}`}><Icon size={16} /> {label}</a>
+            <a
+              key={k}
+              href={go(`/dars/${id}/${no}/${k}`)}
+              className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold ${
+                k === step
+                  ? 'bg-emerald-600 text-white shadow'
+                  : textLocked
+                    ? 'text-slate-400 dark:text-slate-500 opacity-80'
+                    : 'text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              {textLocked ? <Lock size={15} className="text-amber-500" /> : <Icon size={16} />}
+              {label}
+              {textLocked ? <span className="text-[10px] text-amber-500 font-semibold">(শীঘ্রই)</span> : null}
+            </a>
           );
         })}
       </div>
@@ -130,36 +143,53 @@ export default function PorboPage({ id, no, step, progress }) {
       {view === 'video' && <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} />}
 
       {view === 'text' && (
-        <>
-          {videos[String(id)] && (
-            <div className="mb-4">
-              {!listen ? (
-                <button type="button" onClick={() => setListen(true)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200"><Headphones size={16} /> পড়ার সাথে শুনুন</button>
-              ) : (
-                <div className="sticky top-16 z-30 md:top-20">
-                  <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
-                  <button type="button" onClick={() => setListen(false)} className="mt-1 text-xs font-semibold text-slate-500 underline">অডিও বার বন্ধ করুন</button>
-                </div>
-              )}
+        isTextLocked(id) ? (
+          <div className="mx-auto max-w-md py-14 px-4 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20">
+              <Lock size={32} />
             </div>
-          )}
-          <div translate="no" className="reader space-y-4">
-            {porbo.blocks.map((b, i) => (b.type === 'sub' ? <Block key={i} b={b} /> : <NoteWrap key={i} b={b} idx={i} dars={id} porbo={no}><Block b={b} /></NoteWrap>))}
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">দারস {meta.number}-এর লেখা প্রস্তুত হচ্ছে</h3>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              দারস ২৫ থেকে ৩২-এর বিস্তারিত লিখিত পাঠ ও নোট তৈরির কাজ চলছে, ইনশাআল্লাহ শীঘ্রই উন্মুক্ত করা হবে।
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a href={go(`/dars/${id}/${no}/video`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white shadow-sm hover:bg-emerald-700">
+                <Film size={16} /> লেকচার ভিডিও দেখুন
+              </a>
+            </div>
           </div>
-          {porbo.footnotes.length > 0 && (
-            <aside className="mt-8 border-t border-slate-200 dark:border-white/10 pt-4 text-sm text-slate-600 dark:text-slate-300">
-              <h2 className="mb-2 font-bold">পাদটীকা</h2>
-              <ol className="space-y-1.5">
-                {porbo.footnotes.map((f) => (
-                  <li key={f.n} id={`fn-${f.n}`} className="flex gap-2">
-                    <a href={`#fnref-${f.n}`} onClick={(e) => { e.preventDefault(); document.getElementById(`fnref-${f.n}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="shrink-0 font-semibold text-emerald-600 dark:text-emerald-400">[{f.n}]</a>
-                    <span translate="no"><Runs runs={f.runs} /></span>
-                  </li>
-                ))}
-              </ol>
-            </aside>
-          )}
-        </>
+        ) : (
+          <>
+            {videos[String(id)] && (
+              <div className="mb-4">
+                {!listen ? (
+                  <button type="button" onClick={() => setListen(true)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200"><Headphones size={16} /> পড়ার সাথে শুনুন</button>
+                ) : (
+                  <div className="sticky top-16 z-30 md:top-20">
+                    <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
+                    <button type="button" onClick={() => setListen(false)} className="mt-1 text-xs font-semibold text-slate-500 underline">অডিও বার বন্ধ করুন</button>
+                  </div>
+                )}
+              </div>
+            )}
+            <div translate="no" className="reader space-y-4">
+              {porbo.blocks.map((b, i) => (b.type === 'sub' ? <Block key={i} b={b} /> : <NoteWrap key={i} b={b} idx={i} dars={id} porbo={no}><Block b={b} /></NoteWrap>))}
+            </div>
+            {porbo.footnotes.length > 0 && (
+              <aside className="mt-8 border-t border-slate-200 dark:border-white/10 pt-4 text-sm text-slate-600 dark:text-slate-300">
+                <h2 className="mb-2 font-bold">পাদটীকা</h2>
+                <ol className="space-y-1.5">
+                  {porbo.footnotes.map((f) => (
+                    <li key={f.n} id={`fn-${f.n}`} className="flex gap-2">
+                      <a href={`#fnref-${f.n}`} onClick={(e) => { e.preventDefault(); document.getElementById(`fnref-${f.n}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} className="shrink-0 font-semibold text-emerald-600 dark:text-emerald-400">[{f.n}]</a>
+                      <span translate="no"><Runs runs={f.runs} /></span>
+                    </li>
+                  ))}
+                </ol>
+              </aside>
+            )}
+          </>
+        )
       )}
 
       {step === 'quiz' && <QuizModal id={id} no={no} progress={progress} onClose={() => { window.location.hash = `/dars/${id}/${no}/text`; }} />}
@@ -168,17 +198,28 @@ export default function PorboPage({ id, no, step, progress }) {
         {prevHref ? <a href={go(prevHref)} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 dark:border-white/20 px-4 py-2 font-semibold"><ChevronLeft size={18} /> আগের</a> : <span />}
         {view === 'video' && (
           <div className="flex flex-wrap items-center gap-2">
-            <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">লেখা পড়ুন <ChevronRight size={18} /></a>
-            {porbo.quiz.length > 0 && <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><PenLine size={18} /> কুইজ খেলুন</a>}
+            {!isTextLocked(id) && (
+              <a href={go(`/dars/${id}/${no}/text`)} className="inline-flex items-center gap-1 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200">লেখা পড়ুন <ChevronRight size={18} /></a>
+            )}
+            {porbo.quiz.length > 0 && !isTextLocked(id) && <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><PenLine size={18} /> কুইজ খেলুন</a>}
+            {isTextLocked(id) && !done && (
+              <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white"><Circle size={18} /> সম্পন্ন করুন</button>
+            )}
+            {done && (
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1 text-sm font-bold text-emerald-700 dark:text-emerald-300"><CheckCircle2 size={18} /> সম্পন্ন</span>
+                {nextLessonHref && <a href={go(nextLessonHref)} className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-5 py-2.5 font-bold text-white">পরের ধাপ <ChevronRight size={18} /></a>}
+              </div>
+            )}
           </div>
         )}
-        {view === 'text' && porbo.quiz.length > 0 && (
+        {view === 'text' && !isTextLocked(id) && porbo.quiz.length > 0 && (
           <a href={go(`/dars/${id}/${no}/quiz`)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><PenLine size={18} /> কুইজ খেলুন <ChevronRight size={18} /></a>
         )}
-        {view === 'text' && porbo.quiz.length > 0 && !done && (
+        {view === 'text' && !isTextLocked(id) && porbo.quiz.length > 0 && !done && (
           <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-5 py-2.5 font-bold text-emerald-700 dark:text-emerald-200"><Circle size={18} /> কুইজ ছাড়াই সম্পন্ন করুন</button>
         )}
-        {view === 'text' && porbo.quiz.length === 0 && !done && (
+        {view === 'text' && (!porbo.quiz.length || isTextLocked(id)) && !done && (
           <button onClick={() => progress.markDone(id, no)} className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-base font-bold text-white"><Circle size={18} /> সম্পন্ন করুন</button>
         )}
         {done && view !== 'video' && (

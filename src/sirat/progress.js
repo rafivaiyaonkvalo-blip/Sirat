@@ -5,8 +5,11 @@ import index from '../data/darsIndex.json';
 const KEY = 'sirat_progress_v2';
 const OLD_KEY = 'sirat_progress_v1';
 
-// দারস ২৫ থেকে ৩২ লক রাখা হয়েছে (শীঘ্রই উন্মুক্ত করা হবে, সুপার ইউজারের জন্য খোলা)
-export const isDarsLocked = (darsId) => (darsId >= 25 && darsId <= 32) && !isSuperUser(null);
+// দারস ২৫ থেকে ৩২ এখন উন্মুক্ত (ভিডিও দেখা যাবে); ৩২-এর বেশি হলে লক
+export const isDarsLocked = (darsId) => darsId > 32 && !isSuperUser(null);
+
+// দারস ২৫ থেকে ৩২-এর শুধু 'লেখা' (পাঠ্য বিষয়) প্রস্তুত হওয়া পর্যন্ত লক (সুপার ইউজারের জন্য খোলা)
+export const isTextLocked = (darsId) => (darsId >= 25 && darsId <= 32) && !isSuperUser(null);
 
 // পাঠ N খোলা: প্রথম পাঠ সবসময় (যদি পুরো দারস লক না থাকে); অন্যগুলো আগের পাঠের কুইজ/সম্পন্ন হলে (সুপার ইউজারের জন্য সব খোলা)
 export const isUnlocked = (done, darsId, no) => {

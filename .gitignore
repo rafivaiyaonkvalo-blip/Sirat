@@ -39,6 +39,7 @@ scripts/*.json
 *.jks
 
 # Local/build junk
+backup_dars_v1/
 .chrome-temp-profile/
 android-project/
 release/

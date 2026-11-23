@@ -1,6 +1,7 @@
 import { ChevronDown, FileText, Film, PenLine, Sparkles } from 'lucide-react';
 import { bn } from './questions';
 import { href } from './router';
+import { isTextLocked } from './progress';
 
 const STEPS = [
   { key: 'video', label: 'ভিডিও', icon: Film },
@@ -31,25 +32,27 @@ export function PathNode({ darsId, darsNumber, title, seq, no, offsetClass, side
           aria-label={`দারস ${bn(darsNumber)}: ${title}`}
           className={`relative flex h-12 w-12 rotate-45 items-center justify-center rounded-xl border-2 transition hover:scale-105 active:scale-95 sm:h-14 sm:w-14 ${tone} ${current && !locked ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-900 animate-pulse shadow-[0_0_26px_rgba(14,165,233,0.9)]' : ''} ${open ? 'scale-110' : ''}`}
         >
-          <span className="-rotate-45 select-none text-base font-black leading-none text-white drop-shadow-sm">{locked && darsNumber >= 25 ? '🔒' : bn(seq)}</span>
+          <span className="-rotate-45 select-none text-base font-black leading-none text-white drop-shadow-sm">{bn(seq)}</span>
         </button>
 
         {open && (
           <div className={`absolute top-1/2 z-30 flex -translate-y-1/2 items-center ${side === 'right' ? 'left-full' : 'right-full flex-row-reverse'}`}>
             <span className="h-0.5 w-3 bg-emerald-400 shadow-[0_0_8px_rgba(14,165,233,0.9)]" style={{ animation: 'fadeInSubtle 0.25s ease-out' }} />
             {locked ? (
-              <div className="w-44 rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-3 text-xs font-bold leading-snug text-slate-600 dark:text-slate-200 shadow-xl" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both' }}>{darsNumber >= 25 ? '🔒 দারস ২৫-৩২ এখনও বন্ধ রয়েছে (শীঘ্রই আসছে)' : '🔒 আগের ধাপ সম্পন্ন করলে এটি খুলবে'}</div>
+              <div className="w-44 rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-3 text-xs font-bold leading-snug text-slate-600 dark:text-slate-200 shadow-xl" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both' }}>🔒 আগের ধাপ সম্পন্ন করলে এটি খুলবে</div>
             ) : (
             <div className="flex flex-col gap-1.5 rounded-2xl border border-emerald-300 dark:border-emerald-400/40 bg-white dark:bg-slate-800 p-1.5 shadow-[0_0_24px_rgba(14,165,233,0.45)]" style={{ animation: 'subNodePop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both', transformOrigin: side === 'right' ? 'left center' : 'right center' }}>
               {steps.map(({ key, label, icon: Icon }) => {
                 const asBtn = key === 'quiz' && onQuiz;
                 const Tag = asBtn ? 'button' : 'a';
                 const props = asBtn ? { type: 'button', onClick: onQuiz } : { href: href(`/dars/${darsId}/${no}/${key}`) };
+                const textLocked = key === 'text' && isTextLocked(darsId);
                 return (
                 <Tag key={key} {...props} className="flex w-28 items-center gap-2 text-left rounded-xl px-2.5 py-2 text-sm font-bold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/10">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white"><Icon size={14} /></span>
                   <span>{label}</span>
                   {key === 'video' && !hasVideo && <span className="ml-auto text-[9px] font-semibold text-slate-400">শিগগির</span>}
+                  {textLocked && <span className="ml-auto text-[9px] font-semibold text-amber-500">শিগগির</span>}
                 </Tag>
                 );
               })}

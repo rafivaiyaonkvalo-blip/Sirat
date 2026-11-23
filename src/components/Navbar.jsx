@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Heart, Library, Layers, Award, Menu, X, Download, LogIn, User, PenTool } from 'lucide-react';
+import { BookOpen, Heart, Library, Layers, Award, Menu, X, Download, LogIn, User, PenTool, ClipboardList } from 'lucide-react';
 import { isSuperUser } from '../utils/superUser';
 import DynamicLogo, { LOGO_VARIANTS } from './DynamicLogo';
 import { triggerHaptic } from '../utils/haptics';
@@ -177,6 +177,18 @@ export default function Navbar({
             {/* Right Action Buttons */}
             <div className="flex items-center gap-2">
               <NotificationBell />
+
+              {/* অনুশীলন ফলাফল রিপোর্ট বাটন */}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('sirat_open_quiz_results'))}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 shadow-xs active:scale-95"
+                title="অনুশীলন ও পরীক্ষার ফলাফল রিপোর্ট"
+                aria-label="অনুশীলন ফল"
+              >
+                <ClipboardList size={14} className="text-emerald-600 dark:text-emerald-400" />
+                <span className="hidden lg:inline">অনুশীলন ফল</span>
+              </button>
 
               {/* English (ENG) Toggle Button */}
               <button

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Clock, PenLine } from 'lucide-react';
+import { Clock, PenLine, ClipboardList } from 'lucide-react';
 import DarsPicker from './DarsPicker';
 import Quiz from './Quiz';
 import SectionHero from './SectionHero';
@@ -49,6 +49,30 @@ export default function QuizPage() {
         subtitle="যে দারসগুলো চান বেছে নিন। কুইজে উত্তর দিলেই সঠিক উত্তর ও ব্যাখ্যা; পরীক্ষায় প্রতি প্রশ্নে ১ মিনিট, ফল ও ব্যাখ্যা জমা দেওয়ার পর।"
         chips={['কুইজ: সঙ্গে সঙ্গে ব্যাখ্যা', 'পরীক্ষা: সময়সীমাসহ', 'সঠিক ১০ XP, ভুল ৫ XP']}
       />
+
+      {/* অনুশীলন ও পরীক্ষার ফলাফল রিপোর্ট বাটন */}
+      <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/25 flex items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <ClipboardList size={16} />
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
+              অনুশীলন ও পরীক্ষার ফলাফল রিপোর্ট
+            </h4>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
+              দারসভিত্তিক প্রাপ্ত নম্বর, গড় হার এবং পরীক্ষার পূর্ণ ইতিহাস দেখুন
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('sirat_open_quiz_results'))}
+          className="shrink-0 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer active:scale-95"
+        >
+          ফলাফল দেখুন ➔
+        </button>
+      </div>
       <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-1 dark:border-white/10 dark:bg-white/5">
         {MODES.map(({ key, label, hint, icon: Icon }) => (
           <button key={key} onClick={() => setMode(key)} className={`rounded-xl px-3 py-2.5 text-left transition cursor-pointer ${mode === key ? 'bg-emerald-600 text-white shadow-[0_0_18px_rgba(14,165,233,0.5)]' : 'text-slate-600 dark:text-slate-300'}`}>
