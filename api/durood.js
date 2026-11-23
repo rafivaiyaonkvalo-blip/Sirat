@@ -1,11 +1,14 @@
 import crypto from 'node:crypto';
 
+const TARGET_TEN_LAKH = 1000000;
+const CAMPAIGN_TITLE = 'একসাথে ১০ লক্ষ দরূদ';
+
 let cachedParticipantId = null;
 let lastKnownSnapshot = {
-  title: 'একসাথে ১ লক্ষ দরূদ',
-  target: 100000,
+  title: CAMPAIGN_TITLE,
+  target: TARGET_TEN_LAKH,
   isActive: true,
-  total: 148638,
+  total: 148639,
   updatedAt: new Date().toISOString()
 };
 
@@ -42,9 +45,10 @@ async function fetchStats() {
   });
   if (!res.ok) throw new Error(`Stats HTTP ${res.status}`);
   const data = await res.json();
+  const effectiveTarget = Math.max(Number(data.target) || 0, TARGET_TEN_LAKH);
   lastKnownSnapshot = {
-    title: data.title || 'একসাথে ১ লক্ষ দরূদ',
-    target: Number(data.target) || 100000,
+    title: CAMPAIGN_TITLE,
+    target: effectiveTarget,
     isActive: Boolean(data.isActive),
     total: Number(data.total) || lastKnownSnapshot.total,
     updatedAt: data.updatedAt || new Date().toISOString()
@@ -84,7 +88,8 @@ async function contribute(amount, clientParticipantId) {
   const data = await res.json();
   if (data?.total) {
     lastKnownSnapshot.total = Number(data.total);
-    lastKnownSnapshot.target = Number(data.target) || lastKnownSnapshot.target;
+    lastKnownSnapshot.target = TARGET_TEN_LAKH;
+    lastKnownSnapshot.title = CAMPAIGN_TITLE;
   }
   return data;
 }
@@ -105,8 +110,8 @@ export default async function handler(req, res) {
       return res.status(200).json({
         count: snap.total,
         total: snap.total,
-        target: snap.target,
-        title: snap.title,
+        target: TARGET_TEN_LAKH,
+        title: CAMPAIGN_TITLE,
         isActive: snap.isActive,
         updatedAt: snap.updatedAt
       });
@@ -115,8 +120,8 @@ export default async function handler(req, res) {
       return res.status(200).json({
         count: lastKnownSnapshot.total,
         total: lastKnownSnapshot.total,
-        target: lastKnownSnapshot.target,
-        title: lastKnownSnapshot.title,
+        target: TARGET_TEN_LAKH,
+        title: CAMPAIGN_TITLE,
         isActive: lastKnownSnapshot.isActive,
         updatedAt: lastKnownSnapshot.updatedAt
       });
@@ -138,8 +143,8 @@ export default async function handler(req, res) {
         success: true,
         count: result.total || lastKnownSnapshot.total,
         total: result.total || lastKnownSnapshot.total,
-        target: result.target || lastKnownSnapshot.target,
-        title: result.title || lastKnownSnapshot.title,
+        target: TARGET_TEN_LAKH,
+        title: CAMPAIGN_TITLE,
         added: amount
       });
     } catch (err) {
@@ -147,7 +152,9 @@ export default async function handler(req, res) {
       return res.status(500).json({
         error: 'Failed to record durood to campaign',
         total: lastKnownSnapshot.total,
-        count: lastKnownSnapshot.total
+        count: lastKnownSnapshot.total,
+        target: TARGET_TEN_LAKH,
+        title: CAMPAIGN_TITLE
       });
     }
   }

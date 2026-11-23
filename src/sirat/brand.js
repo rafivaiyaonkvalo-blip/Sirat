@@ -19,7 +19,7 @@ export const book = {
 
 // সম্মিলিত দুরূদ ক্যাম্পেইন (sirat.markazuliman.com-এর সাথে রিয়েল-টাইমে সংযুক্ত)
 export const campaign = {
-  title: 'একসাথে ১ লক্ষ দরূদ',
-  target: 100000,
+  title: 'একসাথে ১০ লক্ষ দরূদ',
+  target: 1000000,
   endDate: null, // যেমন: '2026-12-31' দিলে "দিন বাকি" দেখাবে
 };

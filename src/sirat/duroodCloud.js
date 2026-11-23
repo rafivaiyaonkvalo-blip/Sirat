@@ -12,11 +12,11 @@ const ref = () => doc(db, 'campaigns', 'durood');
 export function subscribeGlobal(cb) {
   let active = true;
   let lastData = {
-    count: 148636,
-    target: 100000,
-    title: 'একসাথে ১ লক্ষ দরূদ',
+    count: 148639,
+    target: 1000000,
+    title: 'একসাথে ১০ লক্ষ দরূদ',
     participants: 1376,
-    countries: { BD: 148636 }
+    countries: { BD: 148639 }
   };
 
   const fetchStats = async () => {
@@ -30,8 +30,8 @@ export function subscribeGlobal(cb) {
         const total = Number(d.total || d.count) || lastData.count;
         lastData = {
           count: total,
-          target: Number(d.target) || 100000,
-          title: d.title || 'একসাথে ১ লক্ষ দরূদ',
+          target: Math.max(Number(d.target) || 0, 1000000),
+          title: d.title || 'একসাথে ১০ লক্ষ দরূদ',
           participants: Math.max(1, Math.round(total / 108)),
           countries: { BD: total }
         };
@@ -48,8 +48,8 @@ export function subscribeGlobal(cb) {
         const total2 = Number(d2.total) || lastData.count;
         lastData = {
           count: total2,
-          target: Number(d2.target) || 100000,
-          title: d2.title || 'একসাথে ১ লক্ষ দরূদ',
+          target: Math.max(Number(d2.target) || 0, 1000000),
+          title: 'একসাথে ১০ লক্ষ দরূদ',
           participants: Math.max(1, Math.round(total2 / 108)),
           countries: { BD: total2 }
         };
@@ -164,7 +164,7 @@ export async function addToGlobal(n, { country, newParticipant } = {}) {
 export async function resetGlobalDurood() {
   if (isFirebaseConfigured() && db) {
     try {
-      await setDoc(ref(), { count: 0, target: 100000, participants: 0, countries: {} });
+      await setDoc(ref(), { count: 0, target: 1000000, participants: 0, countries: {} });
       return true;
     } catch (err) {
       console.warn('Could not reset global durood in firestore:', err);
