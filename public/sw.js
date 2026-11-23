@@ -1,5 +1,5 @@
-// Service Worker for Sirat - মারকাযুল ঈমান (PWA v10 - Subpath Compatible)
-const CACHE_NAME = 'sirat-pwa-v10';
+// Service Worker for Sirat - মারকাযুল ঈমান (PWA v11 - Subpath Compatible)
+const CACHE_NAME = 'sirat-pwa-v11';
 const BASE_PATH = self.location.pathname.replace(/\/sw\.js$/, '') || '';
 const STATIC_ASSETS = [
   (BASE_PATH + '/logo.png').replace(/\/\//g, '/'),
