@@ -15,21 +15,40 @@ export default function GlobalVideoHost() {
   const hash = typeof window !== 'undefined' ? window.location.hash : '';
   const isVideoPage = hash.includes('/video');
 
+  // যদি অ্যাংকর স্টেট এখনো আপডেট না হয়ে থাকে, সরাসরি DOM থেকে পরিমাপ নেওয়া
+  const effectiveRect = anchorRect || (() => {
+    if (typeof document === 'undefined') return null;
+    const el = document.getElementById('sirat-video-anchor');
+    if (!el) return null;
+    const rootEl = document.getElementById('root') || document.body;
+    if (rootEl && window.getComputedStyle(rootEl).position === 'static') {
+      rootEl.style.position = 'relative';
+    }
+    const elRect = el.getBoundingClientRect();
+    const rootRect = rootEl.getBoundingClientRect();
+    return {
+      top: Math.round(elRect.top - rootRect.top),
+      left: Math.round(elRect.left - rootRect.left),
+      width: Math.round(elRect.width),
+      height: Math.round(elRect.height),
+    };
+  })();
+
   // ফ্লোটিং উইন্ডো বন্ধ করে দেওয়া হলে এবং ব্যবহারকারী যদি ভিডিও পেজে না থাকেন, তবে লুকানো থাকবে
-  if (isDismissed && (!isVideoPage || !anchorRect)) {
+  if (isDismissed && (!isVideoPage || !effectiveRect)) {
     return null;
   }
 
   // ফ্লোটিং মোড: যদি স্পষ্টভাবে ফ্লোটিং চালু থাকে অথবা ভিডিও পেজে না থাকি
-  const isFloatingMode = isFloating || (!isVideoPage && !anchorRect);
+  const isFloatingMode = isFloating || (!isVideoPage && !effectiveRect);
 
   // যদি ফ্লোটিং বন্ধ করে দেওয়া থাকে এবং ফ্লোটিং মোডে থাকে, তবে লুকানো থাকবে
   if (isDismissed && isFloatingMode) {
     return null;
   }
 
-  // যদি স্বাভাবিক মোডে আছি কিন্তু অ্যাংকর পরিমাপ প্রস্তুত না, এক ফ্রেম অপেক্ষা
-  if (!isFloatingMode && !anchorRect) {
+  // যদি স্বাভাবিক মোডে আছি কিন্তু অ্যাংকর প্রস্তুত না, এক ফ্রেম অপেক্ষা
+  if (!isFloatingMode && !effectiveRect) {
     return null;
   }
 
@@ -46,10 +65,10 @@ export default function GlobalVideoHost() {
           ? {}
           : {
               position: 'absolute',
-              top: `${anchorRect.top}px`,
-              left: `${anchorRect.left}px`,
-              width: `${anchorRect.width}px`,
-              height: `${anchorRect.height}px`,
+              top: `${effectiveRect.top}px`,
+              left: `${effectiveRect.left}px`,
+              width: `${effectiveRect.width}px`,
+              height: `${effectiveRect.height}px`,
               zIndex: 30,
             }
       }

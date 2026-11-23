@@ -58,7 +58,7 @@ export function VideoProvider({ children, onNavigateToTab }) {
   const setAnchorEl = useCallback((el) => {
     anchorElRef.current = el;
     if (el) {
-      // রেন্ডার হওয়া মাত্রই পরিমাপ নেওয়া
+      updateRect();
       requestAnimationFrame(updateRect);
     } else {
       setAnchorRect(null);

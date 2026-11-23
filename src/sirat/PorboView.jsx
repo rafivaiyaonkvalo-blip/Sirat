@@ -102,15 +102,9 @@ export default function PorboPage({ id, no, step, progress }) {
 
   // ভিডিও পেজে স্ক্রল করলে ফ্লোটিং হওয়া (IntersectionObserver)
   useEffect(() => {
-    if (step !== 'video') {
-      setAnchorEl(null);
-      return undefined;
-    }
-    const el = anchorNodeRef.current;
-    if (!el) return undefined;
-    setAnchorEl(el);
-
-    if (typeof IntersectionObserver === 'undefined') return undefined;
+    if (step !== 'video') return undefined;
+    const el = anchorNodeRef.current || document.getElementById('sirat-video-anchor');
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -126,11 +120,8 @@ export default function PorboPage({ id, no, step, progress }) {
     );
 
     observer.observe(el);
-    return () => {
-      observer.disconnect();
-      setAnchorEl(null);
-    };
-  }, [step, isPlaying, float, setAnchorEl]);
+    return () => observer.disconnect();
+  }, [step, isPlaying, float]);
 
   // নোট/বুকমার্ক থেকে এলে ওই অনুচ্ছেদে স্ক্রল ও কিছুক্ষণ জ্বলে ওঠা
   useEffect(() => {
