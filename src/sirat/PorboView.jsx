@@ -57,7 +57,6 @@ export default function PorboPage({ id, no, step, progress }) {
   const meta = index.find((x) => x.id === id);
   const [dars, setDars] = useState(null);
   const [listen, setListen] = useState(false);
-  const [watchVideo, setWatchVideo] = useState(false);
   const lang = useLang();
   const { markVisited } = progress;
 
@@ -143,7 +142,15 @@ export default function PorboPage({ id, no, step, progress }) {
         })}
       </div>
 
-      {view === 'video' && <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} />}
+      {/* ভিডিও প্লেয়ার: ভিডিও ভিউতে মূল আকারে থাকে; ভিডিও চালু অবস্থায় শিক্ষার্থী "লেখা" বা অন্য সেকশনে এলে ভিডিও বন্ধ না হয়ে নিচে ফ্লোটিং মিনিপ্লেয়ার হিসেবে সচল থাকবে */}
+      <VideoPlayer
+        {...videoFor(meta, id, no)}
+        title={porbo.title}
+        currentView={view}
+        onExpandToVideo={() => {
+          window.location.hash = `/dars/${id}/${no}/video`;
+        }}
+      />
 
       {view === 'text' && (
         isTextLocked(id) ? (
@@ -174,35 +181,26 @@ export default function PorboPage({ id, no, step, progress }) {
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 dark:border-white/10 pb-4">
               <div className="flex flex-wrap items-center gap-2">
                 {videos[String(id)] && (
-                  <>
-                    {!listen && !watchVideo ? (
-                      <>
-                        <button type="button" onClick={() => { setListen(true); setWatchVideo(false); }} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-                          <Headphones size={16} /> পড়ার সাথে শুনুন
-                        </button>
-                        <button type="button" onClick={() => { setWatchVideo(true); setListen(false); }} className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500/80 bg-emerald-50/50 dark:bg-emerald-950/20 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors cursor-pointer" title="ভিডিও চালু রেখে নিচে লেখা স্ক্রল করে পড়ুন">
-                          <Film size={16} /> পড়ার সাথে ভিডিও
-                        </button>
-                      </>
-                    ) : null}
-
-                    {listen && (
-                      <div className="sticky top-16 z-30 md:top-20">
-                        <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
-                        <button type="button" onClick={() => setListen(false)} className="mt-1 text-xs font-semibold text-slate-500 hover:text-slate-700 underline cursor-pointer">অডিও বার বন্ধ করুন</button>
-                      </div>
-                    )}
-
-                    {watchVideo && (
-                      <div className="w-full mb-4">
-                        <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} />
-                        <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500">
-                          <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">💡 নিচে স্ক্রল করলে ভিডিওটি স্বয়ংক্রিয়ভাবে ডান কোণায় ভেসে উঠবে (Floating Mini-Player)</span>
-                          <button type="button" onClick={() => setWatchVideo(false)} className="font-semibold hover:text-rose-500 underline cursor-pointer">ভিডিও বন্ধ করুন</button>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                  !listen ? (
+                    <button
+                      type="button"
+                      onClick={() => setListen(true)}
+                      className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                    >
+                      <Headphones size={16} /> পড়ার সাথে শুনুন
+                    </button>
+                  ) : (
+                    <div className="sticky top-16 z-30 md:top-20">
+                      <VideoPlayer {...videoFor(meta, id, no)} title={porbo.title} audioOnly />
+                      <button
+                        type="button"
+                        onClick={() => setListen(false)}
+                        className="mt-1 text-xs font-semibold text-slate-500 hover:text-slate-700 underline cursor-pointer"
+                      >
+                        অডিও বার বন্ধ করুন
+                      </button>
+                    </div>
+                  )
                 )}
               </div>
               <a

@@ -50,7 +50,7 @@ function Placeholder() {
 }
 
 // নিজস্ব কন্ট্রোলসহ প্লেয়ার (YouTube-এর নিজের বাটন/লিংক ঢাকা থাকে)
-function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title, autoplay, onEnd, audioOnly }) {
+function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, title, autoplay, onEnd, audioOnly, currentView = 'video', onExpandToVideo }) {
   const containerRef = useRef(null);
   const box = useRef(null);
   const mount = useRef(null);
@@ -74,8 +74,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
   // ২. অটো-স্ক্রল ফ্লোটিং (Auto-Float on scroll)
   useEffect(() => {
-    if (audio || full) {
-      setIsFloating(false);
+    if (audio || full || (currentView && currentView !== 'video')) {
       return undefined;
     }
     const el = containerRef.current;
@@ -103,7 +102,24 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [playing, dismissedFloat, audio, full]);
+  }, [playing, dismissedFloat, audio, full, currentView]);
+
+  // ভিউ পরিবর্তন হলে (ভিডিও থেকে লেখা সেকশনে এলে ভিডিও বন্ধ না হয়ে ফ্লোটিং হবে)
+  useEffect(() => {
+    if (audio || full) return;
+
+    if (currentView && currentView !== 'video') {
+      if (started) {
+        manualFloatRef.current = true;
+        setIsFloating(true);
+      }
+    } else {
+      if (manualFloatRef.current) {
+        manualFloatRef.current = false;
+        setIsFloating(false);
+      }
+    }
+  }, [currentView, started, audio, full]);
 
   const from = startProp ?? (frac && dur ? Math.floor(frac[0] * dur) : 0);
   const end = endProp ?? (frac && dur ? Math.ceil(frac[1] * dur) : undefined);
@@ -268,7 +284,11 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
     manualFloatRef.current = false;
     setIsFloating(false);
     setDismissedFloat(false);
-    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (currentView && currentView !== 'video' && typeof onExpandToVideo === 'function') {
+      onExpandToVideo();
+    } else {
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   const closeFloating = (e) => {
@@ -276,6 +296,7 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
     manualFloatRef.current = false;
     setIsFloating(false);
     setDismissedFloat(true);
+    media.current?.pause();
   };
 
   useEffect(() => {
@@ -294,10 +315,32 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
     return <div className="aspect-video w-full rounded-2xl bg-slate-900 p-6 text-center text-sm text-slate-200 flex items-center justify-center">{err}</div>;
   }
 
+  const isOtherView = Boolean(currentView && currentView !== 'video');
+
+  // যদি ব্যবহারকারী অন্য ভিউতে থাকেন এবং ভিডিও এখনো চালু না করে থাকেন, তবে খালি জায়গা দখল করবে না
+  if (isOtherView && !isFloating) {
+    return (
+      <div ref={containerRef} className="hidden" aria-hidden="true">
+        <div ref={box}>
+          <div ref={mount} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef} className={`relative w-full ${audio ? 'h-28' : 'aspect-video'}`}>
-      {/* ফ্লোটিং অবস্থায় মূল অবস্থানে প্লেসহোল্ডার কার্ড */}
-      {isFloating && (
+    <div
+      ref={containerRef}
+      className={`${
+        isOtherView
+          ? 'h-0 w-0 overflow-visible relative'
+          : audio
+            ? 'relative h-28 w-full'
+            : 'relative w-full aspect-video'
+      }`}
+    >
+      {/* ফ্লোটিং অবস্থায় মূল অবস্থানে প্লেসহোল্ডার কার্ড (শুধুমাত্র ভিডিও ভিউতে দেখাবে) */}
+      {isFloating && !isOtherView && (
         <div
           onClick={expandFromFloating}
           className="h-full w-full rounded-2xl border-2 border-dashed border-emerald-400/50 dark:border-emerald-600/50 bg-emerald-500/5 dark:bg-emerald-950/20 flex flex-col items-center justify-center gap-2 cursor-pointer p-4 text-center group hover:bg-emerald-500/10 transition-colors select-none"
@@ -502,24 +545,24 @@ function CustomPlayer({ kind, id, src, start: startProp, end: endProp, frac, tit
 }
 
 // একটি পাঠ দুই ভিডিওতে ছড়ানো থাকলে অংশগুলো পরপর চলে
-function Sequence({ entries, title, audioOnly }) {
+function Sequence({ entries, title, audioOnly, currentView, onExpandToVideo }) {
   const [i, setI] = useState(0);
   const next = useCallback(() => setI((x) => (x < entries.length - 1 ? x + 1 : x)), [entries.length]);
-  return <SingleVideo key={i} entry={entries[i]} title={title} autoplay={i > 0} onEnd={i < entries.length - 1 ? next : undefined} audioOnly={audioOnly} />;
+  return <SingleVideo key={i} entry={entries[i]} title={title} autoplay={i > 0} onEnd={i < entries.length - 1 ? next : undefined} audioOnly={audioOnly} currentView={currentView} onExpandToVideo={onExpandToVideo} />;
 }
 
-export default function VideoPlayer({ entry, entries, title, frac, audioOnly }) {
-  if (entries?.length > 1) return <Sequence entries={entries} title={title} audioOnly={audioOnly} />;
-  return <SingleVideo entry={entries?.[0] || entry} title={title} frac={frac} audioOnly={audioOnly} />;
+export default function VideoPlayer({ entry, entries, title, frac, audioOnly, currentView, onExpandToVideo }) {
+  if (entries?.length > 1) return <Sequence entries={entries} title={title} audioOnly={audioOnly} currentView={currentView} onExpandToVideo={onExpandToVideo} />;
+  return <SingleVideo entry={entries?.[0] || entry} title={title} frac={frac} audioOnly={audioOnly} currentView={currentView} onExpandToVideo={onExpandToVideo} />;
 }
 
-function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly }) {
+function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly, currentView, onExpandToVideo }) {
   const cfg = typeof entry === 'string' ? { url: entry } : entry;
   if (!cfg?.url) return <Placeholder />;
   const start = toSec(cfg.start);
   const end = toSec(cfg.end);
   const id = ytId(cfg.url);
-  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} audioOnly={audioOnly} />;
+  if (id) return <CustomPlayer key={cfg.url} kind="yt" id={id} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} audioOnly={audioOnly} currentView={currentView} onExpandToVideo={onExpandToVideo} />;
 
   const vimeo = cfg.url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   const drive = cfg.url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
@@ -531,5 +574,5 @@ function SingleVideo({ entry, title, frac, autoplay, onEnd, audioOnly }) {
       </div>
     );
   }
-  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} audioOnly={audioOnly} />;
+  return <CustomPlayer key={cfg.url} kind="file" src={cfg.url} start={start} end={end} frac={frac} title={title} autoplay={autoplay} onEnd={onEnd} audioOnly={audioOnly} currentView={currentView} onExpandToVideo={onExpandToVideo} />;
 }
