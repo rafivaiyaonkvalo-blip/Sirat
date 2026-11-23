@@ -56,9 +56,9 @@ export function VideoProvider({ children, onNavigateToTab }) {
 
   // নতুন অ্যাংকর রেজিস্টার করা
   const setAnchorEl = useCallback((el) => {
+    if (anchorElRef.current === el) return;
     anchorElRef.current = el;
     if (el) {
-      updateRect();
       requestAnimationFrame(updateRect);
     } else {
       setAnchorRect(null);
