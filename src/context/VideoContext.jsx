@@ -101,6 +101,13 @@ export function VideoProvider({ children, onNavigateToTab }) {
       if (typeof onNavigateToTab === 'function') {
         onNavigateToTab('lessons');
       }
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('tab');
+        window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+      } catch (e) {
+        /* ignore */
+      }
       const targetHash = `#/dars/${current.darsId}/${current.porboNo}/video`;
       if (window.location.hash !== targetHash) {
         window.location.hash = targetHash;
