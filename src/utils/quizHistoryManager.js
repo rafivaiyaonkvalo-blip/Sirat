@@ -18,7 +18,7 @@ const ACTIVE_QUIZ_SESSION_KEY = 'sirat_active_quiz_session';
 const ACTIVE_EXAM_SESSION_KEY = 'sirat_active_exam_session';
 const SEEN_QUESTIONS_KEY = 'sirat_seen_questions_pool';
 const MAX_HISTORY_ITEMS = 50;
-const MAX_SEEN_POOL = 200;
+const MAX_SEEN_POOL = 3000;
 
 /* =========================================================
    1. Quiz & Exam History Persistence
@@ -320,14 +320,18 @@ export function getSeenQuestionKeys() {
 }
 
 /**
- * Mark questions as seen
+ * Mark questions as seen while maintaining strict LRU order (oldest at index 0, newest at end)
  */
 export function markQuestionsSeen(questions) {
-  if (typeof window === 'undefined' || !Array.isArray(questions)) return;
+  if (typeof window === 'undefined' || !Array.isArray(questions) || questions.length === 0) return;
   try {
     const current = getSeenQuestionKeys();
     const newKeys = questions.map(getQuestionKey).filter(Boolean);
-    const set = new Set([...current, ...newKeys]);
+    const set = new Set(current);
+    for (const k of newKeys) {
+      set.delete(k);
+      set.add(k);
+    }
     const updated = Array.from(set).slice(-MAX_SEEN_POOL);
     localStorage.setItem(SEEN_QUESTIONS_KEY, JSON.stringify(updated));
   } catch {}
@@ -351,43 +355,90 @@ export function secureShuffle(array) {
   return arr;
 }
 
-/**
- * Smart Question Selector:
- * 1. Partitions questions into unseen and seen.
- * 2. Unseen questions are prioritized first so quizzes never repeat.
- * 3. Once unseen pool is exhausted, least recently seen questions cycle in.
- */
-export function smartSelectQuestions(allQuestions, count) {
-  if (!Array.isArray(allQuestions) || allQuestions.length === 0) return [];
-  if (allQuestions.length <= count) {
-    return secureShuffle(allQuestions);
-  }
-
-  const seenKeys = new Set(getSeenQuestionKeys());
+function partitionAndOrderByLRU(questions, seenOrderMap) {
   const unseen = [];
   const seen = [];
-
-  for (const q of allQuestions) {
+  for (const q of questions) {
     const key = getQuestionKey(q);
-    if (seenKeys.has(key)) {
-      seen.push(q);
+    if (seenOrderMap.has(key)) {
+      seen.push({ q, recency: seenOrderMap.get(key) });
     } else {
       unseen.push(q);
     }
   }
+  // Unseen randomized freely; seen ordered strictly oldest-seen-first (lowest recency index first)
+  seen.sort((a, b) => a.recency - b.recency);
+  return {
+    unseen: secureShuffle(unseen),
+    seen: seen.map((x) => x.q),
+  };
+}
 
-  const shuffledUnseen = secureShuffle(unseen);
-  const shuffledSeen = secureShuffle(seen);
+/**
+ * Smart Question Selector:
+ * 1. Partitions questions into unseen and seen (does NOT mark unseen before actually answered).
+ * 2. Prioritizes unseen questions first so quizzes never repeat prematurely.
+ * 3. Falls back strictly to least-recently-seen (LRU) order when unseen pool is exhausted.
+ */
+export function smartSelectQuestions(allQuestions, count) {
+  if (!Array.isArray(allQuestions) || allQuestions.length === 0) return [];
 
-  let selected = [];
-  if (shuffledUnseen.length >= count) {
-    selected = shuffledUnseen.slice(0, count);
-  } else {
-    selected = [...shuffledUnseen, ...shuffledSeen.slice(0, count - shuffledUnseen.length)];
+  const seenList = getSeenQuestionKeys();
+  const seenOrderMap = new Map();
+  seenList.forEach((k, idx) => seenOrderMap.set(k, idx));
+
+  const { unseen, seen } = partitionAndOrderByLRU(allQuestions, seenOrderMap);
+  const selected = [...unseen, ...seen].slice(0, count);
+  return secureShuffle(selected);
+}
+
+/**
+ * Balanced Multi-Dars Question Selector:
+ * Distributes quota evenly across selected Dars groups in round-robin fashion,
+ * prioritizing unseen questions in every group before falling back to LRU seen items.
+ */
+export function smartSelectBalanced(groups, count) {
+  if (!Array.isArray(groups) || groups.length === 0 || count <= 0) return [];
+
+  const seenList = getSeenQuestionKeys();
+  const seenOrderMap = new Map();
+  seenList.forEach((k, idx) => seenOrderMap.set(k, idx));
+
+  const queues = secureShuffle(
+    groups
+      .filter((g) => Array.isArray(g) && g.length > 0)
+      .map((g) => {
+        const { unseen, seen } = partitionAndOrderByLRU(g, seenOrderMap);
+        return { unseen, seen, ui: 0, si: 0 };
+      })
+  );
+
+  const selected = [];
+  // Phase 1: Round-robin unseen across all groups
+  let progress = true;
+  while (selected.length < count && progress) {
+    progress = false;
+    for (const grp of queues) {
+      if (selected.length >= count) break;
+      if (grp.ui < grp.unseen.length) {
+        selected.push(grp.unseen[grp.ui++]);
+        progress = true;
+      }
+    }
   }
 
-  // Mark selected as seen
-  markQuestionsSeen(selected);
+  // Phase 2: Round-robin least-recently-seen if total unseen < count
+  progress = true;
+  while (selected.length < count && progress) {
+    progress = false;
+    for (const grp of queues) {
+      if (selected.length >= count) break;
+      if (grp.si < grp.seen.length) {
+        selected.push(grp.seen[grp.si++]);
+        progress = true;
+      }
+    }
+  }
 
   return secureShuffle(selected);
 }

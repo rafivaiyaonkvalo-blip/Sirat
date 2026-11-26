@@ -233,7 +233,7 @@ export default function QuizResultsModal({ isOpen, onClose }) {
                                   পুনরায় ↻
                                 </button>
                               </div>
-                            ) : (
+                            ) : p.quiz > 0 ? (
                               <button
                                 type="button"
                                 disabled={locked}
@@ -242,6 +242,10 @@ export default function QuizResultsModal({ isOpen, onClose }) {
                               >
                                 কুইজ শুরু করুন
                               </button>
+                            ) : (
+                              <div className="mt-1 w-full py-1 rounded-lg bg-slate-100 dark:bg-white/5 text-center text-[10px] font-semibold text-slate-400">
+                                কুইজ নেই
+                              </div>
                             )}
                           </div>
                         );

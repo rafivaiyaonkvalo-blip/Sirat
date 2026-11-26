@@ -42,7 +42,14 @@ export default function QuizModal({ id, no, progress, onClose }) {
     loadDarsLocalized(id, getLang()).then((d) => {
       if (!live) return;
       setDars(d || false);
-      if (d) setQs(pickQuiz(d.porbos[no - 1].quiz));
+      if (d) {
+        setQs(pickQuiz(d.porbos[no - 1]?.quiz, {
+          darsId: d.id,
+          porboNo: no,
+          title: `দারস ${bn(d.number)} · ${d.title}`,
+          n: 20
+        }));
+      }
     });
     return () => { live = false; };
   }, [id, no]);
@@ -58,7 +65,12 @@ export default function QuizModal({ id, no, progress, onClose }) {
   })();
 
   const retry = () => {
-    setQs(pickQuiz(dars.porbos[no - 1].quiz));
+    setQs(pickQuiz(dars.porbos[no - 1]?.quiz, {
+      darsId: dars.id,
+      porboNo: no,
+      title: `দারস ${bn(dars.number)} · ${dars.title}`,
+      n: 20
+    }));
     setAttempt((a) => a + 1);
   };
 
@@ -80,6 +92,7 @@ export default function QuizModal({ id, no, progress, onClose }) {
     <QuizShell heading={dars ? `দারস ${bn(dars.number)} · ${dars.title}` : ''} onClose={onClose}>
         {dars === null && <p className="py-10 text-center text-slate-500">লোড হচ্ছে…</p>}
         {dars === false && <p className="py-10 text-center text-slate-500">কুইজ পাওয়া যায়নি।</p>}
+        {dars && qs.length === 0 && <p className="py-10 text-center text-slate-500">এই পর্বে এখনো কোনো কুইজ যুক্ত করা হয়নি।</p>}
         {dars && qs.length > 0 && (
           <Quiz
             key={attempt}

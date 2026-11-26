@@ -8,7 +8,8 @@ import { recordMistake } from '../utils/mistakesManager';
 import { 
   saveActiveQuizSession, 
   getActiveQuizSession, 
-  clearActiveQuizSession 
+  clearActiveQuizSession,
+  markQuestionsSeen
 } from '../utils/quizHistoryManager';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
@@ -100,6 +101,9 @@ export default function Quiz({
 
     setPicked(nextPicked);
     setGain(nextGain);
+
+    // Record question as seen only when actually answered
+    try { markQuestionsSeen([q]); } catch {}
 
     // Record mistakes for notebook
     if (!isCorrect) {

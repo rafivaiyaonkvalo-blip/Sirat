@@ -18,7 +18,8 @@ let cloudSyncTimeout = null;
 // Unique Key Generator for items
 export function generateMistakeId(item) {
   if (item.id) return String(item.id);
-  const base = item.arabic || item.question || item.bengali || 'item';
+  const scope = item.darsId ? `d${item.darsId}_` : '';
+  const base = `${scope}${item.arabic || item.question || item.bengali || 'item'}`;
   // simple hash
   let hash = 0;
   for (let i = 0; i < base.length; i++) {
@@ -100,6 +101,7 @@ export function recordMistake({
   correctIndex = 0,
   correctText = '',
   sourceTitle = '',
+  darsId = null,
   volumeId = null,
   chapterId = null,
   lessonId = null,
@@ -108,7 +110,7 @@ export function recordMistake({
   if (!arabic && !question && !bengali) return null;
 
   const mistakes = getMistakes();
-  const mistakeId = id ? String(id) : generateMistakeId({ id, type, arabic, bengali, question });
+  const mistakeId = id ? String(id) : generateMistakeId({ id, type, darsId, arabic, bengali, question });
 
   const existingIdx = mistakes.findIndex(m => m.id === mistakeId);
   const now = Date.now();
@@ -144,6 +146,7 @@ export function recordMistake({
       correctIndex: correctIndex ?? 0,
       correctText: (correctText || bengali || arabic || '').trim(),
       sourceTitle: sourceTitle || 'অনুশীলন',
+      darsId,
       volumeId,
       chapterId,
       lessonId,

@@ -5,7 +5,7 @@ import Quiz from './Quiz';
 import SectionHero from './SectionHero';
 import { QuizShell } from './QuizModal';
 import { Exam } from './ExamView';
-import { buildQuestions, bn } from './questions';
+import { buildQuestions, totalQuestions, bn } from './questions';
 import { saveQuizResult } from '../utils/quizHistoryManager';
 
 const MODES = [
@@ -24,7 +24,10 @@ export default function QuizPage() {
 
   const start = async () => {
     setBusy(true);
-    setQs(await buildQuestions(selected, count));
+    const available = totalQuestions(selected);
+    const targetCount = available > 0 ? Math.min(count, available) : count;
+    const sortedIds = [...selected].sort((a, b) => a - b);
+    setQs(await buildQuestions(sortedIds, targetCount));
     setAttempt((a) => a + 1);
     setBusy(false);
   };
@@ -87,7 +90,7 @@ export default function QuizPage() {
           <Quiz 
             key={attempt} 
             questions={qs} 
-            sessionKey={`quiz_view_${selected.join('_')}`}
+            sessionKey={`quiz_view_${[...selected].sort((a, b) => a - b).join('_')}`}
             title="কুইজ" 
             onRetry={start} 
             onClose={() => setQs(null)} 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Clock, MinusCircle, RotateCcw, XCircle, AlertCircle } from 'lucide-react';
 import { bn } from './questions';
+import { shuffleSeed } from './shuffle';
 import { t } from '../i18n';
 import { addQuizAnswer } from './points';
 import { recordMistake } from '../utils/mistakesManager';
@@ -8,7 +9,8 @@ import {
   saveQuizResult, 
   saveActiveExamSession, 
   getActiveExamSession, 
-  clearActiveExamSession 
+  clearActiveExamSession,
+  markQuestionsSeen
 } from '../utils/quizHistoryManager';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ'];
@@ -46,6 +48,8 @@ export function Exam({ questions: initialQuestions, onExit }) {
   const [filter, setFilter] = useState('all');
   const [pendingResume, setPendingResume] = useState(null);
   const submitted = useRef(false);
+  const stateRef = useRef({ questions: initialQuestions, answers: {} });
+  stateRef.current = { questions, answers };
   const total = questions.length;
 
   // Check saved exam session
@@ -66,23 +70,30 @@ export function Exam({ questions: initialQuestions, onExit }) {
 
   const handleDiscardResume = () => {
     clearActiveExamSession();
+    setQuestions(initialQuestions);
+    setAnswers({});
+    setLeft(initialQuestions.length * 60);
     setPendingResume(null);
   };
 
-  // Timer
+  // Stable timer: pauses while resume prompt is shown, avoids re-creating interval per click
   useEffect(() => {
-    if (done) return undefined;
+    if (done || pendingResume) return undefined;
     const t = setInterval(() => {
       setLeft((l) => {
         const next = l - 1;
         if (next > 0 && next % 5 === 0) {
-          saveActiveExamSession({ questions, answers, left: next });
+          saveActiveExamSession({
+            questions: stateRef.current.questions,
+            answers: stateRef.current.answers,
+            left: next
+          });
         }
         return next;
       });
     }, 1000);
     return () => clearInterval(t);
-  }, [done, questions, answers]);
+  }, [done, Boolean(pendingResume)]);
 
   useEffect(() => {
     if (left <= 0 && !submitted.current) finish();
@@ -116,6 +127,7 @@ export function Exam({ questions: initialQuestions, onExit }) {
     });
 
     clearActiveExamSession();
+    try { markQuestionsSeen(questions); } catch {}
     setDone(true);
 
     // Save to history & profile reports
@@ -141,7 +153,7 @@ export function Exam({ questions: initialQuestions, onExit }) {
   };
 
   if (done) {
-    const pct = Math.round((score / total) * 100);
+    const pct = total ? Math.round((score / total) * 100) : 0;
     const g = grade(pct);
     const wrong = answered - score;
     const skipped = total - answered;
@@ -229,12 +241,12 @@ export function Exam({ questions: initialQuestions, onExit }) {
             <p className="mb-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">{q.from}</p>
             <p className="mb-3 font-semibold leading-relaxed"><span className="text-emerald-600 dark:text-emerald-400">{bn(i + 1)}.</span> <span translate="no">{q.q}</span></p>
             <div className="grid gap-2">
-              {q.options.map((o, oi) => {
+              {shuffleSeed(q.options.map((_, idx) => idx), q.salt || `exam_${i}_${q.q}`).map((oi, pos) => {
                 const on = answers[i] === oi;
                 return (
                   <button key={oi} onClick={() => handleAnswer(i, oi)} className={`flex items-start gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition active:scale-[0.99] cursor-pointer ${on ? 'border-emerald-400 bg-emerald-50 shadow-[0_0_12px_rgba(14,165,233,0.35)] dark:bg-emerald-900/40' : 'border-slate-200 hover:border-emerald-300 dark:border-white/10'}`}>
-                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${on ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-white/10 dark:text-emerald-200'}`}>{LETTERS[oi]}</span>
-                    <span translate="no" className="flex-1 font-medium">{o}</span>
+                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${on ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-white/10 dark:text-emerald-200'}`}>{LETTERS[pos]}</span>
+                    <span translate="no" className="flex-1 font-medium">{q.options[oi]}</span>
                   </button>
                 );
               })}
